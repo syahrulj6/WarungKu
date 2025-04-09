@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import { cn } from "~/lib/utils";
-import { HeadMetaData } from "./HeadMetadata";
+import { HeadMetaData } from "./HeadMetaData";
 import { Header } from "./Header";
 
 type PageContainerProps = {

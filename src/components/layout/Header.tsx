@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "../button";
+import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
