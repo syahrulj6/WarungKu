@@ -1,22 +1,159 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for Warung POS Application
 
 generator client {
     provider = "prisma-client-js"
-
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
     directUrl = env("DIRECT_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model User {
+    id          String    @id @default(uuid())
+    username    String    @unique
+    name        String
+    pin         String    
+    role        UserRole  @default(STAFF)
+    isActive    Boolean   @default(true)
+    createdAt   DateTime  @default(now())
+    
+    sales       Sale[]
+    shifts      Shift[]
+    stockAdjustments StockAdjustment[]
+    
+    @@index([username])
+}
 
+enum UserRole {
+    OWNER
+    MANAGER
+    STAFF
+}
+
+model Product {
+    id          String     @id @default(uuid())
+    name        String
+    barcode     String?
+    price       Float
+    costPrice   Float
+    category    String?    
+    stock       Int        @default(0)
+    minStock    Int?       
+    isActive    Boolean    @default(true)
+    createdAt   DateTime   @default(now())
+    
+    saleItems   SaleItem[]
+    stockAdjustments StockAdjustment[]
+    
     @@index([name])
+}
+
+model Customer {
+    id          String     @id @default(uuid())
+    name        String
+    phone       String?    
+    address     String?    
+    debt        Float      @default(0) 
+    createdAt   DateTime   @default(now())
+    
+    sales       Sale[]
+    debtPayments DebtPayment[]
+    
+    @@index([name, phone])
+}
+
+model Sale {
+    id          String      @id @default(uuid())
+    receiptNo   String      
+    userId      String
+    user        User        @relation(fields: [userId], references: [id])
+    customerId  String?
+    customer    Customer?   @relation(fields: [customerId], references: [id])
+    items       SaleItem[]
+    subtotal    Float
+    discount    Float       @default(0)
+    tax         Float       @default(0)
+    total       Float
+    paymentType PaymentType
+    isPaid      Boolean     @default(true)
+    isDebt      Boolean     @default(false) 
+    notes       String?     
+    createdAt   DateTime    @default(now())
+    
+    @@index([receiptNo, createdAt])
+}
+
+model SaleItem {
+    id          String    @id @default(uuid())
+    saleId      String
+    sale        Sale      @relation(fields: [saleId], references: [id])
+    productId   String
+    product     Product   @relation(fields: [productId], references: [id])
+    quantity    Float     
+    price       Float     
+    discount    Float     @default(0)
+    total       Float
+}
+
+enum PaymentType {
+    CASH
+    TRANSFER
+    DEBT        
+    QRIS        
+    OTHER
+}
+
+model DebtPayment {
+    id          String      @id @default(uuid())
+    customerId  String
+    customer    Customer    @relation(fields: [customerId], references: [id])
+    amount      Float
+    paymentType PaymentType
+    notes       String?
+    createdAt   DateTime    @default(now())
+    
+    @@index([customerId, createdAt])
+}
+
+model Shift {
+    id          String      @id @default(uuid())
+    userId      String
+    user        User        @relation(fields: [userId], references: [id])
+    startTime   DateTime    @default(now())
+    endTime     DateTime?
+    startCash   Float       
+    endCash     Float?      
+    cashSales   Float?      
+    cashIn      Float?      
+    cashOut     Float?      
+    notes       String?
+    
+    @@index([userId, startTime])
+}
+
+model StockAdjustment {
+    id          String    @id @default(uuid())
+    productId   String
+    product     Product   @relation(fields: [productId], references: [id])
+    userId      String
+    user        User      @relation(fields: [userId], references: [id])
+    oldStock    Int
+    newStock    Int
+    reason      String?  
+    notes       String?
+    createdAt   DateTime  @default(now())
+    
+    @@index([productId, createdAt])
+}
+
+model DailySummary {
+    id          String      @id @default(uuid())
+    date        DateTime    @unique
+    totalSales  Float
+    cashSales   Float
+    debtSales   Float
+    totalItems  Int
+    createdAt   DateTime    @default(now())
 }
