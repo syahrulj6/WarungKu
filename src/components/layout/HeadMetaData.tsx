@@ -25,7 +25,7 @@ export const HeadMetaData: React.FC<{
   return (
     <Head>
       <title>{title + " | " + defaultTitle}</title>
-      <link rel="icon" href="/favicon.ico" />
+      <link rel="icon" href="/warungku.png" />
 
       {/* metadata */}
       <meta name="title" content={title + " | " + defaultTitle} />

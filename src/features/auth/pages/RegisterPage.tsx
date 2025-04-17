@@ -50,7 +50,7 @@ const RegisterPage = () => {
   return (
     <GuestRoute>
       <PageContainer
-        metaTitle="Daftar Akun - WarungKu POS"
+        metaTitle="Daftar Akun"
         metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS WarungKu"
         pathname="/register"
       >
