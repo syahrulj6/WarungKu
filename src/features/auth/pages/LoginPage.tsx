@@ -37,46 +37,47 @@ const LoginPage = () => {
 
       if (error) throw error;
 
-      await router.replace("/");
+      await router.replace("/dashboard");
     } catch (error) {
       switch ((error as AuthError).code) {
         case SupabaseAuthErrorCode.invalid_credentials:
           form.setError("email", { message: "Email atau password salah" });
-          form.setError("password", {
-            message: "Email atau password salah",
-          });
+          form.setError("password", { message: "Email atau password salah" });
           break;
         case SupabaseAuthErrorCode.email_not_confirmed:
           form.setError("email", { message: "Email belum diverifikasi" });
           break;
         default:
-          toast.error("Sebuah kesalahan terjadi, coba lagi beberapa saat.");
+          toast.error("Terjadi kesalahan, silakan coba lagi");
       }
     }
   };
 
   return (
     <GuestRoute>
-      <PageContainer>
+      <PageContainer
+        metaTitle="Login"
+        metaDescription="Aplikasi POS modern untuk warung Anda. Login untuk mengelola transaksi, stok, dan laporan penjualan."
+        pathname="/login"
+      >
         <SectionContainer
           padded
-          className="mb-4 mt-20 flex min-h-[calc(100vh-144px)] w-full flex-col justify-center md:mb-0 md:mt-20"
+          className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] w-full flex-col justify-center md:mt-20 md:mb-0"
         >
           <Card className="w-full max-w-[480px] self-center">
             <CardHeader className="flex flex-col items-center justify-center">
-              <h1 className="text-center text-2xl font-bold text-primary md:text-3xl">
-                Selamat Datang Kembali 👋
+              <h1 className="text-primary text-center text-2xl font-bold md:text-3xl">
+                Selamat Bekerja! 🏪
               </h1>
-              <p className="text-sm text-muted-foreground">
-                Qepoin kreator favorite kamu
+              <p className="text-muted-foreground text-sm">
+                Aplikasi Kasir Modern untuk Warung Anda
               </p>
             </CardHeader>
             <CardContent>
               <Form {...form}>
                 <LoginFormInner
-                  // isLoading={registerUserIsPending}
                   onLoginSubmit={handleLoginSubmit}
-                  buttonText="Masuk"
+                  buttonText="Masuk ke Dashboard"
                 />
               </Form>
             </CardContent>
@@ -84,25 +85,29 @@ const LoginPage = () => {
             <CardFooter className="flex flex-col gap-4">
               <div className="flex w-full items-center justify-between gap-x-4">
                 <div className="h-[2px] w-full border-t-2" />
-                <p className="flex-1 text-nowrap text-sm text-muted-foreground">
-                  Atau lanjut dengan
+                <p className="text-muted-foreground flex-1 text-sm text-nowrap">
+                  Atau masuk dengan
                 </p>
                 <div className="h-[2px] w-full border-t-2" />
               </div>
 
               <Button variant="secondary" className="w-full" size="lg">
                 <FcGoogle />
-                Masuk dengan Google
+                Masuk dengan Akun Google
               </Button>
 
-              <p>
-                Belum punya akun?{" "}
+              <p className="text-center text-xs">
+                Belum memiliki akses?{" "}
                 <Link
                   href="/register"
-                  className="font-bold text-primary transition-all hover:underline"
+                  className="text-primary font-bold transition-all hover:underline"
                 >
-                  Daftar dong
-                </Link>
+                  Buat akun (Owner)
+                </Link>{" "}
+                / Minta akun ke pemilik warung
+              </p>
+              <p className="text-muted-foreground text-center text-xs">
+                Hanya untuk staf warung terdaftar
               </p>
             </CardFooter>
           </Card>

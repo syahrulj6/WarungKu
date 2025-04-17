@@ -21,17 +21,25 @@ import { GuestRoute } from "~/components/layout/GuestRoute";
 const RegisterPage = () => {
   const form = useForm<AuthFormSchema>({
     resolver: zodResolver(authFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   const { mutate: registerUser, isPending: registerUserIsPending } =
     api.auth.register.useMutation({
       onSuccess: () => {
-        toast("Akun kamu berhasil dibuat!");
-        form.setValue("email", "");
-        form.setValue("password", "");
+        toast.success("Akun berhasil dibuat!", {
+          description:
+            "Silakan login menggunakan email dan password yang telah didaftarkan",
+        });
+        form.reset();
       },
-      onError: () => {
-        toast.error("Ada kesalahan terjadi, coba beberapa saat lagi");
+      onError: (error) => {
+        toast.error("Pendaftaran gagal", {
+          description: error.message || "Silakan coba beberapa saat lagi",
+        });
       },
     });
 
@@ -42,8 +50,8 @@ const RegisterPage = () => {
   return (
     <GuestRoute>
       <PageContainer
-        metaTitle="Buat Akun"
-        metaDescription="Buat akun untuk mengakses semua fitur"
+        metaTitle="Daftar Akun - WarungKu POS"
+        metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS WarungKu"
         pathname="/register"
       >
         <SectionContainer
@@ -51,12 +59,15 @@ const RegisterPage = () => {
           className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] flex-col justify-center md:mb-0"
         >
           <Card className="w-full max-w-[480px] self-center">
-            <CardHeader className="flex flex-col items-center justify-center">
+            <CardHeader className="flex flex-col items-center justify-center space-y-2">
               <h1 className="text-primary text-center text-2xl font-bold md:text-3xl">
                 Buat Akun
               </h1>
-              <p className="text-muted-foreground text-sm"></p>
+              <p className="text-muted-foreground text-center text-sm">
+                Untuk pemilik warung: daftarkan akun staff Anda
+              </p>
             </CardHeader>
+
             <CardContent>
               <Form {...form}>
                 <RegisterFormInner
@@ -69,26 +80,35 @@ const RegisterPage = () => {
 
             <CardFooter className="flex flex-col gap-4">
               <div className="flex w-full items-center justify-between gap-x-4">
-                <div className="h-[2px] w-full border-t-2" />
-                <p className="text-muted-foreground flex-1 text-sm text-nowrap">
-                  Atau lanjut dengan
+                <div className="bg-border h-[1px] w-full" />
+                <p className="text-muted-foreground flex-1 text-center text-sm text-nowrap">
+                  Atau daftar dengan
                 </p>
-                <div className="h-[2px] w-full border-t-2" />
+                <div className="bg-border h-[1px] w-full" />
               </div>
 
-              <Button variant="secondary" className="w-full" size="lg">
-                <FcGoogle />
-                Buat Akun dengan Google
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                size="lg"
+                type="button"
+              >
+                <FcGoogle className="text-lg" />
+                Google
               </Button>
 
-              <p>
-                Sudah punya akun?{" "}
+              <p className="text-center text-sm">
+                Sudah memiliki akun?{" "}
                 <Link
                   href="/login"
-                  className="text-primary font-bold transition-all hover:underline"
+                  className="text-primary font-semibold transition-all hover:underline"
                 >
-                  P, Login
+                  Masuk di sini
                 </Link>
+              </p>
+
+              <p className="text-muted-foreground text-center text-xs">
+                Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan kami
               </p>
             </CardFooter>
           </Card>
