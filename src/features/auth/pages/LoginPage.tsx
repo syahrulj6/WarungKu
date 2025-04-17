@@ -3,14 +3,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { PageContainer } from "~/components/layout/PageContainer";
-import { SectionContainer } from "~/components/layout/SectionContainer";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
 import { type AuthFormSchema, authFormSchema } from "../forms/auth";
 import { toast } from "sonner";
@@ -20,6 +13,15 @@ import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCodes";
 import { useRouter } from "next/router";
 import { GuestRoute } from "~/components/layout/GuestRoute";
 import { LoginFormInner } from "../components/LoginFormInner";
+import Image from "next/image";
+
+// Import Swiper styles and modules
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { ArrowLeft } from "lucide-react";
 
 const LoginPage = () => {
   const form = useForm<AuthFormSchema>({
@@ -37,7 +39,7 @@ const LoginPage = () => {
 
       if (error) throw error;
 
-      await router.replace("/dashboard");
+      await router.replace("/");
     } catch (error) {
       switch ((error as AuthError).code) {
         case SupabaseAuthErrorCode.invalid_credentials:
@@ -53,65 +55,105 @@ const LoginPage = () => {
     }
   };
 
+  // Array of image paths
+  const images = [
+    "/assets/image1.jpg",
+    "/assets/image2.jpg",
+    "/assets/image3.jpg",
+  ];
+
   return (
     <GuestRoute>
       <PageContainer
         metaTitle="Login"
         metaDescription="Aplikasi POS modern untuk warung Anda. Login untuk mengelola transaksi, stok, dan laporan penjualan."
         pathname="/login"
+        withHeader={false}
+        withFooter={false}
       >
-        <SectionContainer
-          padded
-          className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] w-full flex-col justify-center md:mt-20 md:mb-0"
-        >
-          <Card className="w-full max-w-[480px] self-center">
-            <CardHeader className="flex flex-col items-center justify-center">
-              <h1 className="text-primary text-center text-2xl font-bold md:text-3xl">
-                Selamat Bekerja! 🏪
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                Aplikasi Kasir Modern untuk Warung Anda
-              </p>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <LoginFormInner
-                  onLoginSubmit={handleLoginSubmit}
-                  buttonText="Masuk ke Dashboard"
+        <div className="relative">
+          <div className="absolute top-12 left-6 md:top-14 md:left-14">
+            <Button variant="outline" asChild>
+              <Link href="/">
+                <ArrowLeft />
+                Kembali
+              </Link>
+            </Button>
+          </div>
+        </div>
+        <div className="flex min-h-screen">
+          {/* Left Section - Login Form */}
+          <div className="flex w-full flex-col justify-center px-8 py-12 md:w-1/2 md:px-24">
+            <div className="-ml-4 flex items-center">
+              <div className="relative h-14 w-14">
+                <Image
+                  src="/warungku-notext.png"
+                  alt="WarungKu Logo"
+                  fill
+                  sizes="80px"
+                  className="object-contain"
+                  priority
                 />
-              </Form>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4">
-              <div className="flex w-full items-center justify-between gap-x-4">
-                <div className="h-[2px] w-full border-t-2" />
-                <p className="text-muted-foreground flex-1 text-sm text-nowrap">
-                  Atau masuk dengan
-                </p>
-                <div className="h-[2px] w-full border-t-2" />
               </div>
+              <span className="font-bold">WarungKu</span>
+            </div>
 
-              <Button variant="secondary" className="w-full" size="lg">
-                <FcGoogle />
-                Masuk dengan Akun Google
-              </Button>
+            <h1 className="mt-8 mb-2 text-3xl font-bold">
+              Selamat Bekerja! 🏪
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              Aplikasi Kasir Modern untuk Warung Anda
+            </p>
 
-              <p className="text-center text-xs">
-                Belum memiliki akses?{" "}
-                <Link
-                  href="/register"
-                  className="text-primary font-bold transition-all hover:underline"
-                >
-                  Buat akun (Owner)
-                </Link>{" "}
-                / Minta akun ke pemilik warung
-              </p>
-              <p className="text-muted-foreground text-center text-xs">
-                Hanya untuk staf warung terdaftar
-              </p>
-            </CardFooter>
-          </Card>
-        </SectionContainer>
+            <Form {...form}>
+              <LoginFormInner
+                onLoginSubmit={handleLoginSubmit}
+                buttonText="Sign In"
+              />
+            </Form>
+
+            <p className="mt-6 text-center text-sm">
+              Belum punya akun?{" "}
+              <Link
+                href="/register"
+                className="text-primary font-bold hover:underline"
+              >
+                Sign Up
+              </Link>
+            </p>
+          </div>
+
+          {/* Right Section - Image Swiper */}
+          <div className="relative hidden w-1/2 md:flex">
+            <Swiper
+              spaceBetween={0}
+              centeredSlides={true}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[Autoplay, Pagination, Navigation]}
+              className="h-full w-full"
+            >
+              {images.map((src, index) => (
+                <SwiperSlide key={index}>
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={src}
+                      alt={`Login Background ${index + 1}`}
+                      fill
+                      sizes="50vw"
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                    <div className="absolute inset-0 bg-black/40" />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
       </PageContainer>
     </GuestRoute>
   );

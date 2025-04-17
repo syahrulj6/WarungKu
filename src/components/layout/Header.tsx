@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useSession } from "~/hooks/useSession";
 
 const links = [
   { name: "Home", url: "/" },
@@ -11,6 +12,8 @@ const links = [
 ];
 
 export const Header = () => {
+  const { session, loading, handleSignOut } = useSession();
+
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,7 +39,7 @@ export const Header = () => {
   return (
     <>
       <header
-        className={`bg-background fixed top-0 z-50 flex h-16 w-full items-center justify-between px-4 transition-transform duration-300 md:h-24 md:px-8 ${
+        className={`fixed top-0 z-50 flex h-16 w-full items-center justify-between px-4 transition-transform duration-300 md:h-24 md:px-8 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
@@ -76,28 +79,43 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Button asChild variant="default" className="hidden md:flex">
-            <Link href="/login">Try for Free</Link>
-          </Button>
+          {loading ? (
+            <div className="hidden h-10 w-24 animate-pulse rounded-md bg-gray-200 md:flex" />
+          ) : session ? (
+            <>
+              {/* Desktop Logout */}
+              <Button
+                variant="destructive"
+                className="hidden md:flex"
+                onClick={handleSignOut}
+              >
+                Log out
+              </Button>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-          >
-            <div className="space-y-1.5">
-              <span
-                className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""}`}
-              ></span>
-              <span
-                className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
-              ></span>
-              <span
-                className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
-              ></span>
-            </div>
-          </button>
+              {/* Mobile Menu Button */}
+              <button
+                className="md:hidden"
+                onClick={toggleMobileMenu}
+                aria-label="Toggle menu"
+              >
+                <div className="space-y-1.5">
+                  <span
+                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""}`}
+                  ></span>
+                  <span
+                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
+                  ></span>
+                  <span
+                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
+                  ></span>
+                </div>
+              </button>
+            </>
+          ) : (
+            <Button asChild variant="default" className="hidden md:flex">
+              <Link href="/login">Try for Free</Link>
+            </Button>
+          )}
         </div>
       </header>
 
@@ -118,11 +136,24 @@ export const Header = () => {
               {link.name}
             </Link>
           ))}
-          <Button asChild variant="default" className="w-full">
-            <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-              Try for Free
-            </Link>
-          </Button>
+          {session ? (
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => {
+                handleSignOut();
+                setMobileMenuOpen(false);
+              }}
+            >
+              Log out
+            </Button>
+          ) : (
+            <Button asChild variant="default" className="w-full">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                Try for Free
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </>

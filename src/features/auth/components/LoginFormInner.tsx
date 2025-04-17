@@ -37,7 +37,6 @@ export const LoginFormInner = (props: LoginFormInnerProps) => {
               <Input type="email" {...field} />
             </FormControl>
             <FormDescription />
-            <FormMessage />
           </FormItem>
         )}
       />

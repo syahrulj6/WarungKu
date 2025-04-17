@@ -3,20 +3,21 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { PageContainer } from "~/components/layout/PageContainer";
-import { SectionContainer } from "~/components/layout/SectionContainer";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
-import { RegisterFormInner } from "../components/RegisterFormInner";
 import { type AuthFormSchema, authFormSchema } from "../forms/auth";
-import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { GuestRoute } from "~/components/layout/GuestRoute";
+import { RegisterFormInner } from "../components/RegisterFormInner";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { api } from "~/utils/api";
 
 const RegisterPage = () => {
   const form = useForm<AuthFormSchema>({
@@ -47,72 +48,126 @@ const RegisterPage = () => {
     registerUser(values);
   };
 
+  const images = [
+    "/assets/image1.jpg",
+    "/assets/image2.jpg",
+    "/assets/image3.jpg",
+  ];
+
   return (
     <GuestRoute>
       <PageContainer
         metaTitle="Daftar Akun"
         metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS WarungKu"
         pathname="/register"
+        withHeader={false}
+        withFooter={false}
       >
-        <SectionContainer
-          padded
-          className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] flex-col justify-center md:mb-0"
-        >
-          <Card className="w-full max-w-[480px] self-center">
-            <CardHeader className="flex flex-col items-center justify-center space-y-2">
-              <h1 className="text-primary text-center text-2xl font-bold md:text-3xl">
-                Buat Akun
-              </h1>
-              <p className="text-muted-foreground text-center text-sm">
-                Untuk pemilik warung: daftarkan akun staff Anda
-              </p>
-            </CardHeader>
-
-            <CardContent>
-              <Form {...form}>
-                <RegisterFormInner
-                  isLoading={registerUserIsPending}
-                  onRegisterSubmit={handleRegisterSubmit}
-                  showPassword={true}
+        <div className="relative">
+          <div className="absolute top-8 left-6 z-10 md:top-10 md:left-14">
+            <Button variant="outline" asChild>
+              <Link href="/">
+                <ArrowLeft />
+                Kembali
+              </Link>
+            </Button>
+          </div>
+        </div>
+        <div className="flex min-h-screen">
+          {/* Left Section - Register Form */}
+          <div className="flex w-full flex-col justify-center px-8 py-12 md:w-1/2 md:px-24">
+            <div className="-ml-4 flex items-center">
+              <div className="relative h-14 w-14">
+                <Image
+                  src="/warungku-notext.png"
+                  alt="WarungKu Logo"
+                  fill
+                  sizes="80px"
+                  className="object-contain"
+                  priority
                 />
-              </Form>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4">
-              <div className="flex w-full items-center justify-between gap-x-4">
-                <div className="bg-border h-[1px] w-full" />
-                <p className="text-muted-foreground flex-1 text-center text-sm text-nowrap">
-                  Atau daftar dengan
-                </p>
-                <div className="bg-border h-[1px] w-full" />
               </div>
+              <span className="font-bold">WarungKu</span>
+            </div>
 
-              <Button
-                variant="outline"
-                className="w-full gap-2"
-                size="lg"
-                type="button"
+            <h1 className="mb-2 text-2xl font-bold">Daftar Akun Baru</h1>
+            <p className="text-muted-foreground mb-8 text-sm">
+              Aplikasi Kasir Modern untuk Warung Anda
+            </p>
+
+            <Form {...form}>
+              <RegisterFormInner
+                isLoading={registerUserIsPending}
+                onRegisterSubmit={handleRegisterSubmit}
+                showPassword={true}
+                buttonText="Daftar"
+              />
+            </Form>
+
+            <div className="mt-6 flex w-full items-center justify-between gap-x-4">
+              <div className="bg-border h-[1px] w-full" />
+              <p className="text-muted-foreground flex-1 text-center text-sm text-nowrap">
+                Atau daftar dengan
+              </p>
+              <div className="bg-border h-[1px] w-full" />
+            </div>
+
+            <Button
+              variant="outline"
+              className="mt-4 w-full gap-2"
+              size="lg"
+              type="button"
+            >
+              <FcGoogle className="text-lg" />
+              Google
+            </Button>
+
+            <p className="mt-6 text-center text-sm">
+              Sudah memiliki akun?{" "}
+              <Link
+                href="/login"
+                className="text-primary font-bold hover:underline"
               >
-                <FcGoogle className="text-lg" />
-                Google
-              </Button>
+                Masuk di sini
+              </Link>
+            </p>
 
-              <p className="text-center text-sm">
-                Sudah memiliki akun?{" "}
-                <Link
-                  href="/login"
-                  className="text-primary font-semibold transition-all hover:underline"
-                >
-                  Masuk di sini
-                </Link>
-              </p>
+            <p className="text-muted-foreground mt-2 text-center text-xs">
+              Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan kami
+            </p>
+          </div>
 
-              <p className="text-muted-foreground text-center text-xs">
-                Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan kami
-              </p>
-            </CardFooter>
-          </Card>
-        </SectionContainer>
+          {/* Right Section - Image Swiper */}
+          <div className="relative hidden w-1/2 md:flex">
+            <Swiper
+              spaceBetween={0}
+              centeredSlides={true}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              modules={[Autoplay, Pagination, Navigation]}
+              className="h-full w-full"
+            >
+              {images.map((src, index) => (
+                <SwiperSlide key={index}>
+                  <div className="relative h-full w-full">
+                    <Image
+                      src={src}
+                      alt={`Register Background ${index + 1}`}
+                      fill
+                      sizes="50vw"
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                    <div className="absolute inset-0 bg-black/40" />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
       </PageContainer>
     </GuestRoute>
   );
