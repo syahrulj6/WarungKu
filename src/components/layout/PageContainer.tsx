@@ -6,6 +6,9 @@ import { Header } from "./Header";
 type PageContainerProps = {
   withHeader?: boolean;
   withFooter?: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  pathname?: string;
 };
 
 export const PageContainer = forwardRef<
@@ -13,12 +16,25 @@ export const PageContainer = forwardRef<
   React.HTMLAttributes<HTMLElement> & PageContainerProps
 >(
   (
-    { className, children, withHeader = true, withFooter = true, ...props },
+    {
+      className,
+      children,
+      withHeader = true,
+      withFooter = true,
+      metaTitle,
+      metaDescription,
+      pathname = "",
+      ...props
+    },
     ref,
   ) => {
     return (
       <div className="h-full w-full">
-        <HeadMetaData />
+        <HeadMetaData
+          title={metaTitle}
+          metaDescription={metaDescription}
+          pathname={pathname}
+        />
         {withHeader && <Header />}
         <main ref={ref} className={cn("flex flex-col", className)} {...props}>
           {children}

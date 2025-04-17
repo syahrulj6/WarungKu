@@ -41,7 +41,11 @@ const RegisterPage = () => {
 
   return (
     <GuestRoute>
-      <PageContainer>
+      <PageContainer
+        metaTitle="Buat Akun"
+        metaDescription="Buat akun untuk mengakses semua fitur"
+        pathname="/register"
+      >
         <SectionContainer
           padded
           className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] flex-col justify-center md:mb-0"
