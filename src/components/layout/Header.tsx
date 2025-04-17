@@ -39,13 +39,13 @@ export const Header = () => {
   return (
     <>
       <header
-        className={`fixed top-0 z-50 flex h-16 w-full items-center justify-between px-4 transition-transform duration-300 md:h-24 md:px-8 ${
+        className={`bg-background/95 supports-[backdrop-filter]:bg-background/60 fixed top-0 z-50 flex h-16 w-full items-center justify-between px-4 backdrop-blur transition-transform duration-300 md:h-24 md:px-8 ${
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <Link
-          href={"/"}
-          className="text-primary flex items-center text-lg font-bold hover:hover:cursor-pointer md:text-xl"
+          href="/"
+          className="text-primary flex items-center text-lg font-bold hover:cursor-pointer md:text-xl"
         >
           <div className="relative h-10 w-10 md:h-12 md:w-12">
             <Image
@@ -57,7 +57,7 @@ export const Header = () => {
               priority
             />
           </div>
-          <span className="relative">WarungKu</span>
+          <span className="ml-2">WarungKu</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -82,47 +82,51 @@ export const Header = () => {
           {loading ? (
             <div className="hidden h-10 w-24 animate-pulse rounded-md bg-gray-200 md:flex" />
           ) : session ? (
-            <>
-              {/* Desktop Logout */}
-              <Button
-                variant="destructive"
-                className="hidden md:flex"
-                onClick={handleSignOut}
-              >
-                Log out
-              </Button>
-
-              {/* Mobile Menu Button */}
-              <button
-                className="md:hidden"
-                onClick={toggleMobileMenu}
-                aria-label="Toggle menu"
-              >
-                <div className="space-y-1.5">
-                  <span
-                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "translate-y-2 rotate-45" : ""}`}
-                  ></span>
-                  <span
-                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "opacity-0" : "opacity-100"}`}
-                  ></span>
-                  <span
-                    className={`bg-foreground block h-0.5 w-6 transition-all ${mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""}`}
-                  ></span>
-                </div>
-              </button>
-            </>
+            <Button
+              variant="destructive"
+              className="hidden md:flex"
+              onClick={handleSignOut}
+            >
+              Log out
+            </Button>
           ) : (
             <Button asChild variant="default" className="hidden md:flex">
               <Link href="/login">Try for Free</Link>
             </Button>
           )}
+
+          <button
+            className="relative z-10 md:hidden"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            <div className="space-y-1.5">
+              <span
+                className={`bg-foreground block h-0.5 w-6 transition-all ${
+                  mobileMenuOpen ? "translate-y-2 rotate-45" : ""
+                }`}
+              ></span>
+              <span
+                className={`bg-foreground block h-0.5 w-6 transition-all ${
+                  mobileMenuOpen ? "opacity-0" : "opacity-100"
+                }`}
+              ></span>
+              <span
+                className={`bg-foreground block h-0.5 w-6 transition-all ${
+                  mobileMenuOpen ? "-translate-y-2 -rotate-45" : ""
+                }`}
+              ></span>
+            </div>
+          </button>
         </div>
       </header>
 
       {/* Mobile Menu */}
       <div
-        className={`bg-background fixed top-16 left-0 z-40 w-full shadow-lg transition-all duration-300 md:hidden ${
-          mobileMenuOpen ? "translate-y-0" : "-translate-y-full opacity-0"
+        className={`bg-background fixed right-0 left-0 z-40 w-full shadow-lg transition-all duration-300 md:hidden ${
+          mobileMenuOpen
+            ? "translate-y-16 opacity-100"
+            : "-translate-y-full opacity-0"
         }`}
       >
         <div className="flex flex-col space-y-4 p-4">
