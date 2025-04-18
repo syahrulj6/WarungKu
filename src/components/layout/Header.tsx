@@ -43,26 +43,25 @@ export const Header = () => {
           isVisible ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <Link
-          href="/"
-          className="text-primary flex items-center text-lg font-bold hover:cursor-pointer md:text-xl"
-        >
-          <div className="relative h-10 w-10 md:h-12 md:w-12">
-            <Image
-              src="/warungku-notext.png"
-              alt="WarungKu Logo"
-              fill
-              sizes="(max-width: 768px) 40px, 48px"
-              className="object-contain"
-              priority
-            />
-          </div>
-          <span className="ml-2">WarungKu</span>
-        </Link>
+        {/* Left side - Logo and text */}
+        <div className="flex w-1/3 justify-start">
+          <Link href="/" className="flex items-center">
+            <div className="relative h-12 w-12 md:h-14 md:w-14">
+              <Image
+                src="/warungku-notext.png"
+                alt="WarungKu Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="font-semibold">WarungKu</span>
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:block">
-          <ul className="flex items-center gap-10">
+        {/* Center Navigation */}
+        <nav className="hidden w-1/3 md:block">
+          <ul className="flex items-center justify-center gap-10">
             {links.map((link) => (
               <li key={link.name}>
                 <Link
@@ -78,7 +77,8 @@ export const Header = () => {
           </ul>
         </nav>
 
-        <div className="flex items-center gap-4">
+        {/* Right side - Auth buttons */}
+        <div className="flex w-1/3 items-center justify-end gap-4">
           {loading ? (
             <div className="hidden h-10 w-24 animate-pulse rounded-md bg-gray-200 md:flex" />
           ) : session ? (

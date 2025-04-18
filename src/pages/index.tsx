@@ -14,7 +14,7 @@ export default function Home() {
           WarungKu untuk semua kebutuhan warung Anda{" "}
         </h1>
         <p className="text-muted-foreground text-center tracking-tight">
-          ucapkan selamat tinggal pada pengambilan pesanan manual dan proses
+          Ucapkan selamat tinggal pada pengambilan pesanan manual dan proses
           penagihan yang rumit dengan sistem POS kami yang mudah digunakan
         </p>
 
