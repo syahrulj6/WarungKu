@@ -66,7 +66,6 @@ type DashboardLayoutProps = {
 export const DashboardLayout = ({
   children,
   rightPanel,
-  rightPanelTitle = "Panel",
 }: DashboardLayoutProps) => {
   const router = useRouter();
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
@@ -140,7 +139,8 @@ export const DashboardLayout = ({
               </SheetTrigger>
               <SheetContent side="right" className="p w-[300px]">
                 <SheetHeader className="flex items-center justify-between p-4">
-                  <SheetTitle>{rightPanelTitle}</SheetTitle>
+                  <SheetTitle>Current Orders</SheetTitle>
+                  <button></button>
                 </SheetHeader>
                 <div className="p-4">{rightPanel}</div>
               </SheetContent>
@@ -152,7 +152,7 @@ export const DashboardLayout = ({
       {/* Desktop right panel */}
       {rightPanel && !isMobile && (
         <aside className="hidden w-[300px] overflow-y-auto border-l bg-white p-4 md:block">
-          <h3 className="mb-4 text-lg font-semibold">{rightPanelTitle}</h3>
+          <h3 className="mb-4 text-lg font-semibold">Current Orders</h3>
           {rightPanel}
         </aside>
       )}

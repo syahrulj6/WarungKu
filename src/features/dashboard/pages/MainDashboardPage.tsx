@@ -1,6 +1,5 @@
 import React from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
-import { MenuCard } from "../components/MenuCard";
 
 const MainDashboardPage = () => {
   return (
