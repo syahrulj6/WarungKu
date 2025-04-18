@@ -12,7 +12,7 @@ const links = [
 ];
 
 export const Header = () => {
-  const { session, loading, handleSignOut } = useSession();
+  const { session, loading } = useSession();
 
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -86,13 +86,6 @@ export const Header = () => {
               <Button asChild>
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
-              <Button
-                variant="destructive"
-                className="hidden md:flex"
-                onClick={handleSignOut}
-              >
-                Log out
-              </Button>
             </>
           ) : (
             <Button asChild variant="default" className="hidden md:flex">
@@ -149,16 +142,6 @@ export const Header = () => {
             <>
               <Button asChild className="w-full">
                 <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button
-                variant="destructive"
-                className="w-full"
-                onClick={() => {
-                  handleSignOut();
-                  setMobileMenuOpen(false);
-                }}
-              >
-                Log out
               </Button>
             </>
           ) : (
