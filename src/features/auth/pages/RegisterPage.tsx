@@ -133,7 +133,11 @@ const RegisterPage = () => {
             </p>
 
             <p className="text-muted-foreground mt-2 text-center text-xs">
-              Dengan mendaftar, Anda menyetujui Syarat dan Ketentuan kami
+              Dengan mendaftar, Anda menyetujui{" "}
+              <button className="hover:text-foreground underline transition-colors hover:cursor-pointer">
+                Syarat dan Ketentuan
+              </button>{" "}
+              kami
             </p>
           </div>
 
