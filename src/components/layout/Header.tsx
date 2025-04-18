@@ -82,13 +82,18 @@ export const Header = () => {
           {loading ? (
             <div className="hidden h-10 w-24 animate-pulse rounded-md bg-gray-200 md:flex" />
           ) : session ? (
-            <Button
-              variant="destructive"
-              className="hidden md:flex"
-              onClick={handleSignOut}
-            >
-              Log out
-            </Button>
+            <>
+              <Button asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button
+                variant="destructive"
+                className="hidden md:flex"
+                onClick={handleSignOut}
+              >
+                Log out
+              </Button>
+            </>
           ) : (
             <Button asChild variant="default" className="hidden md:flex">
               <Link href="/login">Try for Free</Link>
@@ -141,16 +146,21 @@ export const Header = () => {
             </Link>
           ))}
           {session ? (
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => {
-                handleSignOut();
-                setMobileMenuOpen(false);
-              }}
-            >
-              Log out
-            </Button>
+            <>
+              <Button asChild className="w-full">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button
+                variant="destructive"
+                className="w-full"
+                onClick={() => {
+                  handleSignOut();
+                  setMobileMenuOpen(false);
+                }}
+              >
+                Log out
+              </Button>
+            </>
           ) : (
             <Button asChild variant="default" className="w-full">
               <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
