@@ -2,10 +2,10 @@ import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/utils/api";
+import WarungCard from "../components/WarungCard";
 
 const MainDashboardPage = () => {
   const [search, setSearch] = useState("");
@@ -34,58 +34,9 @@ const MainDashboardPage = () => {
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {getAllWarungData?.map((warung) => {
-            const activeSubscription = warung.subscriptions
-              .filter((sub) => sub.isActive)
-              .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())[0];
-
-            const currentPlan = activeSubscription?.plan || "FREE";
-
-            return (
-              <Card
-                key={warung.id}
-                className="flex flex-col justify-between md:h-44 md:px-6"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium">{warung.name}</h3>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      currentPlan === "FREE"
-                        ? "bg-gray-100 text-gray-800"
-                        : currentPlan === "BASIC"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-purple-100 text-purple-800"
-                    }`}
-                  >
-                    {currentPlan}
-                  </span>
-                </div>
-                <div className="mt-2 text-sm text-gray-500">
-                  {warung.address}
-                </div>
-                {activeSubscription && (
-                  <div className="mt-2 text-xs text-gray-500">
-                    <div>
-                      Valid until:{" "}
-                      {activeSubscription.endDate.toLocaleDateString()}
-                    </div>
-                    <div>
-                      Status:{" "}
-                      <span
-                        className={
-                          activeSubscription.isActive
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }
-                      >
-                        {activeSubscription.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </Card>
-            );
-          })}
+          {getAllWarungData?.map((warung) => (
+            <WarungCard key={warung.id} warung={warung} />
+          ))}
         </div>
       </div>
     </DashboardLayout>
