@@ -6,6 +6,7 @@ import { Button } from "~/components/ui/button";
 import { Menu } from "lucide-react";
 import AccountDropdown from "./AccountDropdown";
 import { IoMailOutline } from "react-icons/io5";
+import { MdOutlineArrowOutward } from "react-icons/md";
 
 const menuItems = [
   {
@@ -27,6 +28,7 @@ const menuItems = [
     title: "Guides",
     category: "Documentation",
     url: "/docs/guides",
+    icon: <MdOutlineArrowOutward />,
   },
 ];
 

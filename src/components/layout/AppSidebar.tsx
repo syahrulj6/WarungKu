@@ -7,6 +7,7 @@ type MenuItem = {
   url: string;
   active?: boolean;
   category: string;
+  icon?: ReactNode;
 };
 
 type SidebarProps = {
@@ -46,6 +47,7 @@ export const AppSidebar = ({ menuItems }: SidebarProps) => {
                   label={item.title}
                   active={item.active}
                   url={item.url}
+                  icon={item.icon}
                 />
               ))}
             </div>
@@ -60,6 +62,7 @@ const SidebarItem = ({
   label,
   active,
   url,
+  icon,
 }: {
   label: string;
   active?: boolean;
@@ -69,10 +72,11 @@ const SidebarItem = ({
   const content = (
     <div
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg transition hover:text-current",
+        "flex w-full items-center gap-2 rounded-lg transition hover:text-current",
         active ? "text-current" : "text-muted-foreground",
       )}
     >
+      {icon && <span className="text-sm">{icon}</span>}
       <span className="text-sm">{label}</span>
     </div>
   );
