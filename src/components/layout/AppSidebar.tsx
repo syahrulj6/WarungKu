@@ -1,60 +1,57 @@
 import { cn } from "~/lib/utils";
 import { type ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Button } from "../ui/button";
-import { useSession } from "~/hooks/useSession";
-import { ArrowLeftToLine } from "lucide-react";
+
+type MenuItem = {
+  title: string;
+  url: string;
+  active?: boolean;
+  category: string;
+};
 
 type SidebarProps = {
-  menuItems: {
-    title: string;
-    url: string;
-    active?: boolean;
-  }[];
+  menuItems: MenuItem[];
 };
 
 export const AppSidebar = ({ menuItems }: SidebarProps) => {
-  const { handleSignOut } = useSession();
-  return (
-    <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
-      {/* Logo */}
-      <div className="mb-5 md:mb-8">
-        <Link href="/">
-          <div className="relative h-12 w-12 md:h-14 md:w-14">
-            <Image
-              src="/warungku-notext.png"
-              alt="WarungKu Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </Link>
-      </div>
+  // Group menu items by category with proper typing
+  const groupedMenuItems = menuItems.reduce<Record<string, MenuItem[]>>(
+    (acc, item) => {
+      const category = item.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    },
+    {},
+  );
 
+  return (
+    <aside className="bg-background flex h-screen w-full flex-col border-r lg:w-56">
       {/* Main Menu */}
-      <nav className="flex flex-1 flex-col items-center space-y-4">
-        {menuItems.map((item) => (
-          <SidebarItem
-            key={item.title}
-            label={item.title}
-            active={item.active}
-            url={item.url}
-          />
+      <nav className="flex flex-1 flex-col overflow-y-auto">
+        <p className="h-14 border-b-1 px-4 py-4 font-semibold text-current md:px-6">
+          WarungKu
+        </p>
+        {Object.entries(groupedMenuItems).map(([category, items]) => (
+          <div key={category} className="border-b-1 py-5">
+            <h3 className="text-muted-foreground mb-3 px-4 text-xs font-semibold uppercase md:px-6">
+              {category}
+            </h3>
+            <div className="flex flex-col gap-2 px-4 md:px-6">
+              {items.map((item) => (
+                <SidebarItem
+                  key={`${category}-${item.title}`}
+                  label={item.title}
+                  active={item.active}
+                  url={item.url}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
-
-      {/* Profile at bottom */}
-      <div className="mt-auto w-full px-4">
-        <Button
-          variant={"destructive"}
-          className="w-full"
-          onClick={handleSignOut}
-        >
-          <ArrowLeftToLine /> Log Out
-        </Button>
-      </div>
     </aside>
   );
 };
@@ -72,11 +69,11 @@ const SidebarItem = ({
   const content = (
     <div
       className={cn(
-        "hover:bg-primary/10 flex w-full items-center gap-4 rounded-lg p-2 transition lg:justify-start lg:px-4 lg:py-2",
-        active ? "text-primary bg-primary/10" : "text-gray-600",
+        "flex w-full items-center gap-3 rounded-lg transition hover:text-current",
+        active ? "text-current" : "text-muted-foreground",
       )}
     >
-      <span className="text-sm lg:text-base">{label}</span>
+      <span className="text-sm">{label}</span>
     </div>
   );
 

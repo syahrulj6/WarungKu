@@ -1,24 +1,32 @@
 import { type ReactNode, useState, useEffect } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { useRouter } from "next/router";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "~/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Menu } from "lucide-react";
+import AccountDropdown from "./AccountDropdown";
+import { IoMailOutline } from "react-icons/io5";
 
 const menuItems = [
   {
-    title: "All Warung",
+    title: "All warung",
+    category: "Warung",
     url: "/dashboard",
   },
   {
-    title: "Menu",
-    url: "/menu",
+    title: "Preferences",
+    category: "Account",
+    url: "/account/preferences",
+  },
+  {
+    title: "Security",
+    category: "Account",
+    url: "/account/security",
+  },
+  {
+    title: "Guides",
+    category: "Documentation",
+    url: "/docs/guides",
   },
 ];
 
@@ -54,7 +62,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="bg-background flex min-h-screen">
       {/* Mobile left sidebar toggle button */}
       {isMobile && (
-        <div className="fixed top-4 left-4 z-50 md:hidden">
+        <div className="fixed top-3 left-3 z-50 md:hidden">
           <Sheet open={isLeftSidebarOpen} onOpenChange={setIsLeftSidebarOpen}>
             <SheetTrigger asChild>
               <Button
@@ -65,8 +73,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-2/4 p-0">
-              <SheetTitle>WarungKu</SheetTitle>
+            <SheetContent side="left" className="w-2/3 p-0">
               <AppSidebar menuItems={enhancedMenuItems} />
             </SheetContent>
           </Sheet>
@@ -76,7 +83,17 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Desktop left sidebar */}
       {!isMobile && <AppSidebar menuItems={enhancedMenuItems} />}
 
-      <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
+      <main className="bg-background flex flex-1 flex-col overflow-auto">
+        <div className="flex h-14 justify-end border-b px-4 py-4 md:px-6">
+          <div className="flex items-center gap-4">
+            <button className="hover:bg-muted-foreground/15 group rounded-md p-1 transition-colors hover:cursor-pointer">
+              <IoMailOutline className="text-muted-foreground text-lg group-hover:text-current" />
+            </button>
+            <AccountDropdown />
+          </div>
+        </div>
+        {children}
+      </main>
     </div>
   );
 };
