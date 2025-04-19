@@ -287,7 +287,7 @@ model Shift {
 
 model Subscription {
   id          String      @id @default(uuid())
-  plan        PlanType    @default(BASIC)
+  plan        PlanType    @default(FREE)
   startDate   DateTime
   endDate     DateTime
   isActive    Boolean     @default(true)
