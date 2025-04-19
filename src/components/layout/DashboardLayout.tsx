@@ -1,13 +1,5 @@
 import { type ReactNode, useState, useEffect } from "react";
 import { AppSidebar } from "./AppSidebar";
-import { GoHomeFill, GoClockFill } from "react-icons/go";
-import {
-  FaConciergeBell,
-  FaShoppingCart,
-  FaBook,
-  FaBell,
-} from "react-icons/fa";
-import { IoSettingsSharp } from "react-icons/io5";
 import { useRouter } from "next/router";
 import {
   Sheet,
@@ -17,58 +9,25 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
-import { PanelRightOpen, PanelRightClose, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 
 const menuItems = [
   {
-    title: "Home",
-    icon: <GoHomeFill />,
+    title: "All Warung",
     url: "/dashboard",
   },
   {
     title: "Menu",
-    icon: <FaConciergeBell />,
     url: "/menu",
-  },
-  {
-    title: "Order",
-    icon: <FaShoppingCart />,
-    url: "/order",
-  },
-  {
-    title: "History",
-    icon: <GoClockFill />,
-    url: "/history",
-  },
-  {
-    title: "Report",
-    icon: <FaBook />,
-    url: "/report",
-  },
-  {
-    title: "Alert",
-    icon: <FaBell />,
-    url: "/alerts",
-  },
-  {
-    title: "Settings",
-    icon: <IoSettingsSharp />,
-    url: "/settings",
   },
 ];
 
 type DashboardLayoutProps = {
   children: ReactNode;
-  rightPanel?: ReactNode;
-  rightPanelTitle?: string;
 };
 
-export const DashboardLayout = ({
-  children,
-  rightPanel,
-}: DashboardLayoutProps) => {
+export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const router = useRouter();
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -84,7 +43,6 @@ export const DashboardLayout = ({
 
   useEffect(() => {
     setIsLeftSidebarOpen(!isMobile);
-    setIsRightPanelOpen(!isMobile);
   }, [isMobile]);
 
   const enhancedMenuItems = menuItems.map((item) => ({
@@ -93,7 +51,7 @@ export const DashboardLayout = ({
   }));
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="bg-background flex min-h-screen">
       {/* Mobile left sidebar toggle button */}
       {isMobile && (
         <div className="fixed top-4 left-4 z-50 md:hidden">
@@ -107,7 +65,8 @@ export const DashboardLayout = ({
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-36 p-0">
+            <SheetContent side="left" className="w-2/4 p-0">
+              <SheetTitle>WarungKu</SheetTitle>
               <AppSidebar menuItems={enhancedMenuItems} />
             </SheetContent>
           </Sheet>
@@ -117,45 +76,7 @@ export const DashboardLayout = ({
       {/* Desktop left sidebar */}
       {!isMobile && <AppSidebar menuItems={enhancedMenuItems} />}
 
-      <main className="flex-1 overflow-auto bg-gray-50 p-6">
-        {children}
-
-        {/* Mobile right panel toggle button */}
-        {rightPanel && isMobile && (
-          <div className="fixed right-4 bottom-4 z-50 md:hidden">
-            <Sheet open={isRightPanelOpen} onOpenChange={setIsRightPanelOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full shadow-lg"
-                >
-                  {isRightPanelOpen ? (
-                    <PanelRightClose className="h-5 w-5" />
-                  ) : (
-                    <PanelRightOpen className="h-5 w-5" />
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="p w-[300px]">
-                <SheetHeader className="flex items-center justify-between p-4">
-                  <SheetTitle>Current Orders</SheetTitle>
-                  <button></button>
-                </SheetHeader>
-                <div className="p-4">{rightPanel}</div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
-      </main>
-
-      {/* Desktop right panel */}
-      {rightPanel && !isMobile && (
-        <aside className="hidden w-[300px] overflow-y-auto border-l bg-white p-4 md:block">
-          <h3 className="mb-4 text-lg font-semibold">Current Orders</h3>
-          {rightPanel}
-        </aside>
-      )}
+      <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
     </div>
   );
 };

@@ -9,12 +9,13 @@ import { ArrowLeftToLine } from "lucide-react";
 type SidebarProps = {
   menuItems: {
     title: string;
+    icon: ReactNode;
     url: string;
     active?: boolean;
   }[];
 };
 
-export const AppSidebar = ({ menuItems }: SidebarProps) => {
+export const WarungSidebar = ({ menuItems }: SidebarProps) => {
   const { handleSignOut } = useSession();
   return (
     <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
@@ -39,6 +40,7 @@ export const AppSidebar = ({ menuItems }: SidebarProps) => {
           <SidebarItem
             key={item.title}
             label={item.title}
+            icon={item.icon}
             active={item.active}
             url={item.url}
           />
@@ -62,6 +64,7 @@ export const AppSidebar = ({ menuItems }: SidebarProps) => {
 const SidebarItem = ({
   label,
   active,
+  icon,
   url,
 }: {
   label: string;
@@ -76,6 +79,7 @@ const SidebarItem = ({
         active ? "text-primary bg-primary/10" : "text-gray-600",
       )}
     >
+      <span className="text-xl">{icon}</span>
       <span className="text-sm lg:text-base">{label}</span>
     </div>
   );

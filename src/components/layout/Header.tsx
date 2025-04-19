@@ -83,7 +83,7 @@ export const Header = () => {
             <div className="hidden h-10 w-24 animate-pulse rounded-md bg-gray-200 md:flex" />
           ) : session ? (
             <>
-              <Button asChild>
+              <Button asChild className="hidden md:block">
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
             </>
