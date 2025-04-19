@@ -1,25 +1,26 @@
-import React from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useState } from "react";
+import { api } from "~/utils/api";
+import { useSession } from "~/hooks/useSession";
 
 const AccountDropdown = () => {
-  const [theme, setTheme] = React.useState("light");
+  const [theme, setTheme] = useState("light");
+  const { handleSignOut } = useSession();
+
+  const { data } = api.profile.getProfile.useQuery();
 
   return (
     <DropdownMenu>
@@ -29,7 +30,10 @@ const AccountDropdown = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <div className="mx-2 my-2">
+          <p className="font-semibold">{data?.username}</p>
+          <span className="text-muted-foreground text-sm">{data?.email}</span>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
@@ -50,7 +54,7 @@ const AccountDropdown = () => {
 
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          Log out
+          <button onClick={handleSignOut}>Log out</button>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>
