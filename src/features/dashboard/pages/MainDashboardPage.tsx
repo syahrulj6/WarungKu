@@ -6,11 +6,25 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/utils/api";
 import WarungCard from "../components/WarungCard";
+import { useDebounce } from "use-debounce";
 
 const MainDashboardPage = () => {
-  const [search, setSearch] = useState("");
-  const { data: getAllWarungData, isLoading: isGetAllWarungDataLoading } =
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+
+  const { data: allWarungData, isLoading: isAllLoading } =
     api.warung.getWarung.useQuery();
+
+  const { data: searchWarungData, isLoading: isSearchLoading } =
+    api.warung.searchWarungByName.useQuery(
+      { name: debouncedSearchTerm },
+      { enabled: debouncedSearchTerm.length > 0 },
+    );
+
+  const displayData =
+    debouncedSearchTerm.length > 0 ? searchWarungData : allWarungData;
+  const isLoading =
+    debouncedSearchTerm.length > 0 ? isSearchLoading : isAllLoading;
 
   return (
     <DashboardLayout>
@@ -23,8 +37,8 @@ const MainDashboardPage = () => {
             <Input
               id="search"
               placeholder="Cari warung"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="h-8 pl-8 text-sm md:pl-10 md:text-sm"
             />
             <Label htmlFor="search">
@@ -33,11 +47,26 @@ const MainDashboardPage = () => {
           </div>
         </div>
 
+        {isLoading && (
+          <div className="text-muted-foreground mt-4 text-center text-sm">
+            Memuat data...
+          </div>
+        )}
+
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {getAllWarungData?.map((warung) => (
+          {displayData?.map((warung) => (
             <WarungCard key={warung.id} warung={warung} />
           ))}
         </div>
+
+        {!isLoading &&
+          debouncedSearchTerm &&
+          (!displayData || displayData.length === 0) && (
+            <div className="text-muted-foreground mt-4 text-center text-sm">
+              Tidak ada warung yang ditemukan dengan nama "{debouncedSearchTerm}
+              "
+            </div>
+          )}
       </div>
     </DashboardLayout>
   );
