@@ -17,17 +17,17 @@ const menuItems = [
   {
     title: "Preferences",
     category: "Account",
-    url: "/account/preferences",
+    url: "/dashboard/account/me",
   },
   {
     title: "Security",
     category: "Account",
-    url: "/account/security",
+    url: "/dashboard/account/security",
   },
   {
     title: "Guides",
     category: "Documentation",
-    url: "/docs/guides",
+    url: "/docs",
     icon: <MdOutlineArrowOutward />,
   },
 ];
