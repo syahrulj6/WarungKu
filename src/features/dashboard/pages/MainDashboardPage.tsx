@@ -1,3 +1,4 @@
+// MainDashboardPage.tsx
 import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
@@ -5,21 +6,31 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/utils/api";
-import WarungCard from "../components/WarungCard";
+import { WarungCard } from "../components/WarungCard";
 import { useDebounce } from "use-debounce";
+import { CreateWarungModal } from "../components/CreateWarungModal";
+import { useSession } from "~/hooks/useSession";
 
 const MainDashboardPage = () => {
+  const [showCreateWarung, setShowCreateWarung] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
-  const { data: allWarungData, isLoading: isAllLoading } =
-    api.warung.getWarung.useQuery();
+  const { session } = useSession();
+
+  const {
+    data: allWarungData,
+    isLoading: isAllLoading,
+    refetch,
+  } = api.warung.getWarung.useQuery();
 
   const { data: searchWarungData, isLoading: isSearchLoading } =
     api.warung.searchWarungByName.useQuery(
       { name: debouncedSearchTerm },
       { enabled: debouncedSearchTerm.length > 0 },
     );
+
+  const createWarung = api.warung.createWarung.useMutation();
 
   const displayData =
     debouncedSearchTerm.length > 0 ? searchWarungData : allWarungData;
@@ -30,9 +41,7 @@ const MainDashboardPage = () => {
     <DashboardLayout>
       <div className="flex flex-col p-4 md:p-6">
         <div className="flex flex-col gap-2 md:flex-row">
-          <Button size="sm">
-            Buat warung <Plus />
-          </Button>
+          <CreateWarungModal refetch={refetch} />
           <div className="relative h-8 md:w-72">
             <Input
               id="search"

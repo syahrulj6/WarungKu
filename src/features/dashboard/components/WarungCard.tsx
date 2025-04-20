@@ -10,7 +10,7 @@ interface WarungCardProps {
   warung: WarungWithSubscriptions;
 }
 
-const WarungCard = ({ warung }: WarungCardProps) => {
+export const WarungCard = ({ warung }: WarungCardProps) => {
   const activeSubscription = warung.subscriptions
     .filter((sub) => sub.isActive)
     .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())[0];
@@ -54,5 +54,3 @@ const WarungCard = ({ warung }: WarungCardProps) => {
     </Card>
   );
 };
-
-export default WarungCard;

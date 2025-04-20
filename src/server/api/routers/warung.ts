@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { createWarungFormSchema } from "~/schemas/warung";
 
 export const warungRouter = createTRPCRouter({
   getWarung: privateProcedure.query(async ({ ctx }) => {
@@ -52,6 +53,51 @@ export const warungRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to perform search",
+        });
+      }
+    }),
+
+  createWarung: privateProcedure
+    .input(createWarungFormSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { name, address, logoUrl, phone } = input;
+
+      try {
+        const existingWarung = await db.warung.findFirst({
+          where: {
+            ownerId: user?.id,
+            name: name,
+          },
+        });
+
+        if (existingWarung) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "You already have a warung with this name",
+          });
+        }
+
+        const newWarung = await db.warung.create({
+          data: {
+            name,
+            address,
+            logoUrl,
+            phone,
+            ownerId: user!.id,
+            isActive: true,
+          },
+        });
+
+        return newWarung;
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        console.error("Failed to create warung:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create warung",
         });
       }
     }),
