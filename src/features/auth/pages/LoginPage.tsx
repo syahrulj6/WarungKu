@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
 import { PageContainer } from "~/components/layout/PageContainer";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -13,8 +12,6 @@ import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCodes";
 import { useRouter } from "next/router";
 import { LoginFormInner } from "../components/LoginFormInner";
 import Image from "next/image";
-
-// Import Swiper styles and modules
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import "swiper/css";

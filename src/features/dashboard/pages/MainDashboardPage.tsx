@@ -1,14 +1,12 @@
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/utils/api";
 import { WarungCard } from "../components/WarungCard";
 import { useDebounce } from "use-debounce";
 import { CreateWarungModal } from "../components/CreateWarungModal";
-import { useSession } from "~/hooks/useSession";
 
 const MainDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
