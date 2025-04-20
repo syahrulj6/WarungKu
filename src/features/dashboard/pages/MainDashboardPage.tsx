@@ -1,4 +1,3 @@
-// MainDashboardPage.tsx
 import { Plus, Search } from "lucide-react";
 import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
@@ -12,11 +11,8 @@ import { CreateWarungModal } from "../components/CreateWarungModal";
 import { useSession } from "~/hooks/useSession";
 
 const MainDashboardPage = () => {
-  const [showCreateWarung, setShowCreateWarung] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
-
-  const { session } = useSession();
 
   const {
     data: allWarungData,
@@ -29,8 +25,6 @@ const MainDashboardPage = () => {
       { name: debouncedSearchTerm },
       { enabled: debouncedSearchTerm.length > 0 },
     );
-
-  const createWarung = api.warung.createWarung.useMutation();
 
   const displayData =
     debouncedSearchTerm.length > 0 ? searchWarungData : allWarungData;
