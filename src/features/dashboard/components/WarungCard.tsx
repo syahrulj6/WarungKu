@@ -1,6 +1,8 @@
 import type { Subscription, Warung } from "@prisma/client";
+import Link from "next/link";
 import React from "react";
 import { Card } from "~/components/ui/card";
+import { MdArrowForwardIos } from "react-icons/md";
 
 type WarungWithSubscriptions = Warung & {
   subscriptions: Subscription[];
@@ -18,39 +20,28 @@ export const WarungCard = ({ warung }: WarungCardProps) => {
   const currentPlan = activeSubscription?.plan || "FREE";
 
   return (
-    <Card className="flex flex-col justify-between md:h-44 md:px-6 md:py-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium">{warung.name}</h3>
-        <span
-          className={`rounded-full px-2 py-1 text-xs font-medium ${
-            currentPlan === "FREE"
-              ? "bg-gray-100 text-gray-800"
-              : currentPlan === "BASIC"
-                ? "bg-blue-100 text-blue-800"
-                : "bg-purple-100 text-purple-800"
-          }`}
-        >
-          {currentPlan}
-        </span>
-      </div>
-      <div className="mt-2 text-sm text-gray-500">{warung.address}</div>
-      {activeSubscription && (
-        <div className="mt-2 text-xs text-gray-500">
-          <div>
-            Valid until: {activeSubscription.endDate.toLocaleDateString()}
-          </div>
-          <div>
-            Status:{" "}
-            <span
-              className={
-                activeSubscription.isActive ? "text-green-500" : "text-red-500"
-              }
-            >
-              {activeSubscription.isActive ? "Active" : "Inactive"}
-            </span>
-          </div>
+    <Link href={`/dashboard/warung/${warung.id}`}>
+      <Card className="group flex flex-col justify-between transition-all hover:shadow-xl md:h-44 md:px-6 md:py-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">{warung.name}</h3>
+          <span
+            className={`rounded-full px-2 py-1 text-xs font-medium ${
+              currentPlan === "FREE"
+                ? "bg-gray-100 text-gray-800"
+                : currentPlan === "BASIC"
+                  ? "bg-blue-100 text-blue-800"
+                  : "bg-purple-100 text-purple-800"
+            }`}
+          >
+            {currentPlan}
+          </span>
         </div>
-      )}
-    </Card>
+        <div className="mt-2 flex w-full justify-between">
+          <div className="text-muted-foreground text-sm">{warung.address}</div>
+
+          <MdArrowForwardIos className="text-muted-foreground mr-2 text-sm transition-all group-hover:mr-0 group-hover:text-lg group-hover:text-current" />
+        </div>
+      </Card>
+    </Link>
   );
 };
