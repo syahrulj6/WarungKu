@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { type AuthFormSchema, authFormSchema } from "../forms/auth";
 import { toast } from "sonner";
-import { GuestRoute } from "~/components/layout/GuestRoute";
+// import { GuestRoute } from "~/components/layout/GuestRoute";
 import { RegisterFormInner } from "../components/RegisterFormInner";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
@@ -55,7 +55,7 @@ const RegisterPage = () => {
   ];
 
   return (
-    <GuestRoute>
+    <>
       <PageContainer
         metaTitle="Daftar Akun"
         metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS WarungKu"
@@ -173,7 +173,7 @@ const RegisterPage = () => {
           </div>
         </div>
       </PageContainer>
-    </GuestRoute>
+    </>
   );
 };
 

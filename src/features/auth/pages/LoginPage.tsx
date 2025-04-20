@@ -11,7 +11,6 @@ import { supabase } from "~/lib/supabase/client";
 import { type AuthError } from "@supabase/supabase-js";
 import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCodes";
 import { useRouter } from "next/router";
-import { GuestRoute } from "~/components/layout/GuestRoute";
 import { LoginFormInner } from "../components/LoginFormInner";
 import Image from "next/image";
 
@@ -63,7 +62,7 @@ const LoginPage = () => {
   ];
 
   return (
-    <GuestRoute>
+    <>
       <PageContainer
         metaTitle="Login"
         metaDescription="Aplikasi POS modern untuk warung Anda. Login untuk mengelola transaksi, stok, dan laporan penjualan."
@@ -155,7 +154,7 @@ const LoginPage = () => {
           </div>
         </div>
       </PageContainer>
-    </GuestRoute>
+    </>
   );
 };
 

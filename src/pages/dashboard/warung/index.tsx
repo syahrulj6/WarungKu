@@ -1,1 +1,1 @@
-export { default } from "~/features/warung/pages/MainWarungPage";
+export { default } from "~/features/dashboard/pages/MainDashboardPage";
