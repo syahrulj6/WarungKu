@@ -21,7 +21,7 @@ export const WarungCard = ({ warung }: WarungCardProps) => {
 
   return (
     <Link href={`/dashboard/warung/${warung.id}`}>
-      <Card className="group flex flex-col justify-between transition-all hover:shadow-xl md:h-44 md:px-6 md:py-4">
+      <Card className="group flex h-40 flex-col justify-between px-4 transition-all hover:shadow-xl md:h-44 md:px-6 md:py-4">
         <div className="flex items-center justify-between">
           <h3 className="font-medium">{warung.name}</h3>
           <span

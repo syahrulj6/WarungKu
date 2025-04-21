@@ -15,7 +15,6 @@ type SidebarProps = {
 };
 
 export const AppSidebar = ({ menuItems }: SidebarProps) => {
-  // Group menu items by category with proper typing
   const groupedMenuItems = menuItems.reduce<Record<string, MenuItem[]>>(
     (acc, item) => {
       const category = item.category;

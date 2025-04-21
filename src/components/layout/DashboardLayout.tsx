@@ -10,22 +10,22 @@ import { MdOutlineArrowOutward } from "react-icons/md";
 
 const menuItems = [
   {
-    title: "All warung",
+    title: "Semua warung",
     category: "Warung",
     url: "/dashboard",
   },
   {
-    title: "Preferences",
+    title: "Preferensi akun",
     category: "Account",
     url: "/dashboard/account/me",
   },
   {
-    title: "Security",
+    title: "Keamanan",
     category: "Account",
     url: "/dashboard/account/security",
   },
   {
-    title: "Guides",
+    title: "Pandudan",
     category: "Documentation",
     url: "/docs",
     icon: <MdOutlineArrowOutward />,
