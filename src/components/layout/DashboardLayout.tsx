@@ -25,7 +25,7 @@ const menuItems = [
     url: "/dashboard/account/security",
   },
   {
-    title: "Pandudan",
+    title: "Panduan",
     category: "Documentation",
     url: "/docs",
     icon: <MdOutlineArrowOutward />,
