@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "~/schemas/auth";
 export const profileSettingFormSchema = z.object({
   username: z
     .string()
@@ -7,3 +8,9 @@ export const profileSettingFormSchema = z.object({
 });
 
 export type ProfileSettingFormSchema = z.infer<typeof profileSettingFormSchema>;
+
+export const changePasswordFormSchema = z.object({
+  currentPassword: passwordSchema,
+  newPassword: passwordSchema,
+});
+export type changePasswordFormSchema = z.infer<typeof changePasswordFormSchema>;

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import {
   Card,
@@ -10,6 +10,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/utils/api";
 import {
+  changePasswordFormSchema,
   type ProfileSettingFormSchema,
   profileSettingFormSchema,
 } from "../forms/profile";
@@ -25,34 +26,44 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 import { MdOutlineEmail } from "react-icons/md";
 import { GoDotFill } from "react-icons/go";
-import { LiaEdit } from "react-icons/lia";
+import { PasswordFormInner } from "../components/PasswordFormInner";
 
 const AccountProfilePage = () => {
   const { data: getProfileData, isLoading } = api.profile.getProfile.useQuery();
 
-  const form = useForm<ProfileSettingFormSchema>({
+  const profileForm = useForm<ProfileSettingFormSchema>({
     resolver: zodResolver(profileSettingFormSchema),
     defaultValues: {
       username: "",
     },
   });
 
+  const passwordForm = useForm<changePasswordFormSchema>({
+    resolver: zodResolver(changePasswordFormSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+    },
+  });
+
   useEffect(() => {
     if (getProfileData) {
-      form.reset({
+      profileForm.reset({
         username: getProfileData.username ?? "",
       });
     }
-  }, [getProfileData, form]);
+  }, [getProfileData, profileForm]);
 
   const updateProfile = api.profile.updateProfile.useMutation({
     onSuccess: ({ username }) => {
-      form.reset({ username });
+      profileForm.reset({ username });
       toast.success("Berhasil update profile");
     },
     onError: (err) => {
       if (err instanceof TRPCClientError && err.message === "USERNAME_USED") {
-        form.setError("username", { message: "Username sudah digunakan" });
+        profileForm.setError("username", {
+          message: "Username sudah digunakan",
+        });
       }
       toast.error("Gagal update profile");
     },
@@ -63,6 +74,22 @@ const AccountProfilePage = () => {
       username:
         values.username !== getProfileData?.username ? values.username : "",
     });
+  };
+
+  const changePasswordMutation = api.auth.changePassword.useMutation();
+
+  const handleChangePassword = async (values: changePasswordFormSchema) => {
+    try {
+      await changePasswordMutation.mutateAsync({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
+
+      toast.success("Password berhasil diubah!");
+      passwordForm.reset();
+    } catch (error) {
+      toast.error("Gagal mengubah password");
+    }
   };
 
   return (
@@ -90,7 +117,7 @@ const AccountProfilePage = () => {
                 </div>
               </div>
             ) : getProfileData ? (
-              <Form {...form}>
+              <Form {...profileForm}>
                 <ProfileSettingFormInner
                   defaultValues={{
                     username: getProfileData?.username,
@@ -104,15 +131,19 @@ const AccountProfilePage = () => {
             <Button
               size="sm"
               variant="outline"
-              disabled={!form.formState.isDirty || updateProfile.isPending}
-              onClick={() => form.reset()}
+              disabled={
+                !profileForm.formState.isDirty || updateProfile.isPending
+              }
+              onClick={() => profileForm.reset()}
             >
               Batal
             </Button>
             <Button
               size="sm"
-              disabled={!form.formState.isDirty || updateProfile.isPending}
-              onClick={form.handleSubmit(handleUpdateProfileSubmit)}
+              disabled={
+                !profileForm.formState.isDirty || updateProfile.isPending
+              }
+              onClick={profileForm.handleSubmit(handleUpdateProfileSubmit)}
             >
               {updateProfile.isPending ? (
                 <Loader className="animate-spin" />
@@ -149,6 +180,51 @@ const AccountProfilePage = () => {
               </Button>
             </div>
           </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="-mt-2 -mb-3">
+            <CardTitle className="font-normal">Ganti Password</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent>
+            <Form {...passwordForm}>
+              <PasswordFormInner />
+            </Form>
+          </CardContent>
+          <Separator />
+          <CardFooter className="-my-2 flex justify-end gap-2">
+            <>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  passwordForm.reset();
+                }}
+                disabled={
+                  changePasswordMutation.isPending ||
+                  !passwordForm.formState.isDirty ||
+                  changePasswordMutation.isPending
+                }
+              >
+                Batal
+              </Button>
+              <Button
+                size="sm"
+                disabled={
+                  !passwordForm.formState.isDirty ||
+                  changePasswordMutation.isPending
+                }
+                onClick={passwordForm.handleSubmit(handleChangePassword)}
+              >
+                {changePasswordMutation.isPending ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  "Simpan"
+                )}
+              </Button>
+            </>
+          </CardFooter>
         </Card>
       </div>
     </DashboardLayout>
