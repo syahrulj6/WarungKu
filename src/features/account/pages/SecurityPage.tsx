@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import { api } from "~/utils/api";
-import QRCode from "react-qr-code";
 import { toast } from "sonner";
 
 const SecurityPage = () => {
   const [step, setStep] = useState<"initial" | "verify" | "enabled">("initial");
   const [token, setToken] = useState("");
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [mfaSecret, setMfaSecret] = useState<{
-    secret: string;
-    otpauthUrl: string;
-  } | null>(null);
+  const [mfaSecret, setMfaSecret] = useState<string | null>(null);
 
-  // Assuming you have these procedures defined in your tRPC router
   const { data: mfaData, refetch } = api.security.getMfaStatus.useQuery();
   const generateSecret = api.security.generateMfaSecret.useMutation();
   const enableMfa = api.security.enableMfa.useMutation();
   const disableMfa = api.security.disableMfa.useMutation();
+  const resendCode = api.security.sendMfaCode.useMutation();
 
   const handleGenerateMfa = async () => {
-    const secret = await generateSecret.mutateAsync();
-    setMfaSecret(secret);
-    setStep("verify");
+    try {
+      const secret = await generateSecret.mutateAsync();
+      setMfaSecret(secret.secret);
+      setStep("verify");
+      toast.success("Verification code sent to your email");
+    } catch (error) {
+      toast.error("Failed to generate MFA secret");
+    }
   };
 
   const handleEnableMfa = async () => {
@@ -33,7 +34,7 @@ const SecurityPage = () => {
 
       const result = await enableMfa.mutateAsync({
         token,
-        secret: mfaSecret.secret,
+        secret: mfaSecret,
       });
       setBackupCodes(result.backupCodes);
       setStep("enabled");
@@ -45,9 +46,22 @@ const SecurityPage = () => {
   };
 
   const handleDisableMfa = async () => {
-    await disableMfa.mutateAsync();
-    await refetch();
-    toast.success("MFA disabled successfully");
+    try {
+      await disableMfa.mutateAsync();
+      await refetch();
+      toast.success("MFA disabled successfully");
+    } catch (error) {
+      toast.error("Failed to disable MFA");
+    }
+  };
+
+  const handleResendCode = async () => {
+    try {
+      await resendCode.mutateAsync();
+      toast.success("New verification code sent to your email");
+    } catch (error) {
+      toast.error("Failed to resend code");
+    }
   };
 
   return (
@@ -70,7 +84,7 @@ const SecurityPage = () => {
                 <div>
                   <h3 className="font-medium">MFA is enabled</h3>
                   <p className="text-muted-foreground text-sm">
-                    Your account is protected with multi-factor authentication
+                    Your account is protected with email verification
                   </p>
                 </div>
                 <button
@@ -87,7 +101,7 @@ const SecurityPage = () => {
                 <div>
                   <h3 className="font-medium">MFA is disabled</h3>
                   <p className="text-muted-foreground text-sm">
-                    Enable multi-factor authentication for extra security
+                    Enable email verification for extra security
                   </p>
                 </div>
                 <button
@@ -98,23 +112,13 @@ const SecurityPage = () => {
                 </button>
               </div>
 
-              {step === "verify" && mfaSecret && (
+              {step === "verify" && (
                 <div className="mt-6 space-y-4">
-                  <h4 className="font-medium">Set up authenticator app</h4>
+                  <h4 className="font-medium">Email Verification</h4>
                   <p className="text-muted-foreground text-sm">
-                    Scan this QR code with your authenticator app
+                    We've sent a 6-digit verification code to your email
+                    address.
                   </p>
-                  <div className="flex items-start gap-6">
-                    <div className="rounded-md bg-white p-2">
-                      <QRCode value={mfaSecret.otpauthUrl} size={128} />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm">Or enter this code manually:</p>
-                      <div className="rounded-md bg-gray-100 p-2 font-mono">
-                        {mfaSecret.secret}
-                      </div>
-                    </div>
-                  </div>
 
                   <div className="mt-4 space-y-2">
                     <label className="block text-sm font-medium">
@@ -127,12 +131,20 @@ const SecurityPage = () => {
                       className="w-full rounded-md border p-2"
                       placeholder="Enter 6-digit code"
                     />
-                    <button
-                      onClick={handleEnableMfa}
-                      className="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white"
-                    >
-                      Verify and enable
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleEnableMfa}
+                        className="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white"
+                      >
+                        Verify and enable
+                      </button>
+                      <button
+                        onClick={handleResendCode}
+                        className="text-primary hover:text-primary-dark rounded-md px-4 py-2"
+                      >
+                        Resend code
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -142,7 +154,7 @@ const SecurityPage = () => {
                   <h4 className="font-medium">MFA enabled successfully</h4>
                   <p className="text-muted-foreground text-sm">
                     Please save these backup codes in a safe place. You can use
-                    them to access your account if you lose your device.
+                    them to access your account if you can't receive emails.
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {backupCodes.map((code, i) => (
