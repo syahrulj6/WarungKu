@@ -1,7 +1,1 @@
-import React from "react";
-
-const security = () => {
-  return <div>security</div>;
-};
-
-export default security;
+export { default } from "~/features/account/pages/SecurityPage";

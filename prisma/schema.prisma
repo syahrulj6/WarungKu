@@ -59,6 +59,11 @@ model User {
   adjustments StockAdjustment[]
   debtPayments DebtPayment[]
 
+  // Multi Factor Auth
+  mfaEnabled    Boolean   @default(false)
+  mfaSecret     String?
+  mfaBackupCodes String[]
+
   @@unique([email])
 }
 
