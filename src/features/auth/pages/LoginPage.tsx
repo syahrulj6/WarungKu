@@ -18,6 +18,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { ArrowLeft } from "lucide-react";
+import { api } from "~/utils/api";
 
 const LoginPage = () => {
   const form = useForm<AuthFormSchema>({
@@ -25,6 +26,10 @@ const LoginPage = () => {
   });
 
   const router = useRouter();
+
+  const { refetch: checkMfa } = api.auth.checkMfaRequired.useQuery(undefined, {
+    enabled: false,
+  });
 
   const handleLoginSubmit = async (values: AuthFormSchema) => {
     try {
@@ -35,7 +40,13 @@ const LoginPage = () => {
 
       if (error) throw error;
 
-      await router.replace("/dashboard");
+      const { data } = await checkMfa();
+
+      if (data?.mfaRequired) {
+        await router.replace("/verify-mfa");
+      } else {
+        await router.replace("/dashboard");
+      }
     } catch (error) {
       switch ((error as AuthError).code) {
         case SupabaseAuthErrorCode.invalid_credentials:

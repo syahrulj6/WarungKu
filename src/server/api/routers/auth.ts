@@ -7,6 +7,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { authenticator } from "otplib";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -91,5 +92,37 @@ export const authRouter = createTRPCRouter({
       }
 
       return { success: true, data };
+    }),
+
+  checkMfaRequired: privateProcedure.query(async ({ ctx }) => {
+    const user = await ctx.db.user.findUnique({
+      where: { id: ctx.user?.id },
+      select: { mfaEnabled: true },
+    });
+
+    return { mfaRequired: user?.mfaEnabled ?? false };
+  }),
+
+  verifyMfaLogin: privateProcedure
+    .input(z.object({ token: z.string().length(6) }))
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+
+      const dbUser = await db.user.findUnique({
+        where: { id: user?.id },
+        select: { mfaSecret: true },
+      });
+
+      if (!dbUser?.mfaSecret) {
+        throw new Error("MFA not configured for this user");
+      }
+
+      const verified = authenticator.check(input.token, dbUser.mfaSecret);
+
+      if (!verified) {
+        throw new Error("Invalid verification code");
+      }
+
+      return { success: true };
     }),
 });
