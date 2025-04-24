@@ -22,7 +22,6 @@ const DocsPage = () => {
       content: [
         "Pengenalan WarungKu",
         "Persyaratan Sistem",
-        "Instalasi Aplikasi",
         "Tampilan Antarmuka",
       ],
     },
