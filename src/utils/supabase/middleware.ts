@@ -34,20 +34,18 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
 
-  const publicRoutes = ["/", "/login", "/register"];
-  const protectedRoutes = ["/dashboard", "/dashboard/"];
+  const publicRoutes = ["/login", "/register"];
+  const protectedRoutes = ["/dashboard", "/verify-mfa"];
 
   // Handle unauthenticated users
   if (!user) {
-    // Check if trying to access route starts with any protected route
-    const isProtectedRoute =
-      protectedRoutes.some(
-        (route) => path === route || path.startsWith(route),
-      ) || path.startsWith("/dashboard/");
+    const isProtectedRoute = protectedRoutes.some(
+      (route) => path === route || path.startsWith(route),
+    );
 
-    if (isProtectedRoute) {
+    if (isProtectedRoute || path === "/") {
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = "/login";
       return NextResponse.redirect(url);
     }
     return response;
@@ -55,7 +53,34 @@ export async function updateSession(request: NextRequest) {
 
   // Handle authenticated users
   if (user) {
+    const mfaVerified = request.cookies.get("mfa_verified")?.value === "true";
+    const isMfaRequired = path === "/verify-mfa";
+    const isDashboard = path.startsWith("/dashboard");
+    const isRootPath = path === "/";
+
+    // Redirect root path based on MFA status
+    if (isRootPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = mfaVerified ? "/dashboard/warungku" : "/verify-mfa";
+      return NextResponse.redirect(url);
+    }
+
+    // Redirect /dashboard/ to /dashboard/warungku
     if (path === "/dashboard" || path === "/dashboard/") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard/warung";
+      return NextResponse.redirect(url);
+    }
+
+    // Block unverified users from dashboard
+    if (!mfaVerified && isDashboard) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/verify-mfa";
+      return NextResponse.redirect(url);
+    }
+
+    // Block verified users from MFA page
+    if (mfaVerified && isMfaRequired) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard/warung";
       return NextResponse.redirect(url);

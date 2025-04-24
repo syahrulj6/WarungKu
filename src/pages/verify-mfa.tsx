@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { PageContainer } from "~/components/layout/PageContainer";
@@ -9,17 +9,43 @@ import { Input } from "~/components/ui/input";
 const VerifyMfaPage = () => {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const initialCodeSent = useRef(false);
   const router = useRouter();
-  const verifyMfa = api.auth.verifyMfaLogin.useMutation();
-  const resendCode = api.security.sendMfaCode.useMutation();
 
+  const verifyMfa = api.auth.verifyMfaLogin.useMutation();
   const sendMfaCode = api.security.sendMfaCode.useMutation();
 
   useEffect(() => {
-    // Send code when page loads
-    sendMfaCode.mutateAsync().catch(() => {
-      toast.error("Failed to send verification code");
-    });
+    // Only send the initial code if we haven't sent one yet
+    if (!initialCodeSent.current) {
+      const sendInitialCode = async () => {
+        try {
+          await sendMfaCode.mutateAsync();
+          initialCodeSent.current = true;
+          toast.success("Verification code sent to your email");
+        } catch (error) {
+          toast.error("Failed to send verification code");
+        }
+      };
+
+      sendInitialCode();
+    }
+
+    // Start countdown for resend button
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +54,8 @@ const VerifyMfaPage = () => {
 
     try {
       await verifyMfa.mutateAsync({ token: code });
-      await router.push("/dashboard");
+      document.cookie = "mfa_verified=true; path=/; max-age=86400";
+      await router.push("/dashboard/warung");
     } catch (error) {
       toast.error("Invalid verification code");
     } finally {
@@ -38,7 +65,21 @@ const VerifyMfaPage = () => {
 
   const handleResend = async () => {
     try {
-      await resendCode.mutateAsync();
+      await sendMfaCode.mutateAsync();
+      setCanResend(false);
+      setCountdown(60);
+      // Restart countdown
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
       toast.success("New code sent to your email");
     } catch (error) {
       toast.error("Failed to resend code");
@@ -72,8 +113,9 @@ const VerifyMfaPage = () => {
               variant="link"
               onClick={handleResend}
               className="w-full"
+              disabled={!canResend}
             >
-              Resend Code
+              {canResend ? "Resend Code" : `Resend in ${countdown}s`}
             </Button>
           </form>
         </div>

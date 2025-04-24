@@ -2,10 +2,9 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { authenticator } from "otplib";
 import { createTRPCRouter, privateProcedure } from "../trpc";
-import { sendVerificationEmail } from "~/lib/email"; // Your email service
+import { sendVerificationEmail } from "~/lib/email";
 
 export const securityRouter = createTRPCRouter({
-  // Check if MFA is enabled for the user
   getMfaStatus: privateProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.user.findUnique({
       where: { id: ctx.user?.id },
@@ -28,22 +27,18 @@ export const securityRouter = createTRPCRouter({
       });
     }
 
-    // Generate a new secret key
     const secret = authenticator.generateSecret();
 
-    // Generate a verification code
     const token = authenticator.generate(secret);
 
-    // Send verification email
     await sendVerificationEmail({
       email: ctx.user.email,
       token,
     });
 
-    return { secret }; // Return secret to store in session
+    return { secret };
   }),
 
-  // Verify and enable MFA
   enableMfa: privateProcedure
     .input(
       z.object({
@@ -62,7 +57,9 @@ export const securityRouter = createTRPCRouter({
         });
       }
 
-      // Verify the token
+      // Set options to allow for time skew
+      authenticator.options = { window: 1 };
+
       const verified = authenticator.check(token, secret);
 
       if (!verified) {
@@ -79,12 +76,10 @@ export const securityRouter = createTRPCRouter({
         });
       }
 
-      // Generate backup codes
       const backupCodes = Array.from({ length: 8 }, () =>
         Math.random().toString(36).substring(2, 8).toUpperCase(),
       );
 
-      // Update user in database
       await db.user.update({
         where: { id: user.id },
         data: {
@@ -97,7 +92,6 @@ export const securityRouter = createTRPCRouter({
       return { backupCodes };
     }),
 
-  // Disable MFA for the user
   disableMfa: privateProcedure.mutation(async ({ ctx }) => {
     const { db, user } = ctx;
 
@@ -117,15 +111,20 @@ export const securityRouter = createTRPCRouter({
   sendMfaCode: privateProcedure.mutation(async ({ ctx }) => {
     const { db, user } = ctx;
 
+    if (!user) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not authenticated",
+      });
+    }
+
     const userData = await db.user.findUnique({
       where: {
-        id: user?.id,
+        id: user.id,
       },
       select: {
         email: true,
         mfaEnabled: true,
-        id: true,
-        mfaBackupCodes: true,
         mfaSecret: true,
       },
     });
@@ -137,54 +136,18 @@ export const securityRouter = createTRPCRouter({
       });
     }
 
+    // Use the same authenticator options for consistency
+    authenticator.options = { window: 1 };
+
     // Generate new code using stored secret
     const token = authenticator.generate(userData.mfaSecret);
 
     // Send verification email
     await sendVerificationEmail({
-      email: userData?.email,
+      email: userData.email,
       token,
     });
 
     return { success: true };
   }),
-
-  // Verify MFA code (for login)
-  verifyMfaCode: privateProcedure
-    .input(z.object({ token: z.string().length(6) }))
-    .mutation(async ({ ctx, input }) => {
-      const { user, db } = ctx;
-
-      const userData = await db.user.findUnique({
-        where: {
-          id: user?.id,
-        },
-        select: {
-          email: true,
-          mfaEnabled: true,
-          id: true,
-          mfaBackupCodes: true,
-          mfaSecret: true,
-        },
-      });
-
-      if (!userData?.mfaSecret) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "MFA not properly configured",
-        });
-      }
-
-      // Verify the token
-      const verified = authenticator.check(input.token, userData?.mfaSecret);
-
-      if (!verified) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Invalid verification code",
-        });
-      }
-
-      return { success: true };
-    }),
 });

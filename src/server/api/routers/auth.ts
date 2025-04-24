@@ -8,6 +8,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { authenticator } from "otplib";
+import { TRPCError } from "@trpc/server";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -68,7 +69,10 @@ export const authRouter = createTRPCRouter({
       const { user } = ctx;
 
       if (!user) {
-        throw new Error("Unauthorized");
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Unauthorized",
+        });
       }
 
       const userEmail = user.email;
@@ -79,7 +83,10 @@ export const authRouter = createTRPCRouter({
         });
 
       if (signInError) {
-        throw new Error("Current password is incorrect");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Current password is incorrect",
+        });
       }
 
       const { data, error: updateError } =
@@ -88,7 +95,10 @@ export const authRouter = createTRPCRouter({
         });
 
       if (updateError) {
-        throw new Error("Failed to update password");
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update password",
+        });
       }
 
       return { success: true, data };
@@ -108,19 +118,38 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
 
+      if (!user) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not authenticated",
+        });
+      }
+
       const dbUser = await db.user.findUnique({
-        where: { id: user?.id },
-        select: { mfaSecret: true },
+        where: { id: user.id },
+        select: {
+          mfaEnabled: true,
+          mfaSecret: true,
+        },
       });
 
-      if (!dbUser?.mfaSecret) {
-        throw new Error("MFA not configured for this user");
+      if (!dbUser?.mfaEnabled || !dbUser?.mfaSecret) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "MFA not configured for this user",
+        });
       }
+
+      // Set options to allow for time skew (1 period before and after current)
+      authenticator.options = { window: 1 };
 
       const verified = authenticator.check(input.token, dbUser.mfaSecret);
 
       if (!verified) {
-        throw new Error("Invalid verification code");
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid verification code",
+        });
       }
 
       return { success: true };

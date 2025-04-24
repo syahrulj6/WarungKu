@@ -43,8 +43,13 @@ const LoginPage = () => {
       const { data } = await checkMfa();
 
       if (data?.mfaRequired) {
+        // Clear any existing mfa_verified cookie
+        document.cookie =
+          "mfa_verified=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         await router.replace("/verify-mfa");
       } else {
+        // Set mfa_verified cookie since MFA is not required
+        document.cookie = "mfa_verified=true; path=/; max-age=86400"; // 24 hours
         await router.replace("/dashboard");
       }
     } catch (error) {
