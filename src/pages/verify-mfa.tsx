@@ -4,10 +4,14 @@ import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { PageContainer } from "~/components/layout/PageContainer";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "~/components/ui/input-otp";
 
 const VerifyMfaPage = () => {
-  const [code, setCode] = useState("");
+  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [countdown, setCountdown] = useState(60);
@@ -18,7 +22,6 @@ const VerifyMfaPage = () => {
   const sendMfaCode = api.security.sendMfaCode.useMutation();
 
   useEffect(() => {
-    // Only send the initial code if we haven't sent one yet
     if (!initialCodeSent.current) {
       const sendInitialCode = async () => {
         try {
@@ -29,11 +32,9 @@ const VerifyMfaPage = () => {
           toast.error("Failed to send verification code");
         }
       };
-
       sendInitialCode();
     }
 
-    // Start countdown for resend button
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -50,10 +51,15 @@ const VerifyMfaPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
+    if (otp.length !== 6) {
+      toast.error("Please enter a 6-digit code");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      await verifyMfa.mutateAsync({ token: code });
+      await verifyMfa.mutateAsync({ token: otp });
       document.cookie = "mfa_verified=true; path=/; max-age=86400";
       await router.push("/dashboard/warung");
     } catch (error) {
@@ -68,7 +74,7 @@ const VerifyMfaPage = () => {
       await sendMfaCode.mutateAsync();
       setCanResend(false);
       setCountdown(60);
-      // Restart countdown
+
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -95,14 +101,21 @@ const VerifyMfaPage = () => {
             We've sent a 6-digit verification code to your email address
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Enter 6-digit code"
-              maxLength={6}
-            />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={otp}
+                onChange={(value) => setOtp(value)}
+                containerClassName="gap-2"
+              >
+                <InputOTPGroup>
+                  {[...Array(6)].map((_, index) => (
+                    <InputOTPSlot key={index} index={index} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Verifying..." : "Verify"}

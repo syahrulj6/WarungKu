@@ -18,7 +18,6 @@ export const securityRouter = createTRPCRouter({
     };
   }),
 
-  // Generate secret and send verification email
   generateMfaSecret: privateProcedure.mutation(async ({ ctx }) => {
     if (!ctx.user?.email) {
       throw new TRPCError({
@@ -63,7 +62,6 @@ export const securityRouter = createTRPCRouter({
       const verified = authenticator.check(token, secret);
 
       if (!verified) {
-        // Generate and send new code if verification fails
         const newToken = authenticator.generate(secret);
         await sendVerificationEmail({
           email: user.email,
@@ -107,7 +105,6 @@ export const securityRouter = createTRPCRouter({
     return { success: true };
   }),
 
-  // Send a new verification code (for login)
   sendMfaCode: privateProcedure.mutation(async ({ ctx }) => {
     const { db, user } = ctx;
 
