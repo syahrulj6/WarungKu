@@ -49,8 +49,8 @@ const VerifyMfaPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     if (otp.length !== 6) {
       toast.error("Please enter a 6-digit code");
@@ -91,6 +91,13 @@ const VerifyMfaPage = () => {
       toast.error("Failed to resend code");
     }
   };
+
+  // Auto-submit when OTP length reaches 6
+  useEffect(() => {
+    if (otp.length === 6) {
+      handleSubmit();
+    }
+  }, [otp]);
 
   return (
     <PageContainer metaTitle="Verify MFA" withHeader={false} withFooter={false}>
