@@ -139,7 +139,6 @@ const DocsPage = () => {
             ))}
           </div>
 
-          {/* Getting Started Section */}
           <Card className="mt-8 p-6">
             <h2 className="mb-4 text-xl font-semibold">Langkah Awal</h2>
             <div className="space-y-4">
@@ -155,7 +154,42 @@ const DocsPage = () => {
                   </p>
                 </div>
               </div>
-              {/* ... rest of the steps ... */}
+              <div className="flex gap-4">
+                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                  2
+                </div>
+                <div>
+                  <h3 className="font-medium">Login ke Dashboard</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Setelah verifikasi, login menggunakan email dan password
+                    yang telah didaftarkan.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                  3
+                </div>
+                <div>
+                  <h3 className="font-medium">Buat Warung Pertama</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Isi data warung Anda seperti nama, alamat, dan informasi
+                    kontak.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                  4
+                </div>
+                <div>
+                  <h3 className="font-medium">Tambahkan Produk</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Mulai tambahkan produk-produk yang dijual di warung Anda
+                    beserta harga dan stok.
+                  </p>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
