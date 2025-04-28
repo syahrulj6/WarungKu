@@ -35,7 +35,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   const publicRoutes = ["/login", "/register"];
-  const protectedRoutes = ["/dashboard", "/verify-mfa"];
+  const protectedRoutes = ["/dashboard", "/verify-mfa", "/docs"];
 
   // Handle unauthenticated users
   if (!user) {
