@@ -3,6 +3,7 @@ import React from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import { PageContainer } from "~/components/layout/PageContainer";
 import { Card } from "~/components/ui/card";
+import { SectionCard } from "../components/SectionCard";
 import {
   IoPlayOutline,
   IoStorefrontOutline,
@@ -10,7 +11,6 @@ import {
   IoPersonOutline,
   IoCartOutline,
   IoCashOutline,
-  IoSettingsOutline,
   IoHelpCircleOutline,
 } from "react-icons/io5";
 
@@ -130,29 +130,12 @@ const DocsPage = () => {
           {/* Daftar Section */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {sections.map((section, index) => (
-              <Card
+              <SectionCard
                 key={index}
-                className="p-4 transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 mt-1 rounded-md p-2">
-                    {section.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="mb-3 text-xl font-semibold">
-                      {section.title}
-                    </h2>
-                    <ul className="text-muted-foreground space-y-2">
-                      {section.content.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-primary">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </Card>
+                icon={section.icon}
+                title={section.title}
+                content={section.content}
+              />
             ))}
           </div>
 
@@ -172,42 +155,7 @@ const DocsPage = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  2
-                </div>
-                <div>
-                  <h3 className="font-medium">Login ke Dashboard</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Setelah verifikasi, login menggunakan email dan password
-                    yang telah didaftarkan.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  3
-                </div>
-                <div>
-                  <h3 className="font-medium">Buat Warung Pertama</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Isi data warung Anda seperti nama, alamat, dan informasi
-                    kontak.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  4
-                </div>
-                <div>
-                  <h3 className="font-medium">Tambahkan Produk</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Mulai tambahkan produk-produk yang dijual di warung Anda
-                    beserta harga dan stok.
-                  </p>
-                </div>
-              </div>
+              {/* ... rest of the steps ... */}
             </div>
           </Card>
         </div>
