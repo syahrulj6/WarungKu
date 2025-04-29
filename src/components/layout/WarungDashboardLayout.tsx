@@ -15,6 +15,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
@@ -117,7 +118,13 @@ export const WarungDashboardLayout = ({
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-36 p-0">
+          <SheetContent side="left" className="w-2/4 p-0">
+            <SheetHeader className="p-4">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetDescription className="sr-only">
+                Main navigation menu for the application
+              </SheetDescription>
+            </SheetHeader>
             <WarungSidebar menuItems={enhancedMenuItems} />
           </SheetContent>
         </Sheet>
@@ -171,6 +178,9 @@ export const WarungDashboardLayout = ({
             <SheetContent side="right" className="w-72 p-0">
               <SheetHeader className="p-4">
                 <SheetTitle>{rightPanelTitle}</SheetTitle>
+                <SheetDescription>
+                  Panel showing current order information
+                </SheetDescription>
               </SheetHeader>
               <div className="p-4">{rightPanel}</div>
             </SheetContent>

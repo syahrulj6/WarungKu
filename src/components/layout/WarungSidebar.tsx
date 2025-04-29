@@ -2,10 +2,6 @@ import { cn } from "~/lib/utils";
 import { type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import { useSession } from "~/hooks/useSession";
-import { ArrowLeftToLine } from "lucide-react";
-import AccountDropdown from "./AccountDropdown";
 
 type SidebarProps = {
   menuItems: {
@@ -17,10 +13,8 @@ type SidebarProps = {
 };
 
 export const WarungSidebar = ({ menuItems }: SidebarProps) => {
-  const { handleSignOut } = useSession();
-
   return (
-    <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
+    <aside className="flex h-screen w-full flex-col items-center border-r bg-white md:py-6 lg:w-40">
       {/* Logo */}
       <div className="mb-5 md:mb-8">
         <Link href="/">
