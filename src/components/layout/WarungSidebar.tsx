@@ -2,9 +2,6 @@ import { cn } from "~/lib/utils";
 import { type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import { useSession } from "~/hooks/useSession";
-import { ArrowLeftToLine } from "lucide-react";
 
 type SidebarProps = {
   menuItems: {
@@ -16,12 +13,11 @@ type SidebarProps = {
 };
 
 export const WarungSidebar = ({ menuItems }: SidebarProps) => {
-  const { handleSignOut } = useSession();
   return (
     <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
       {/* Logo */}
       <div className="mb-5 md:mb-8">
-        <Link href="/">
+        <Link href="/dashboard/warung">
           <div className="relative h-12 w-12 md:h-14 md:w-14">
             <Image
               src="/warungku-notext.png"
@@ -46,17 +42,6 @@ export const WarungSidebar = ({ menuItems }: SidebarProps) => {
           />
         ))}
       </nav>
-
-      {/* Profile at bottom */}
-      <div className="mt-auto w-full px-4">
-        <Button
-          variant={"destructive"}
-          className="w-full"
-          onClick={handleSignOut}
-        >
-          <ArrowLeftToLine /> Log Out
-        </Button>
-      </div>
     </aside>
   );
 };
