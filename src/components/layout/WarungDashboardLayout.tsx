@@ -61,13 +61,15 @@ const menuItems = [
 
 type WarungDashboardLayoutProps = {
   children: ReactNode;
-  rightPanel?: ReactNode;
+  withRightPanel?: boolean;
+  rightPanelContent?: ReactNode;
   rightPanelTitle?: string;
 };
 
 export const WarungDashboardLayout = ({
   children,
-  rightPanel,
+  withRightPanel = false,
+  rightPanelContent,
   rightPanelTitle = "Current Orders",
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
@@ -143,23 +145,22 @@ export const WarungDashboardLayout = ({
             <div className="p-6">{children}</div>
           </main>
 
-          {/* Right Sidebar (Desktop) */}
-          {rightPanel && !isMobile && (
+          {/* Right Sidebar (Desktop) - Only shown if withRightPanel is true */}
+          {withRightPanel && !isMobile && (
             <div className="relative w-72 border-l bg-white">
-              {/* Content starts below header */}
               <div className="absolute inset-0 overflow-y-auto p-4">
                 <h3 className="mb-4 text-lg font-semibold">
                   {rightPanelTitle}
                 </h3>
-                {rightPanel}
+                {rightPanelContent}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Mobile Right Panel */}
-      {rightPanel && isMobile && (
+      {/* Mobile Right Panel - Only shown if withRightPanel is true */}
+      {withRightPanel && isMobile && (
         <div className="fixed right-4 bottom-4 z-50 md:hidden">
           <Sheet open={isRightPanelOpen} onOpenChange={setIsRightPanelOpen}>
             <SheetTrigger asChild>
@@ -182,7 +183,7 @@ export const WarungDashboardLayout = ({
                   Panel showing current order information
                 </SheetDescription>
               </SheetHeader>
-              <div className="p-4">{rightPanel}</div>
+              <div className="p-4">{rightPanelContent}</div>
             </SheetContent>
           </Sheet>
         </div>
