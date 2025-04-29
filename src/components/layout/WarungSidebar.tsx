@@ -18,6 +18,7 @@ type SidebarProps = {
 
 export const WarungSidebar = ({ menuItems }: SidebarProps) => {
   const { handleSignOut } = useSession();
+
   return (
     <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
       {/* Logo */}
@@ -47,9 +48,6 @@ export const WarungSidebar = ({ menuItems }: SidebarProps) => {
           />
         ))}
       </nav>
-
-      {/* Profile at bottom */}
-      <AccountDropdown />
     </aside>
   );
 };

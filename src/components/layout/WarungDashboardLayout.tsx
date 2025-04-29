@@ -1,5 +1,6 @@
 import { type ReactNode, useState, useEffect } from "react";
 import { WarungSidebar } from "./WarungSidebar";
+import { WarungHeader } from "./WarungHeader";
 import { GoHomeFill, GoClockFill } from "react-icons/go";
 import {
   FaConciergeBell,
@@ -33,7 +34,7 @@ const menuItems = [
   {
     title: "Order",
     icon: <FaShoppingCart />,
-    url: "/waung/order",
+    url: "/warung/order",
   },
   {
     title: "History",
@@ -66,6 +67,7 @@ type WarungDashboardLayoutProps = {
 export const WarungDashboardLayout = ({
   children,
   rightPanel,
+  rightPanelTitle = "Current Orders",
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
@@ -92,69 +94,88 @@ export const WarungDashboardLayout = ({
     active: router.pathname.startsWith(item.url),
   }));
 
+  const toggleLeftSidebar = () => setIsLeftSidebarOpen(!isLeftSidebarOpen);
+
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Mobile left sidebar toggle button */}
+      {/* Fixed Left Sidebar (Desktop) */}
+      {!isMobile && (
+        <div className="fixed top-0 left-0 z-30 h-screen w-40 border-r">
+          <WarungSidebar menuItems={enhancedMenuItems} />
+        </div>
+      )}
+
+      {/* Mobile Left Sidebar */}
       {isMobile && (
-        <div className="fixed top-4 left-4 z-50 md:hidden">
-          <Sheet open={isLeftSidebarOpen} onOpenChange={setIsLeftSidebarOpen}>
+        <Sheet open={isLeftSidebarOpen} onOpenChange={setIsLeftSidebarOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="fixed top-4 left-4 z-50 rounded-full shadow-sm md:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-36 p-0">
+            <WarungSidebar menuItems={enhancedMenuItems} />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      <div className="flex flex-1 flex-col">
+        <WarungHeader
+          toggleSidebar={toggleLeftSidebar}
+          className={!isMobile ? "ml-40" : ""}
+        />
+
+        <div className="flex flex-1">
+          <main
+            className={`flex-1 overflow-auto bg-gray-50 ${!isMobile ? "ml-40" : ""}`}
+          >
+            <div className="p-6">{children}</div>
+          </main>
+
+          {/* Right Sidebar (Desktop) */}
+          {rightPanel && !isMobile && (
+            <div className="relative w-72 border-l bg-white">
+              {/* Content starts below header */}
+              <div className="absolute inset-0 overflow-y-auto p-4">
+                <h3 className="mb-4 text-lg font-semibold">
+                  {rightPanelTitle}
+                </h3>
+                {rightPanel}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Right Panel */}
+      {rightPanel && isMobile && (
+        <div className="fixed right-4 bottom-4 z-50 md:hidden">
+          <Sheet open={isRightPanelOpen} onOpenChange={setIsRightPanelOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full shadow-sm"
+                className="rounded-full shadow-lg"
               >
-                <Menu className="h-5 w-5" />
+                {isRightPanelOpen ? (
+                  <PanelRightClose className="h-5 w-5" />
+                ) : (
+                  <PanelRightOpen className="h-5 w-5" />
+                )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-36 p-0">
-              <WarungSidebar menuItems={enhancedMenuItems} />
+            <SheetContent side="right" className="w-72 p-0">
+              <SheetHeader className="p-4">
+                <SheetTitle>{rightPanelTitle}</SheetTitle>
+              </SheetHeader>
+              <div className="p-4">{rightPanel}</div>
             </SheetContent>
           </Sheet>
         </div>
-      )}
-
-      {/* Desktop left sidebar */}
-      {!isMobile && <WarungSidebar menuItems={enhancedMenuItems} />}
-
-      <main className="flex-1 overflow-auto bg-gray-50 p-6">
-        {children}
-
-        {/* Mobile right panel toggle button */}
-        {rightPanel && isMobile && (
-          <div className="fixed right-4 bottom-4 z-50 md:hidden">
-            <Sheet open={isRightPanelOpen} onOpenChange={setIsRightPanelOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full shadow-lg"
-                >
-                  {isRightPanelOpen ? (
-                    <PanelRightClose className="h-5 w-5" />
-                  ) : (
-                    <PanelRightOpen className="h-5 w-5" />
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="p w-[300px]">
-                <SheetHeader className="flex items-center justify-between p-4">
-                  <SheetTitle>Current Orders</SheetTitle>
-                  <button></button>
-                </SheetHeader>
-                <div className="p-4">{rightPanel}</div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        )}
-      </main>
-
-      {/* Desktop right panel */}
-      {rightPanel && !isMobile && (
-        <aside className="hidden w-[300px] overflow-y-auto border-l bg-white p-4 md:block">
-          <h3 className="mb-4 text-lg font-semibold">Current Orders</h3>
-          {rightPanel}
-        </aside>
       )}
     </div>
   );
