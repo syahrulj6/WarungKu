@@ -2,6 +2,10 @@ import { cn } from "~/lib/utils";
 import { type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "../ui/button";
+import { useSession } from "~/hooks/useSession";
+import { ArrowLeftToLine } from "lucide-react";
+import AccountDropdown from "./AccountDropdown";
 
 type SidebarProps = {
   menuItems: {
@@ -13,11 +17,12 @@ type SidebarProps = {
 };
 
 export const WarungSidebar = ({ menuItems }: SidebarProps) => {
+  const { handleSignOut } = useSession();
   return (
     <aside className="flex h-screen w-full flex-col items-center border-r bg-white py-6 lg:w-40">
       {/* Logo */}
       <div className="mb-5 md:mb-8">
-        <Link href="/dashboard/warung">
+        <Link href="/">
           <div className="relative h-12 w-12 md:h-14 md:w-14">
             <Image
               src="/warungku-notext.png"
@@ -42,6 +47,9 @@ export const WarungSidebar = ({ menuItems }: SidebarProps) => {
           />
         ))}
       </nav>
+
+      {/* Profile at bottom */}
+      <AccountDropdown />
     </aside>
   );
 };
@@ -60,8 +68,8 @@ const SidebarItem = ({
   const content = (
     <div
       className={cn(
-        "hover:bg-primary/10 flex w-full items-center gap-4 rounded-lg p-2 transition lg:justify-start lg:px-4 lg:py-2",
-        active ? "text-primary bg-primary/10" : "text-gray-600",
+        "hover:bg-primary hover:text-background flex w-full items-center gap-4 rounded-lg p-2 transition lg:justify-start lg:px-4 lg:py-2",
+        active ? "bg-primary text-background" : "text-muted-foreground",
       )}
     >
       <span className="text-xl">{icon}</span>

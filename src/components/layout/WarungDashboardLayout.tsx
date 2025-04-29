@@ -21,39 +21,39 @@ import { PanelRightOpen, PanelRightClose, Menu } from "lucide-react";
 
 const menuItems = [
   {
-    title: "Home",
+    title: "Overview",
     icon: <GoHomeFill />,
-    url: "/dashboard",
+    url: "/dashboard/warung",
   },
   {
     title: "Menu",
     icon: <FaConciergeBell />,
-    url: "/menu",
+    url: "/warung/menu",
   },
   {
     title: "Order",
     icon: <FaShoppingCart />,
-    url: "/order",
+    url: "/waung/order",
   },
   {
     title: "History",
     icon: <GoClockFill />,
-    url: "/history",
+    url: "/warung/history",
   },
   {
     title: "Report",
     icon: <FaBook />,
-    url: "/report",
+    url: "/warung/report",
   },
   {
     title: "Alert",
     icon: <FaBell />,
-    url: "/alerts",
+    url: "/warung/alerts",
   },
   {
     title: "Settings",
     icon: <IoSettingsSharp />,
-    url: "/settings",
+    url: "/warung/settings",
   },
 ];
 
