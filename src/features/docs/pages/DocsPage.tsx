@@ -1,7 +1,6 @@
 import Image from "next/image";
 import React from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
-import { PageContainer } from "~/components/layout/PageContainer";
 import { Card } from "~/components/ui/card";
 import { SectionCard } from "../components/SectionCard";
 import {
@@ -85,116 +84,105 @@ const DocsPage = () => {
   ];
 
   return (
-    <PageContainer
-      metaTitle="Warungku Docs"
-      withFooter={true}
-      withHeader={false}
-    >
-      <DashboardLayout>
-        <div className="space-y-6 px-4 py-8 md:space-y-8 md:px-6">
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <Image
-              src="/warungku-notext.png"
-              alt="logo"
-              width={60}
-              height={60}
-            />
-            <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold md:text-3xl">
-                WarungKu Documentation
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                Panduan lengkap untuk menggunakan Pos WarungKu
-              </p>
-            </div>
-          </div>
-
-          {/* Pengenalan */}
-          <Card className="p-6">
-            <h2 className="mb-4 text-xl font-semibold">Apa itu WarungKu?</h2>
-            <p className="text-muted-foreground mb-4">
-              WarungKu adalah aplikasi Point of Sale (POS) yang dirancang khusus
-              untuk UMKM dan warung kecil. Dengan aplikasi ini, Anda dapat
-              dengan mudah mengelola:
+    <DashboardLayout>
+      <div className="space-y-6 px-4 py-8 md:space-y-8 md:px-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Image src="/warungku-notext.png" alt="logo" width={60} height={60} />
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-semibold md:text-3xl">
+              WarungKu Documentation
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Panduan lengkap untuk menggunakan Pos WarungKu
             </p>
-            <ul className="text-muted-foreground list-disc space-y-2 pl-6">
-              <li>Data warung/usaha Anda</li>
-              <li>Katalog produk dengan kategori</li>
-              <li>Stok dan harga produk</li>
-              <li>Transaksi penjualan harian</li>
-              <li>Laporan keuangan</li>
-            </ul>
-          </Card>
-
-          {/* Daftar Section */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {sections.map((section, index) => (
-              <SectionCard
-                key={index}
-                icon={section.icon}
-                title={section.title}
-                content={section.content}
-              />
-            ))}
           </div>
+        </div>
 
-          <Card className="mt-8 p-6">
-            <h2 className="mb-4 text-xl font-semibold">Langkah Awal</h2>
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  1
-                </div>
-                <div>
-                  <h3 className="font-medium">Registrasi Akun</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Buat akun baru dengan mengisi formulir registrasi. Anda akan
-                    menerima email verifikasi.
-                  </p>
-                </div>
+        {/* Pengenalan */}
+        <Card className="p-6">
+          <h2 className="mb-4 text-xl font-semibold">Apa itu WarungKu?</h2>
+          <p className="text-muted-foreground mb-4">
+            WarungKu adalah aplikasi Point of Sale (POS) yang dirancang khusus
+            untuk UMKM dan warung kecil. Dengan aplikasi ini, Anda dapat dengan
+            mudah mengelola:
+          </p>
+          <ul className="text-muted-foreground list-disc space-y-2 pl-6">
+            <li>Data warung/usaha Anda</li>
+            <li>Katalog produk dengan kategori</li>
+            <li>Stok dan harga produk</li>
+            <li>Transaksi penjualan harian</li>
+            <li>Laporan keuangan</li>
+          </ul>
+        </Card>
+
+        {/* Daftar Section */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {sections.map((section, index) => (
+            <SectionCard
+              key={index}
+              icon={section.icon}
+              title={section.title}
+              content={section.content}
+            />
+          ))}
+        </div>
+
+        <Card className="mt-8 p-6">
+          <h2 className="mb-4 text-xl font-semibold">Langkah Awal</h2>
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                1
               </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  2
-                </div>
-                <div>
-                  <h3 className="font-medium">Login ke Dashboard</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Setelah verifikasi, login menggunakan email dan password
-                    yang telah didaftarkan.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  3
-                </div>
-                <div>
-                  <h3 className="font-medium">Buat Warung Pertama</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Isi data warung Anda seperti nama, alamat, dan informasi
-                    kontak.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-4">
-                <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
-                  4
-                </div>
-                <div>
-                  <h3 className="font-medium">Tambahkan Produk</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Mulai tambahkan produk-produk yang dijual di warung Anda
-                    beserta harga dan stok.
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-medium">Registrasi Akun</h3>
+                <p className="text-muted-foreground text-sm">
+                  Buat akun baru dengan mengisi formulir registrasi. Anda akan
+                  menerima email verifikasi.
+                </p>
               </div>
             </div>
-          </Card>
-        </div>
-      </DashboardLayout>
-    </PageContainer>
+            <div className="flex gap-4">
+              <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                2
+              </div>
+              <div>
+                <h3 className="font-medium">Login ke Dashboard</h3>
+                <p className="text-muted-foreground text-sm">
+                  Setelah verifikasi, login menggunakan email dan password yang
+                  telah didaftarkan.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                3
+              </div>
+              <div>
+                <h3 className="font-medium">Buat Warung Pertama</h3>
+                <p className="text-muted-foreground text-sm">
+                  Isi data warung Anda seperti nama, alamat, dan informasi
+                  kontak.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="bg-primary flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white">
+                4
+              </div>
+              <div>
+                <h3 className="font-medium">Tambahkan Produk</h3>
+                <p className="text-muted-foreground text-sm">
+                  Mulai tambahkan produk-produk yang dijual di warung Anda
+                  beserta harga dan stok.
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 };
 

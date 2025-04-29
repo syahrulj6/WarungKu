@@ -65,7 +65,11 @@ const SecurityPage = () => {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      metaTitle="Account Security"
+      metaDescription="Kelola keamanan akun anda"
+      pathname="/dashboard/account/security"
+    >
       <div className="space-y-4 p-4 md:space-y-6 md:p-6">
         <div className="flex flex-col gap-1 md:gap-2">
           <h1 className="text-xl font-semibold md:text-2xl">

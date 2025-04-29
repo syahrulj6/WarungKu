@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import AccountDropdown from "./AccountDropdown";
 import { IoMailOutline } from "react-icons/io5";
 import { MdOutlineArrowOutward } from "react-icons/md";
+import { HeadMetaData } from "./HeadMetaData";
 
 const menuItems = [
   {
@@ -34,9 +35,17 @@ const menuItems = [
 
 type DashboardLayoutProps = {
   children: ReactNode;
+  metaTitle?: string;
+  metaDescription?: string;
+  pathname?: string;
 };
 
-export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+export const DashboardLayout = ({
+  children,
+  metaDescription,
+  metaTitle,
+  pathname,
+}: DashboardLayoutProps) => {
   const router = useRouter();
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -62,6 +71,12 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <div className="bg-background flex min-h-screen">
+      <HeadMetaData
+        title={metaTitle}
+        metaDescription={metaDescription}
+        pathname={pathname || router.pathname}
+      />
+
       {/* Mobile left sidebar toggle button */}
       {isMobile && (
         <div className="fixed top-3 left-3 z-50 md:hidden">

@@ -93,7 +93,11 @@ const AccountProfilePage = () => {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      metaTitle="Account Preference"
+      metaDescription="Kelola akun anda"
+      pathname="/dashboard/account/me"
+    >
       <div className="space-y-4 p-4 md:space-y-6 md:p-6">
         <div className="flex flex-col gap-1 md:gap-2">
           <h1 className="text-xl font-semibold md:text-2xl">Preferensi Akun</h1>

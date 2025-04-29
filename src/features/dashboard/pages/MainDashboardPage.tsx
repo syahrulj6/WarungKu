@@ -7,6 +7,7 @@ import { api } from "~/utils/api";
 import { WarungCard } from "../components/WarungCard";
 import { useDebounce } from "use-debounce";
 import { CreateWarungModal } from "../components/CreateWarungModal";
+import { PageContainer } from "~/components/layout/PageContainer";
 
 const MainDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,7 +31,11 @@ const MainDashboardPage = () => {
     debouncedSearchTerm.length > 0 ? isSearchLoading : isAllLoading;
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      metaTitle="Dashboard"
+      metaDescription="Kelola warung Anda dengan mudah melalui dashboard WarungKu"
+      pathname="/dashboard/warung"
+    >
       <div className="flex flex-col p-4 md:p-6">
         <div className="flex flex-col gap-2 md:flex-row">
           <CreateWarungModal refetch={refetch} />
