@@ -19,7 +19,15 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
-import { PanelRightOpen, PanelRightClose, Menu } from "lucide-react";
+import {
+  PanelRightOpen,
+  PanelRightClose,
+  Menu,
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftOpen,
+  ShoppingCart,
+} from "lucide-react";
 
 const menuItems = [
   {
@@ -73,7 +81,7 @@ export const WarungDashboardLayout = ({
   rightPanelTitle = "Current Orders",
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -98,6 +106,7 @@ export const WarungDashboardLayout = ({
   }));
 
   const toggleLeftSidebar = () => setIsLeftSidebarOpen(!isLeftSidebarOpen);
+  const toggleRightPanel = () => setIsRightPanelOpen(!isRightPanelOpen);
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -135,6 +144,7 @@ export const WarungDashboardLayout = ({
       <div className="flex flex-1 flex-col">
         <WarungHeader
           toggleSidebar={toggleLeftSidebar}
+          toggleRightPanel={toggleRightPanel}
           className={!isMobile ? "ml-40" : ""}
         />
 
@@ -142,24 +152,30 @@ export const WarungDashboardLayout = ({
           <main
             className={`flex-1 overflow-auto bg-gray-50 ${!isMobile ? "ml-40" : ""}`}
           >
-            <div className="p-6">{children}</div>
+            <div className="flex flex-col p-4">{children}</div>
           </main>
 
-          {/* Right Sidebar (Desktop) - Only shown if withRightPanel is true */}
+          {/* Right Sidebar (Desktop) */}
           {withRightPanel && !isMobile && (
-            <div className="relative w-72 border-l bg-white">
-              <div className="absolute inset-0 overflow-y-auto p-4">
-                <h3 className="mb-4 text-lg font-semibold">
-                  {rightPanelTitle}
-                </h3>
-                {rightPanelContent}
+            <div
+              className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-72" : "w-0"}`}
+            >
+              <div className="absolute inset-y-0 right-0 flex h-full border-l bg-white">
+                {isRightPanelOpen && (
+                  <div className="h-full w-72 overflow-y-auto p-4">
+                    <h3 className="mb-4 text-lg font-semibold">
+                      {rightPanelTitle}
+                    </h3>
+                    {rightPanelContent}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Mobile Right Panel - Only shown if withRightPanel is true */}
+      {/* Mobile Right Panel */}
       {withRightPanel && isMobile && (
         <div className="fixed right-4 bottom-4 z-50 md:hidden">
           <Sheet open={isRightPanelOpen} onOpenChange={setIsRightPanelOpen}>
@@ -172,7 +188,7 @@ export const WarungDashboardLayout = ({
                 {isRightPanelOpen ? (
                   <PanelRightClose className="h-5 w-5" />
                 ) : (
-                  <PanelRightOpen className="h-5 w-5" />
+                  <ShoppingCart className="h-5 w-5" />
                 )}
               </Button>
             </SheetTrigger>

@@ -5,21 +5,14 @@ const MainDashboardPage = () => {
   return (
     <WarungDashboardLayout
       withRightPanel={true}
-      rightPanelContent={<RightPanel />}
-      rightPanelTitle="Current Orders"
+      rightPanelTitle="Current Order"
     >
-      <div className="p-4"></div>
+      <div className="">
+        <h1 className="text-2xl font-bold">Dashboard Content</h1>
+        {/* Your main content here */}
+      </div>
     </WarungDashboardLayout>
   );
 };
-
-const RightPanel = () => (
-  <div>
-    <div className="space-y-2">
-      <div className="rounded-lg border p-3">Order #1</div>
-      <div className="rounded-lg border p-3">Order #2</div>
-    </div>
-  </div>
-);
 
 export default MainDashboardPage;
