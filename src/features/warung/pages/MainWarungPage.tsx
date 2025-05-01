@@ -10,6 +10,10 @@ import {
   ShoppingCart,
   Utensils,
 } from "lucide-react";
+import { BarChartCard } from "../components/BarChartCard";
+import { PieChartCard } from "../components/PieChartCard";
+import { useWarungDashboardData } from "~/hooks/useDashboardData";
+import { chartActivityConfig } from "~/utils/type";
 
 const MainDashboardPage = () => {
   const router = useRouter();
@@ -23,6 +27,14 @@ const MainDashboardPage = () => {
       enabled: !!id,
     },
   );
+
+  const {
+    sortedChartData,
+    pieChartData,
+    totalActivities,
+    last7DaysCount,
+    activityCounts,
+  } = useWarungDashboardData(id as string);
 
   const currentDate = new Date();
   const options: Intl.DateTimeFormatOptions = {
@@ -60,21 +72,33 @@ const MainDashboardPage = () => {
         />
         <MetricsCard
           title="Pesanan"
-          value="24"
+          value={totalActivities.toString()}
           iconBg="bg-yellow-500"
           icon={<ShoppingCart className="h-4 w-4" />}
         />
         <MetricsCard
-          title="Dine in"
-          value="5"
+          title="Aktivitas 7 Hari"
+          value={last7DaysCount.toString()}
           iconBg="bg-red-500"
           icon={<Utensils className="h-4 w-4" />}
         />
         <MetricsCard
-          title="Take away"
-          value={`${0} $`}
+          title="Produk Terjual"
+          value="24"
           iconBg="bg-blue-500"
           icon={<CupSoda className="h-4 w-4" />}
+        />
+      </div>
+
+      {/* Charts Section */}
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="col-span-2">
+          <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+        </div>
+        <PieChartCard
+          data={pieChartData}
+          totalActivities={totalActivities}
+          config={chartActivityConfig}
         />
       </div>
     </WarungDashboardLayout>
