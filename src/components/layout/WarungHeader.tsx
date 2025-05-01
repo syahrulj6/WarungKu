@@ -1,16 +1,18 @@
 import { Button } from "../ui/button";
-import { Menu, PanelLeftOpen, ShoppingCart } from "lucide-react";
-import { useSession } from "~/hooks/useSession";
+import { Menu, ShoppingCart } from "lucide-react";
 import AccountDropdown from "./AccountDropdown";
+import type React from "react";
 
 export const WarungHeader = ({
   toggleSidebar,
   toggleRightPanel,
   className = "",
+  children,
 }: {
   toggleSidebar: () => void;
   toggleRightPanel?: () => void;
   className?: string;
+  children?: React.ReactNode;
 }) => {
   return (
     <header
@@ -25,7 +27,7 @@ export const WarungHeader = ({
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <h1 className="text-lg font-semibold">WarungKu POS</h1>
+        <div className="flex items-center">{children}</div>
       </div>
       <div className="flex items-center gap-4">
         {toggleRightPanel && (

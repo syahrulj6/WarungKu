@@ -19,15 +19,7 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
-import {
-  PanelRightOpen,
-  PanelRightClose,
-  Menu,
-  ChevronLeft,
-  ChevronRight,
-  PanelLeftOpen,
-  ShoppingCart,
-} from "lucide-react";
+import { PanelRightClose, Menu, ShoppingCart } from "lucide-react";
 
 const menuItems = [
   {
@@ -72,6 +64,7 @@ type WarungDashboardLayoutProps = {
   withRightPanel?: boolean;
   rightPanelContent?: ReactNode;
   rightPanelTitle?: string;
+  headerContent?: ReactNode;
 };
 
 export const WarungDashboardLayout = ({
@@ -79,6 +72,7 @@ export const WarungDashboardLayout = ({
   withRightPanel = false,
   rightPanelContent,
   rightPanelTitle = "Current Orders",
+  headerContent,
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
@@ -146,7 +140,10 @@ export const WarungDashboardLayout = ({
           toggleSidebar={toggleLeftSidebar}
           toggleRightPanel={toggleRightPanel}
           className={!isMobile ? "ml-40" : ""}
-        />
+        >
+          {" "}
+          {headerContent}
+        </WarungHeader>
 
         <div className="flex flex-1">
           <main
