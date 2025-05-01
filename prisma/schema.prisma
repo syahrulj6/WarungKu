@@ -8,10 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ========================
-// CORE MODELS
-// ========================
-
 model Warung {
   id          String     @id @default(uuid())
   name        String
@@ -21,8 +17,6 @@ model Warung {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  // Relations
   owner       User       @relation("WarungOwner", fields: [ownerId], references: [id])
   ownerId     String
   staff       WarungStaff[]
@@ -35,9 +29,49 @@ model Warung {
   subscriptions Subscription[]
   debtPayments DebtPayment[]
   stockAdjustments StockAdjustment[]
-
+  activities  WarungActivity[]
   @@unique([ownerId, name])
   @@index([name])
+}
+
+model WarungActivity {
+  id          String      @id @default(uuid())
+  type        ActivityType
+  description String
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  warung      Warung      @relation(fields: [warungId], references: [id])
+  warungId    String
+  user        User?       @relation(fields: [userId], references: [id])
+  userId      String?
+  relatedSale Sale?       @relation("ActivitySale", fields: [saleId], references: [id])
+  saleId      String?
+  relatedProduct Product? @relation("ActivityProduct", fields: [productId], references: [id])
+  productId   String?
+  relatedCustomer Customer? @relation("ActivityCustomer", fields: [customerId], references: [id])
+  customerId  String?
+  @@index([warungId, createdAt])
+  @@index([warungId, type])
+}
+
+enum ActivityType {
+  SALE_CREATED
+  SALE_UPDATED
+  SALE_DELETED
+  PRODUCT_ADDED
+  PRODUCT_UPDATED
+  PRODUCT_STOCK_ADJUSTED
+  CUSTOMER_ADDED
+  CUSTOMER_UPDATED
+  STAFF_ADDED
+  STAFF_REMOVED
+  SHIFT_OPENED
+  SHIFT_CLOSED
+  DEBT_PAID
+  STOCK_LOW
+  IMPORT_COMPLETED
+  EXPORT_COMPLETED
+  SETTINGS_CHANGED
 }
 
 model User {
@@ -47,23 +81,17 @@ model User {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  // Multi-tenancy relations
   ownedWarungs Warung[]  @relation("WarungOwner")
   staffRoles   WarungStaff[]
   invitations  StaffInvitation[]
-
-  // POS Relations
   sales       Sale[]
   shifts      Shift[]
   adjustments StockAdjustment[]
   debtPayments DebtPayment[]
-
-  // Multi Factor Auth
+  activities  WarungActivity[]
   mfaEnabled    Boolean   @default(false)
   mfaSecret     String?
   mfaBackupCodes String[]
-
   @@unique([email])
 }
 
@@ -75,7 +103,6 @@ model WarungStaff {
   userId    String
   role      WarungStaffRole @default(STAFF)
   createdAt DateTime @default(now())
-
   @@unique([warungId, userId])
 }
 
@@ -86,13 +113,10 @@ model StaffInvitation {
   token       String     @unique
   expiresAt   DateTime
   createdAt   DateTime   @default(now())
-
-  // Relations
   warung      Warung     @relation(fields: [warungId], references: [id])
   warungId    String
   invitedBy   User       @relation(fields: [invitedById], references: [id])
   invitedById String
-
   @@index([warungId, email])
 }
 
@@ -103,10 +127,6 @@ enum WarungStaffRole {
   CASHIER
 }
 
-// ========================
-// CUSTOMER MODELS
-// ========================
-
 model Customer {
   id          String     @id @default(uuid())
   name        String
@@ -116,15 +136,11 @@ model Customer {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  // Multi-tenancy
   warung      Warung     @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   sales       Sale[]
   debtPayments DebtPayment[]
-
+  activities  WarungActivity[] @relation("ActivityCustomer")
   @@index([warungId, name])
   @@index([warungId, phone])
 }
@@ -135,23 +151,14 @@ model DebtPayment {
   paymentType PaymentType
   notes       String?
   createdAt   DateTime    @default(now())
-
-  // Multi-tenancy
   warung      Warung      @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   customer    Customer    @relation(fields: [customerId], references: [id])
   customerId  String
   user        User        @relation(fields: [userId], references: [id])
   userId      String
-
   @@index([warungId, createdAt])
 }
-
-// ========================
-// INVENTORY MODELS
-// ========================
 
 model Product {
   id          String     @id @default(uuid())
@@ -164,17 +171,13 @@ model Product {
   isActive    Boolean    @default(true)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-
-  // Multi-tenancy
   warung      Warung     @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   category    Category?  @relation(fields: [categoryId], references: [id])
   categoryId  String?
   saleItems   SaleItem[]
   adjustments StockAdjustment[]
-
+  activities  WarungActivity[] @relation("ActivityProduct")
   @@unique([warungId])
   @@index([warungId, name])
 }
@@ -185,7 +188,6 @@ model Category {
   warung      Warung     @relation(fields: [warungId], references: [id])
   warungId    String
   products    Product[]
-  
   @@unique([warungId, name])
 }
 
@@ -196,48 +198,35 @@ model StockAdjustment {
   reason      String?
   notes       String?
   createdAt   DateTime  @default(now())
-
-  // Multi-tenancy
   warung      Warung    @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   product     Product   @relation(fields: [productId], references: [id])
   productId   String
   user        User      @relation(fields: [userId], references: [id])
   userId      String
-
   @@index([warungId, productId])
   @@index([warungId, createdAt])
 }
 
-// ========================
-// SALES MODELS
-// ========================
-
 model Sale {
   id          String      @id @default(uuid())
-  receiptNo   String      // Format: WARUNG-001-0001
+  receiptNo   String
   totalAmount Float
   tax         Float       @default(0)
   paymentType PaymentType
   isPaid      Boolean     @default(true)
   notes       String?
   createdAt   DateTime    @default(now())
-  shift       Shift?      @relation(fields: [shiftId], references: [id]) // Added for Shift relation
+  shift       Shift?      @relation(fields: [shiftId], references: [id])
   shiftId     String?
-
-  // Multi-tenancy
   warung      Warung      @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   customer    Customer?   @relation(fields: [customerId], references: [id])
   customerId  String?
   user        User        @relation(fields: [userId], references: [id])
   userId      String
   items       SaleItem[]
-
+  activities  WarungActivity[] @relation("ActivitySale")
   @@index([warungId, receiptNo])
   @@index([warungId, createdAt])
 }
@@ -260,10 +249,6 @@ enum PaymentType {
   DEBT
 }
 
-// ========================
-// OPERATIONAL MODELS
-// ========================
-
 model Shift {
   id          String      @id @default(uuid())
   startTime   DateTime    @default(now())
@@ -273,22 +258,13 @@ model Shift {
   cashIn      Float?      
   cashOut     Float?      
   notes       String?
-
-  // Multi-tenancy
   warung      Warung      @relation(fields: [warungId], references: [id])
   warungId    String
-
-  // Relations
   user        User        @relation(fields: [userId], references: [id])
   userId      String
-  sales       Sale[]      // This now has reciprocal relation in Sale model
-
+  sales       Sale[]
   @@index([warungId, startTime])
 }
-
-// ========================
-// ADDITIONAL FEATURES
-// ========================
 
 model Subscription {
   id          String      @id @default(uuid())
@@ -296,11 +272,8 @@ model Subscription {
   startDate   DateTime
   endDate     DateTime
   isActive    Boolean     @default(true)
-
-  // Multi-tenancy
   warung      Warung      @relation(fields: [warungId], references: [id])
   warungId    String
-
   @@index([warungId, isActive])
 }
 

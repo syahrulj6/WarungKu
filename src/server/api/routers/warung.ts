@@ -121,4 +121,24 @@ export const warungRouter = createTRPCRouter({
         });
       }
     }),
+
+  getWarungActivities: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { warungId } = input;
+
+      const activities = await db.warungActivity.findMany({
+        where: {
+          warungId: warungId,
+          userId: user?.id,
+        },
+      });
+
+      return activities;
+    }),
 });
