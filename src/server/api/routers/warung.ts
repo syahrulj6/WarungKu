@@ -19,6 +19,26 @@ export const warungRouter = createTRPCRouter({
     return warung;
   }),
 
+  getWarungById: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { warungId } = input;
+
+      const warung = await db.warung.findUnique({
+        where: {
+          id: warungId,
+          ownerId: user?.id,
+        },
+      });
+
+      return warung;
+    }),
+
   searchWarungByName: privateProcedure
     .input(
       z.object({
