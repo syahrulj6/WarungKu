@@ -102,11 +102,18 @@ export const WarungDashboardLayout = ({
     setIsRightPanelOpen(!isMobile);
   }, [isMobile]);
 
-  const enhancedMenuItems = menuItems.map((item) => ({
-    ...item,
-    active: router.pathname.startsWith(item.url),
-    href: item.path(id as string),
-  }));
+  const enhancedMenuItems = menuItems.map((item) => {
+    const isActive =
+      router.pathname === item.url ||
+      (item.url !== "/dashboard/warung/[id]" &&
+        router.pathname.startsWith(item.url));
+
+    return {
+      ...item,
+      active: isActive,
+      href: item.path(id as string),
+    };
+  });
 
   const toggleLeftSidebar = () => setIsLeftSidebarOpen(!isLeftSidebarOpen);
   const toggleRightPanel = () => setIsRightPanelOpen(!isRightPanelOpen);
