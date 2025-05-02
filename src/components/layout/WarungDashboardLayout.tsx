@@ -103,7 +103,7 @@ export const WarungDashboardLayout = ({
   const toggleRightPanel = () => setIsRightPanelOpen(!isRightPanelOpen);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="bg-background flex min-h-screen">
       {/* Fixed Left Sidebar (Desktop) */}
       {!isMobile && (
         <div className="fixed top-0 left-0 z-30 h-screen w-40 border-r">
@@ -147,7 +147,7 @@ export const WarungDashboardLayout = ({
 
         <div className="flex flex-1">
           <main
-            className={`flex-1 overflow-auto bg-gray-50 ${!isMobile ? "ml-40" : ""}`}
+            className={`bg-accent/20 flex-1 overflow-auto ${!isMobile ? "ml-40" : ""}`}
           >
             <div className="flex flex-col p-4">{children}</div>
           </main>
@@ -157,7 +157,7 @@ export const WarungDashboardLayout = ({
             <div
               className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-72" : "w-0"}`}
             >
-              <div className="absolute inset-y-0 right-0 flex h-full border-l bg-white">
+              <div className="bg-bacgkround absolute inset-y-0 right-0 flex h-full border-l">
                 {isRightPanelOpen && (
                   <div className="h-full w-72 overflow-y-auto p-4">
                     <h3 className="mb-4 text-lg font-semibold">

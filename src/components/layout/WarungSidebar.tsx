@@ -14,7 +14,7 @@ type SidebarProps = {
 
 export const WarungSidebar = ({ menuItems }: SidebarProps) => {
   return (
-    <aside className="flex h-screen w-full flex-col items-center border-r bg-white md:py-6 lg:w-40">
+    <aside className="bg-background flex h-screen w-full flex-col items-center border-r md:py-6 lg:w-40">
       {/* Logo */}
       <div className="mb-5 md:mb-8">
         <Link href="/">
