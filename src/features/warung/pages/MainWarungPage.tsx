@@ -92,7 +92,7 @@ const MainDashboardPage = () => {
 
       {/* Charts Section */}
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="col-span-2">
+        <div className="md:col-span-2">
           <BarChartCard data={sortedChartData} config={chartActivityConfig} />
         </div>
         <PieChartCard

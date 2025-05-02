@@ -12,15 +12,30 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "~/hooks/useSession";
+import { useTheme } from "next-themes";
+import { Moon, Sun, Monitor } from "lucide-react";
 
 const AccountDropdown = () => {
-  const [theme, setTheme] = useState("light");
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const { handleSignOut } = useSession();
 
   const { data } = api.profile.getProfile.useQuery();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="sm" disabled>
+        Account
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>
@@ -45,13 +60,22 @@ const AccountDropdown = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Theme</DropdownMenuItem>
+          <DropdownMenuLabel>Theme</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-            <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="light">
+              <Sun className="mr-2 h-4 w-4" />
+              <span>Light</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+              <Moon className="mr-2 h-4 w-4" />
+              <span>Dark</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system">
+              <Monitor className="mr-2 h-4 w-4" />
+              <span>System</span>
+            </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
-
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <button onClick={handleSignOut}>Log out</button>

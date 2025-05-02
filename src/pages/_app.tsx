@@ -5,18 +5,26 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "~/components/theme-provider";
 
-const geist = Poppins({
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "600", "700", "500"],
 });
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <div className={geist.className}>
-      <Component {...pageProps} />
-      <Toaster position="top-center" />
-    </div>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <div className={poppins.className}>
+        <Component {...pageProps} />
+        <Toaster position="top-center" />
+      </div>
+    </ThemeProvider>
   );
 };
 
