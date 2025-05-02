@@ -19,7 +19,7 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
-import { PanelRightClose, Menu, ShoppingCart } from "lucide-react";
+import { Menu, PanelRightClose, ShoppingCart } from "lucide-react";
 
 const menuItems = [
   {
@@ -129,26 +129,28 @@ export const WarungDashboardLayout = ({
 
       {/* Mobile Left Sidebar */}
       {isMobile && (
-        <Sheet open={isLeftSidebarOpen} onOpenChange={setIsLeftSidebarOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="fixed top-4 left-4 z-50 rounded-full shadow-sm md:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-2/4 p-0">
-            <SheetHeader className="p-4">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <SheetDescription className="sr-only">
-                Main navigation menu for the application
-              </SheetDescription>
-            </SheetHeader>
-            <WarungSidebar menuItems={enhancedMenuItems} />
-          </SheetContent>
-        </Sheet>
+        <div className="fixed top-4 left-4 z-50 md:hidden">
+          <Sheet open={isLeftSidebarOpen} onOpenChange={setIsLeftSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full shadow-sm"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-2/4 p-0">
+              <SheetHeader className="p-4">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Main navigation menu for the application
+                </SheetDescription>
+              </SheetHeader>
+              <WarungSidebar menuItems={enhancedMenuItems} />
+            </SheetContent>
+          </Sheet>
+        </div>
       )}
 
       <div className="flex flex-1 flex-col">
