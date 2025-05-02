@@ -25,37 +25,44 @@ const menuItems = [
   {
     title: "Overview",
     icon: <GoHomeFill />,
-    url: "/dashboard/warung",
+    url: "/dashboard/warung/[id]",
+    path: (id: string) => `/dashboard/warung/${id}`,
   },
   {
     title: "Menu",
     icon: <FaConciergeBell />,
-    url: "/warung/menu",
+    url: "/dashboard/warung/[id]/menu",
+    path: (id: string) => `/dashboard/warung/${id}/menu`,
   },
   {
     title: "Order",
     icon: <FaShoppingCart />,
-    url: "/warung/order",
+    url: "/dashborad/warung/[id]/order",
+    path: (id: string) => `/dashboard/warung/${id}/order`,
   },
   {
     title: "History",
     icon: <GoClockFill />,
-    url: "/warung/history",
+    url: "dashboard/warung/[id]/history",
+    path: (id: string) => `/dashboard/warung/${id}/history`,
   },
   {
     title: "Report",
     icon: <FaBook />,
-    url: "/warung/report",
+    url: "/dashboard/warung/[id]/reports",
+    path: (id: string) => `/dashboard/warung/${id}/report`,
   },
   {
     title: "Alert",
     icon: <FaBell />,
-    url: "/warung/alerts",
+    url: "/dashboard/warung/[id]/alerts",
+    path: (id: string) => `/dashboard/warung/${id}/reports`,
   },
   {
     title: "Settings",
     icon: <IoSettingsSharp />,
-    url: "/warung/settings",
+    url: "/dashboard/warung/[id]/settings",
+    path: (id: string) => `/dashboard/warung/${id}/settings`,
   },
 ];
 
@@ -75,6 +82,7 @@ export const WarungDashboardLayout = ({
   headerContent,
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
+  const { id } = router.query;
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -97,6 +105,7 @@ export const WarungDashboardLayout = ({
   const enhancedMenuItems = menuItems.map((item) => ({
     ...item,
     active: router.pathname.startsWith(item.url),
+    href: item.path(id as string),
   }));
 
   const toggleLeftSidebar = () => setIsLeftSidebarOpen(!isLeftSidebarOpen);
