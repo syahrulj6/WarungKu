@@ -13,6 +13,7 @@ import {
 const VerifyMfaPage = () => {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
   const [canResend, setCanResend] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const initialCodeSent = useRef(false);
@@ -21,19 +22,25 @@ const VerifyMfaPage = () => {
   const verifyMfa = api.auth.verifyMfaLogin.useMutation();
   const sendMfaCode = api.security.sendMfaCode.useMutation();
 
+  // Send initial code and setup countdown
   useEffect(() => {
-    if (!initialCodeSent.current) {
-      const sendInitialCode = async () => {
-        try {
-          await sendMfaCode.mutateAsync();
-          initialCodeSent.current = true;
-          toast.success("Verification code sent to your email");
-        } catch (error) {
-          toast.error("Failed to send verification code");
-        }
-      };
-      sendInitialCode();
-    }
+    const sendInitialCode = async () => {
+      if (initialCodeSent.current) return;
+
+      try {
+        setIsSendingCode(true);
+        initialCodeSent.current = true;
+        await sendMfaCode.mutateAsync();
+        toast.success("Verification code sent to your email");
+      } catch (error) {
+        initialCodeSent.current = false;
+        toast.error("Failed to send verification code");
+      } finally {
+        setIsSendingCode(false);
+      }
+    };
+
+    sendInitialCode();
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -70,10 +77,14 @@ const VerifyMfaPage = () => {
   };
 
   const handleResend = async () => {
+    if (!canResend || isSendingCode) return;
+
     try {
-      await sendMfaCode.mutateAsync();
+      setIsSendingCode(true);
       setCanResend(false);
       setCountdown(60);
+
+      await sendMfaCode.mutateAsync();
 
       const timer = setInterval(() => {
         setCountdown((prev) => {
@@ -89,6 +100,9 @@ const VerifyMfaPage = () => {
       toast.success("New code sent to your email");
     } catch (error) {
       toast.error("Failed to resend code");
+      setCanResend(true);
+    } finally {
+      setIsSendingCode(false);
     }
   };
 
@@ -115,6 +129,7 @@ const VerifyMfaPage = () => {
                 value={otp}
                 onChange={(value) => setOtp(value)}
                 containerClassName="gap-2"
+                disabled={isLoading}
               >
                 <InputOTPGroup>
                   {[...Array(6)].map((_, index) => (
@@ -124,19 +139,24 @@ const VerifyMfaPage = () => {
               </InputOTP>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Verifying..." : "Verify"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || otp.length !== 6}
+            >
+              Verify
             </Button>
 
-            <Button
-              type="button"
-              variant="link"
-              onClick={handleResend}
-              className="w-full"
-              disabled={!canResend}
-            >
-              {canResend ? "Resend Code" : `Resend in ${countdown}s`}
-            </Button>
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="link"
+                onClick={handleResend}
+                disabled={!canResend || isSendingCode}
+              >
+                {canResend ? "Resend Code" : `Resend in ${countdown}s`}
+              </Button>
+            </div>
           </form>
         </div>
       </div>
