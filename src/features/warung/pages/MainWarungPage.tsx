@@ -62,44 +62,46 @@ const MainDashboardPage = () => {
         </div>
       }
     >
-      {/* Metrics Card */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        <MetricsCard
-          title="Pendapatan"
-          value="Rp 1.250.000"
-          iconBg="bg-primary"
-          icon={<ArrowUpRight className="h-4 w-4" />}
-        />
-        <MetricsCard
-          title="Pesanan"
-          value={totalActivities.toString()}
-          iconBg="bg-yellow-500"
-          icon={<ShoppingCart className="h-4 w-4" />}
-        />
-        <MetricsCard
-          title="Aktivitas 7 Hari"
-          value={last7DaysCount.toString()}
-          iconBg="bg-red-500"
-          icon={<Utensils className="h-4 w-4" />}
-        />
-        <MetricsCard
-          title="Produk Terjual"
-          value="24"
-          iconBg="bg-blue-500"
-          icon={<CupSoda className="h-4 w-4" />}
-        />
-      </div>
-
-      {/* Charts Section */}
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="md:col-span-2">
-          <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+      <div className="flex flex-col gap-4">
+        {/* Metrics Card */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <MetricsCard
+            title="Pendapatan"
+            value="Rp 1.250.000"
+            iconBg="bg-primary"
+            icon={<ArrowUpRight className="h-4 w-4" />}
+          />
+          <MetricsCard
+            title="Pesanan"
+            value={totalActivities.toString()}
+            iconBg="bg-yellow-500"
+            icon={<ShoppingCart className="h-4 w-4" />}
+          />
+          <MetricsCard
+            title="Aktivitas 7 Hari"
+            value={last7DaysCount.toString()}
+            iconBg="bg-red-500"
+            icon={<Utensils className="h-4 w-4" />}
+          />
+          <MetricsCard
+            title="Produk Terjual"
+            value="24"
+            iconBg="bg-blue-500"
+            icon={<CupSoda className="h-4 w-4" />}
+          />
         </div>
-        <PieChartCard
-          data={pieChartData}
-          totalActivities={totalActivities}
-          config={chartActivityConfig}
-        />
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+          </div>
+          <PieChartCard
+            data={pieChartData}
+            totalActivities={totalActivities}
+            config={chartActivityConfig}
+          />
+        </div>
       </div>
     </WarungDashboardLayout>
   );

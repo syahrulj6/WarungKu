@@ -30,13 +30,17 @@ export const PieChartCard = ({
     <div className="h-full w-full md:flex-1">
       <Card className="flex h-fit flex-col md:h-full">
         <CardHeader className="items-center pb-0">
-          <CardTitle>Activities Breakdown</CardTitle>
-          <CardDescription>By Activity Type</CardDescription>
+          <CardTitle className="text-sm md:text-base">
+            Activities Breakdown
+          </CardTitle>
+          <CardDescription className="text-xs md:text-sm">
+            By Activity Type
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 pb-0">
           <ChartContainer
             config={config}
-            className="mx-auto aspect-square max-h-[250px]"
+            className="mx-auto aspect-square max-h-[180px] md:max-h-[200px]"
           >
             <PieChart>
               <Tooltip
@@ -47,8 +51,8 @@ export const PieChartCard = ({
                 data={data}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={40}
+                outerRadius={70}
                 paddingAngle={5}
                 strokeWidth={0}
               >
@@ -65,14 +69,14 @@ export const PieChartCard = ({
                           <tspan
                             x={viewBox.cx}
                             y={viewBox.cy}
-                            className="fill-foreground text-3xl font-bold"
+                            className="fill-foreground text-xl font-bold md:text-2xl"
                           >
                             {totalActivities.toLocaleString()}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 24}
-                            className="fill-muted-foreground"
+                            y={(viewBox.cy || 0) + 20}
+                            className="fill-muted-foreground text-xs"
                           >
                             Activities
                           </tspan>
@@ -85,10 +89,10 @@ export const PieChartCard = ({
             </PieChart>
           </ChartContainer>
         </CardContent>
-        <CardFooter className="flex-col gap-2 text-sm">
-          <div className="flex items-center gap-2 leading-none font-medium">
+        <CardFooter className="flex-col gap-1 text-xs md:gap-2 md:text-sm">
+          <div className="flex items-center gap-1 leading-none font-medium md:gap-2">
             5.2% activities increased this month{" "}
-            <TrendingUp className="h-4 w-4" />
+            <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
           </div>
           <div className="text-muted-foreground leading-none">
             Showing total activities by type
