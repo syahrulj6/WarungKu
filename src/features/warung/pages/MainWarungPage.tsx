@@ -14,6 +14,7 @@ import { BarChartCard } from "../components/BarChartCard";
 import { PieChartCard } from "../components/PieChartCard";
 import { useWarungDashboardData } from "~/hooks/useDashboardData";
 import { chartActivityConfig } from "~/utils/type";
+import { DishCard } from "../components/DishCard";
 
 const MainDashboardPage = () => {
   const router = useRouter();
@@ -27,6 +28,9 @@ const MainDashboardPage = () => {
       enabled: !!id,
     },
   );
+
+  const { data: productData, isLoading: productDataLoading } =
+    api.product.getTrendingProduct.useQuery();
 
   const {
     sortedChartData,
@@ -101,6 +105,10 @@ const MainDashboardPage = () => {
             totalActivities={totalActivities}
             config={chartActivityConfig}
           />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <DishCard title="Trending Dishes" dishesData={productData} />
+          <DishCard title="Out of Stock" dishesData={productData} />
         </div>
       </div>
     </WarungDashboardLayout>
