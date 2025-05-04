@@ -47,7 +47,7 @@ export const DishCard = ({
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center text-sm">
-            No dishes available
+            Tidak ada menu tersedia
           </p>
         </CardContent>
       </Card>
@@ -59,7 +59,7 @@ export const DishCard = ({
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-lg md:text-xl">{title}</CardTitle>
         <Button variant="ghost">
-          View All <ArrowRight className="ml-2 h-4 w-4" />
+          Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -75,7 +75,7 @@ export const DishCard = ({
             <div className="flex flex-col">
               <h4 className="font-semibold">{dish.name}</h4>
               <p className="text-muted-foreground text-sm">
-                Orders: <span className="text-primary">{dish.stock}</span>
+                Pesanan: <span className="text-primary">{dish.stock}</span>
               </p>
             </div>
           </div>

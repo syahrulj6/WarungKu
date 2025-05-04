@@ -16,7 +16,9 @@ import {
 } from "~/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import { ChartContainer, ChartTooltipContent } from "~/components/ui/chart";
+import { Skeleton } from "~/components/ui/skeleton";
 
 interface BarChartCardProps {
   data: { date: string; count: number }[];
@@ -26,15 +28,42 @@ interface BarChartCardProps {
       color: string;
     };
   };
+  isLoading?: boolean;
 }
 
-export const BarChartCard = ({ data, config }: BarChartCardProps) => {
+export const BarChartCard = ({
+  data,
+  config,
+  isLoading = false,
+}: BarChartCardProps) => {
+  if (isLoading) {
+    return (
+      <Card className="flex w-full flex-col">
+        <CardHeader className="pb-2">
+          <CardTitle>
+            <Skeleton className="h-6 w-32" />
+          </CardTitle>
+          <CardDescription>
+            <Skeleton className="h-4 w-24" />
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="h-32 w-full overflow-hidden md:h-40 lg:h-48">
+          <Skeleton className="h-full w-full" />
+        </CardContent>
+        <CardFooter className="flex-col gap-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </CardFooter>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex w-full flex-col justify-center">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm md:text-base">Your activities</CardTitle>
+        <CardTitle className="text-sm md:text-base">Aktivitas Anda</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Last 7 days
+          7 Hari Terakhir
         </CardDescription>
       </CardHeader>
       <CardContent className="h-32 w-full overflow-hidden md:h-40 lg:h-48">
@@ -49,7 +78,9 @@ export const BarChartCard = ({ data, config }: BarChartCardProps) => {
                 dataKey="date"
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => format(new Date(value), "MMM d")}
+                tickFormatter={(value) =>
+                  format(new Date(value), "d MMM", { locale: id })
+                }
                 tick={{ fill: "#666", fontSize: 10 }}
               />
               <Tooltip
@@ -63,11 +94,11 @@ export const BarChartCard = ({ data, config }: BarChartCardProps) => {
       </CardContent>
       <CardFooter className="flex-col items-start gap-1 text-xs md:gap-2 md:text-sm">
         <div className="flex gap-1 leading-none font-medium md:gap-2">
-          Your activities over the last 7 days{" "}
+          Aktivitas Anda selama 7 hari terakhir{" "}
           <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Showing total activities for the last 7 days
+          Menampilkan total aktivitas untuk 7 hari terakhir
         </div>
       </CardFooter>
     </Card>

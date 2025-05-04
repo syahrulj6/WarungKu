@@ -106,7 +106,7 @@ const MainDashboardPage = () => {
             config={chartActivityConfig}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <DishCard title="Trending Dishes" dishesData={productData} />
           <DishCard title="Out of Stock" dishesData={productData} />
         </div>
