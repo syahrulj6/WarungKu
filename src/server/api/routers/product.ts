@@ -80,7 +80,6 @@ export const productRouter = createTRPCRouter({
           });
         }
 
-        // Get public URL
         const { data: publicUrlData } = supabaseAdminClient.storage
           .from(SUPABASE_BUCKET.ProductPictures)
           .getPublicUrl(data.path);
@@ -88,7 +87,6 @@ export const productRouter = createTRPCRouter({
         productPictureUrl = publicUrlData.publicUrl + "?t=" + timestamp;
       }
 
-      // Create the product in database
       const product = await db.product.create({
         data: {
           name: productData.name,
