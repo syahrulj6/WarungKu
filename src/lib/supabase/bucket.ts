@@ -1,3 +1,3 @@
 export enum SUPABASE_BUCKET {
-  ProfilePictures = "profile-pictures",
+  ProductPictures = "product-pictures",
 }
