@@ -15,33 +15,40 @@ export const WarungHeader = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <header
-      className={`bg-background sticky top-0 z-40 flex h-16 items-center justify-between border-b px-4 ${className}`}
-    >
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-        <div className="flex items-center">{children}</div>
-      </div>
-      <div className="flex items-center gap-4">
-        {toggleRightPanel && (
+    <div className={`sticky top-0 z-40 ${className}`}>
+      {/* Main header bar */}
+      <header className="bg-background flex h-16 items-center justify-between border-b px-4">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
-            className="hidden md:flex"
-            onClick={toggleRightPanel}
+            className="md:hidden"
+            onClick={toggleSidebar}
           >
-            <ShoppingCart className="h-5 w-5" />
+            <Menu className="h-5 w-5" />
           </Button>
-        )}
-        <AccountDropdown />
-      </div>
-    </header>
+          {/* Desktop header content - shown inline */}
+          {children && <div className="hidden md:flex">{children}</div>}
+        </div>
+        <div className="flex items-center gap-4">
+          {toggleRightPanel && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden md:flex"
+              onClick={toggleRightPanel}
+            >
+              <ShoppingCart className="h-5 w-5" />
+            </Button>
+          )}
+          <AccountDropdown />
+        </div>
+      </header>
+
+      {/* Mobile header content - shown below header */}
+      {children && (
+        <div className="bg-background border-b p-4 md:hidden">{children}</div>
+      )}
+    </div>
   );
 };

@@ -1,23 +1,32 @@
-import { Search } from "lucide-react";
-import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { useId, useState } from "react";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
 export const MenuHeader = () => {
   const [searchMenu, setSearchMenu] = useState("");
+  const searchId = useId();
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="">
+    <div className="flex w-full flex-col gap-4 md:flex-row md:items-center">
+      <div className="relative w-full">
         <Input
-          id="search"
+          id={searchId}
           placeholder="Search menu"
-          className="pl-10 text-sm md:pl-12 md:text-base"
+          className="w-full pl-10 text-sm"
+          value={searchMenu}
+          onChange={(e) => setSearchMenu(e.target.value)}
         />
-        <Label htmlFor="search">
-          <Search className="text-muted-foreground absolute top-1/2 left-20 h-4 w-4 -translate-y-1/2 md:left-8 md:h-5 md:w-5" />
+        <Label htmlFor={searchId}>
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         </Label>
       </div>
+
+      <Button className="w-full md:w-auto">
+        <Plus className="h-4 w-4" />
+        <span className="ml-2">Add product</span>
+      </Button>
     </div>
   );
 };

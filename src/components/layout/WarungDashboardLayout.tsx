@@ -159,7 +159,6 @@ export const WarungDashboardLayout = ({
           toggleRightPanel={toggleRightPanel}
           className={!isMobile ? "ml-40" : ""}
         >
-          {" "}
           {headerContent}
         </WarungHeader>
 
