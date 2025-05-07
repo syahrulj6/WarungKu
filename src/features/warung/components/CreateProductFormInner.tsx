@@ -19,7 +19,8 @@ import {
 
 export const CreateProductFormInner = () => {
   const form = useFormContext<CreateProductFormSchema>();
-  const { data: categories } = api.category.getAllCategory.useQuery();
+  const { data: categories, isLoading } =
+    api.category.getAllCategory.useQuery();
 
   return (
     <>
@@ -29,7 +30,7 @@ export const CreateProductFormInner = () => {
         name="name"
         render={({ field }) => (
           <FormItem className="col-span-2">
-            <FormLabel>Nama Produk</FormLabel>
+            <FormLabel>Nama Produk*</FormLabel>
             <FormControl>
               <Input {...field} placeholder="Contoh: Nasi Goreng Special" />
             </FormControl>
@@ -45,12 +46,12 @@ export const CreateProductFormInner = () => {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Harga Jual</FormLabel>
+              <FormLabel>Harga Jual*</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   type="number"
-                  placeholder="Rp 25.000"
+                  placeholder="25000"
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </FormControl>
@@ -70,9 +71,9 @@ export const CreateProductFormInner = () => {
                 <Input
                   {...field}
                   type="number"
-                  placeholder="Rp 15.000"
+                  placeholder="15000"
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                  value={field.value || ""}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />
@@ -88,7 +89,7 @@ export const CreateProductFormInner = () => {
           name="stock"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Stok Saat Ini</FormLabel>
+              <FormLabel>Stok Awal*</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -115,7 +116,7 @@ export const CreateProductFormInner = () => {
                   type="number"
                   placeholder="5"
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                  value={field.value || ""}
+                  value={field.value ?? ""}
                 />
               </FormControl>
               <FormMessage />
@@ -130,14 +131,17 @@ export const CreateProductFormInner = () => {
         name="categoryId"
         render={({ field }) => (
           <FormItem className="col-span-2">
-            <FormLabel>Kategori Produk</FormLabel>
+            <FormLabel>Kategori</FormLabel>
             <Select
               onValueChange={field.onChange}
-              value={field.value || undefined}
+              value={field.value ?? undefined}
+              disabled={isLoading}
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih kategori" />
+                  <SelectValue
+                    placeholder={isLoading ? "Memuat..." : "Pilih kategori"}
+                  />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

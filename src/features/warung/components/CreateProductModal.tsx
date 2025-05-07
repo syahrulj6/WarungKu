@@ -38,7 +38,7 @@ export const CreateProductModal = ({
       price: 0,
       costPrice: 0,
       minStock: 0,
-      categoryId: "",
+      categoryId: undefined, // Changed from empty string
       stock: 0,
     },
   });
@@ -49,14 +49,14 @@ export const CreateProductModal = ({
     console.log("Submitting:", data);
     createProduct.mutate(data, {
       onSuccess: () => {
-        toast.success("Product created successfully");
+        toast.success("Produk berhasil dibuat");
         refetch?.();
         form.reset();
         setOpen(false);
       },
       onError: (error) => {
         console.error("Error:", error);
-        toast.error(error.message || "Failed to create product");
+        toast.error(error.message || "Gagal membuat produk");
       },
     });
   };
@@ -66,9 +66,9 @@ export const CreateProductModal = ({
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Buat Product</DialogTitle>
+          <DialogTitle>Buat Produk Baru</DialogTitle>
           <DialogDescription>
-            Isi form dibawah ini untuk membuat product.
+            Isi form dibawah ini untuk menambahkan produk baru
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -77,7 +77,7 @@ export const CreateProductModal = ({
               e.preventDefault();
               void form.handleSubmit(handleCreateProduct)(e);
             }}
-            className="mt-2 grid grid-cols-2 space-y-2 gap-x-2"
+            className="mt-2 grid grid-cols-2 gap-x-2 gap-y-4"
           >
             <CreateProductFormInner />
             <Button
@@ -88,7 +88,7 @@ export const CreateProductModal = ({
               {createProduct.isPending ? (
                 <LoaderCircleIcon className="animate-spin" />
               ) : (
-                "Create Product"
+                "Simpan Produk"
               )}
             </Button>
           </form>

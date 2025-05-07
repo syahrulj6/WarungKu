@@ -57,15 +57,24 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      const warung = await db.warung.findFirst({
+        where: { ownerId: user.id },
+      });
+
+      if (!warung) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Anda belum memiliki warung",
+        });
+      }
+
       let productPictureUrl: string | undefined = undefined;
       const timestamp = new Date().getTime().toString();
 
-      // Handle image upload if provided
       if (productPictureBase64) {
         const fileName = `product-${user.id}-${Date.now()}.jpeg`;
         const buffer = Buffer.from(productPictureBase64, "base64");
 
-        // Upload to Supabase storage
         const { data, error } = await supabaseAdminClient.storage
           .from(SUPABASE_BUCKET.ProductPictures)
           .upload(fileName, buffer, {
@@ -76,7 +85,7 @@ export const productRouter = createTRPCRouter({
         if (error) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload product image",
+            message: "Gagal mengupload gambar produk",
           });
         }
 
@@ -95,21 +104,30 @@ export const productRouter = createTRPCRouter({
           costPrice: productData.costPrice ?? 0,
           minStock: productData.minStock,
           productPictureUrl,
-          warungId: user.id,
+          warung: {
+            connect: {
+              id: warung.id,
+            },
+          },
           ...(productData.categoryId && {
-            categoryId: productData.categoryId,
+            category: {
+              connect: {
+                id: productData.categoryId,
+              },
+            },
           }),
         },
         include: {
           category: true,
+          warung: true,
         },
       });
 
       await db.warungActivity.create({
         data: {
           type: ActivityType.PRODUCT_ADDED,
-          description: `Product ${product.name} created`,
-          warungId: user.id,
+          description: `Produk ${product.name} ditambahkan`,
+          warungId: warung.id,
           userId: user.id,
           productId: product.id,
           metadata: {
