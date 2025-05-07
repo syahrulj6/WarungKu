@@ -178,7 +178,6 @@ model Product {
   saleItems   SaleItem[]
   adjustments StockAdjustment[]
   activities  WarungActivity[] @relation("ActivityProduct")
-  @@unique([warungId])
   @@index([warungId, name])
 }
 
