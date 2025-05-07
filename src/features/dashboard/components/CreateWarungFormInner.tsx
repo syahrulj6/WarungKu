@@ -14,20 +14,6 @@ export const CreateWarungFormInner = () => {
 
   return (
     <>
-      {/* <FormField
-        control={form.control}
-        name="logoUrl"
-        render={({ field }) => (
-          <FormItem className="col-span-2">
-            <FormLabel>Deskripsi</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="Deskripsi project" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      /> */}
-
       <FormField
         control={form.control}
         name="name"

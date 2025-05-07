@@ -3,6 +3,7 @@ import { useId, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { CreateProductModal } from "./CreateProductModal";
 
 export const MenuHeader = () => {
   const [searchMenu, setSearchMenu] = useState("");
@@ -23,10 +24,12 @@ export const MenuHeader = () => {
         </Label>
       </div>
 
-      <Button className="w-full md:w-auto">
-        <Plus className="h-4 w-4" />
-        <span className="ml-2">Add product</span>
-      </Button>
+      <CreateProductModal>
+        <Button className="w-full md:w-auto">
+          <Plus className="h-4 w-4" />
+          <span className="ml-2">Add product</span>
+        </Button>
+      </CreateProductModal>
     </div>
   );
 };

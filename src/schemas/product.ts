@@ -26,5 +26,3 @@ export const createProductFormSchema = z.object({
   categoryId: z.string().optional(),
   isActive: z.boolean().default(true),
 });
-
-export type CreateProductFormValues = z.infer<typeof createProductFormSchema>;

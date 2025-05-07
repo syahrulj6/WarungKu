@@ -1,8 +1,6 @@
 import React from "react";
 import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
 import { MenuHeader } from "../components/MenuHeader";
-import { Button } from "~/components/ui/button";
-import { Coffee, Pizza, Star } from "lucide-react";
 import { CategoryList } from "../components/CategoryList";
 
 const MenuPage = () => {
