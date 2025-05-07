@@ -98,14 +98,36 @@ export const warungRouter = createTRPCRouter({
           });
         }
 
-        const newWarung = await db.warung.create({
+        // Create the warung and default categories in a transaction
+        const [newWarung] = await db.$transaction([
+          db.warung.create({
+            data: {
+              name,
+              address,
+              logoUrl,
+              phone,
+              ownerId: user!.id,
+              isActive: true,
+            },
+          }),
+          // Create default categories
+          ...["Food", "Beverage", "Snack"].map((categoryName) =>
+            db.category.create({
+              data: {
+                name: categoryName,
+                warungId: user!.id, // This will be updated after we get the new warung ID
+              },
+            }),
+          ),
+        ]);
+
+        await db.category.updateMany({
+          where: {
+            warungId: user!.id,
+            name: { in: ["Food", "Beverage", "Snack"] },
+          },
           data: {
-            name,
-            address,
-            logoUrl,
-            phone,
-            ownerId: user!.id,
-            isActive: true,
+            warungId: newWarung.id,
           },
         });
 
