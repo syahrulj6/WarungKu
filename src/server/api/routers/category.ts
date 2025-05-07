@@ -3,7 +3,6 @@ import { createTRPCRouter, privateProcedure } from "../trpc";
 import { z } from "zod";
 
 export const categoryRouter = createTRPCRouter({
-  // Get all categories for the current warung
   getAllCategory: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
 
@@ -15,12 +14,24 @@ export const categoryRouter = createTRPCRouter({
     }
 
     try {
+      console.log("Fetching categories for user:", user.id);
+      const warungs = await db.warung.findMany({
+        where: { ownerId: user.id },
+        select: { id: true },
+      });
+      console.log("User warungs:", warungs);
+
       const categories = await db.category.findMany({
-        where: { warungId: user.id },
+        where: {
+          warungId: { in: warungs.map((w) => w.id) },
+        },
         orderBy: { name: "asc" },
       });
+      console.log("Found categories:", categories);
+
       return categories;
     } catch (error) {
+      console.error("Error fetching categories:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch categories",
@@ -28,7 +39,6 @@ export const categoryRouter = createTRPCRouter({
     }
   }),
 
-  // Create default categories if they don't exist
   createDefaultsCategory: privateProcedure.mutation(async ({ ctx }) => {
     const { db, user } = ctx;
 
@@ -42,7 +52,6 @@ export const categoryRouter = createTRPCRouter({
     const defaultCategories = ["Food", "Beverage", "Snack"];
 
     try {
-      // Check which default categories don't exist yet
       const existingCategories = await db.category.findMany({
         where: {
           warungId: user.id,
@@ -70,7 +79,6 @@ export const categoryRouter = createTRPCRouter({
     }
   }),
 
-  // Create a custom category
   createCategory: privateProcedure
     .input(
       z.object({
