@@ -98,9 +98,8 @@ export const warungRouter = createTRPCRouter({
           });
         }
 
-        // Create the warung and default categories in a transaction
-        const [newWarung] = await db.$transaction([
-          db.warung.create({
+        const result = await db.$transaction(async (tx) => {
+          const newWarung = await tx.warung.create({
             data: {
               name,
               address,
@@ -109,29 +108,20 @@ export const warungRouter = createTRPCRouter({
               ownerId: user!.id,
               isActive: true,
             },
-          }),
-          // Create default categories
-          ...["Food", "Beverage", "Snack"].map((categoryName) =>
-            db.category.create({
-              data: {
-                name: categoryName,
-                warungId: user!.id, // This will be updated after we get the new warung ID
-              },
-            }),
-          ),
-        ]);
+          });
 
-        await db.category.updateMany({
-          where: {
-            warungId: user!.id,
-            name: { in: ["Food", "Beverage", "Snack"] },
-          },
-          data: {
-            warungId: newWarung.id,
-          },
+          await tx.category.createMany({
+            data: [
+              { name: "Food", warungId: newWarung.id },
+              { name: "Beverage", warungId: newWarung.id },
+              { name: "Snack", warungId: newWarung.id },
+            ],
+          });
+
+          return newWarung;
         });
 
-        return newWarung;
+        return result;
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error;
