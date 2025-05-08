@@ -6,14 +6,17 @@ import { api } from "~/utils/api";
 import { MenuCard } from "../components/MenuCard";
 
 const MenuPage = () => {
-  const { data: productData, isLoading: productIsLoading } =
-    api.product.getAllProduct.useQuery();
+  const {
+    data: productData,
+    isLoading: productIsLoading,
+    refetch: refetchProductData,
+  } = api.product.getAllProduct.useQuery();
 
   return (
     <WarungDashboardLayout
       withRightPanel={true}
       rightPanelTitle="Current Order"
-      headerContent={<MenuHeader />}
+      headerContent={<MenuHeader refetchProductData={refetchProductData} />}
     >
       <div className="flex flex-col gap-6">
         <CategoryList />

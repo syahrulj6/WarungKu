@@ -5,7 +5,11 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { CreateProductModal } from "./CreateProductModal";
 
-export const MenuHeader = () => {
+export const MenuHeader = ({
+  refetchProductData,
+}: {
+  refetchProductData: () => void;
+}) => {
   const [searchMenu, setSearchMenu] = useState("");
   const searchId = useId();
 
@@ -24,7 +28,7 @@ export const MenuHeader = () => {
         </Label>
       </div>
 
-      <CreateProductModal>
+      <CreateProductModal refetch={refetchProductData}>
         <Button className="w-full md:w-auto">
           <Plus className="h-4 w-4" />
           <span className="ml-2">Add product</span>
