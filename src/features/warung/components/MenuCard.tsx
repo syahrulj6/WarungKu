@@ -1,12 +1,38 @@
-export const MenuCard = ({ title, price, available, imageUrl }: any) => (
-  <div className="rounded-xl bg-white p-4 text-center shadow">
-    <img
-      src={imageUrl}
-      alt={title}
-      className="mx-auto mb-4 h-32 w-full object-contain"
-    />
-    <h3 className="font-semibold">{title}</h3>
-    <p className="font-bold text-orange-500">${price.toFixed(2)}</p>
-    <p className="text-sm text-gray-500">{available} Pan Available</p>
-  </div>
-);
+import Image from "next/image";
+import { Card } from "~/components/ui/card";
+
+interface MenuCardProps {
+  name: string;
+  productImage?: string;
+  price: number;
+  stock: number;
+  category?: string;
+}
+
+export const MenuCard = ({
+  name,
+  productImage,
+  price,
+  stock,
+  category,
+}: MenuCardProps) => {
+  return (
+    <Card className="flex flex-col items-center gap-2 px-4 hover:cursor-pointer">
+      <div className="relative aspect-square h-48 w-full md:h-60">
+        <Image
+          src={productImage ?? ""}
+          alt="product image"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
+
+      <h1 className="text-lg font-semibold md:text-xl">{name}</h1>
+      <p className="text-primary text-sm font-semibold md:text-base">{price}</p>
+      <p className="text-xs md:text-sm">
+        {stock} <span className="text-muted-foreground">Tersedia</span>
+      </p>
+    </Card>
+  );
+};
