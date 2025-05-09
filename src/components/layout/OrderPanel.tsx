@@ -4,9 +4,13 @@ import { useOrderStore } from "~/stores/order-store";
 import { Input } from "~/components/ui/input";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export const OrderPanel = () => {
   const { items, updateQuantity, removeItem, clearOrder } = useOrderStore();
+  const router = useRouter();
+  const { id } = router.query;
 
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -70,7 +74,9 @@ export const OrderPanel = () => {
               <Button variant="outline" className="flex-1" onClick={clearOrder}>
                 Clear
               </Button>
-              <Button className="flex-1">Checkout</Button>
+              <Button className="flex-1" asChild>
+                <Link href={`/dashboard/warung/${id}/order`}>Check Out</Link>
+              </Button>
             </div>
           </div>
         </>

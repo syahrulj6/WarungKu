@@ -38,7 +38,7 @@ const menuItems = [
   {
     title: "Order",
     icon: <FaShoppingCart />,
-    url: "/dashborad/warung/[id]/order",
+    url: "/dashboard/warung/[id]/order",
     path: (id: string) => `/dashboard/warung/${id}/order`,
   },
   {
