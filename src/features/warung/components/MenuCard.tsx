@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Card } from "~/components/ui/card";
+import { formatRupiah } from "~/lib/format";
 
 interface MenuCardProps {
   name: string;
@@ -27,7 +28,9 @@ export const MenuCard = ({
       </div>
 
       <h1 className="text-lg font-semibold md:text-xl">{name}</h1>
-      <p className="text-primary text-sm font-semibold md:text-base">{price}</p>
+      <p className="text-primary text-sm font-semibold md:text-base">
+        {formatRupiah(price)}
+      </p>
       <p className="text-xs md:text-sm">
         {stock} <span className="text-muted-foreground">Tersedia</span>
       </p>

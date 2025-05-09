@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { formatRupiah, parseRupiah } from "~/lib/format";
 
 export const CreateProductFormInner = () => {
   const form = useFormContext<CreateProductFormSchema>();
@@ -50,9 +51,12 @@ export const CreateProductFormInner = () => {
               <FormControl>
                 <Input
                   {...field}
-                  type="number"
-                  placeholder="25000"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  placeholder="Rp25.000"
+                  value={field.value ? formatRupiah(field.value) : ""}
+                  onChange={(e) => {
+                    const value = parseRupiah(e.target.value);
+                    field.onChange(value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -70,10 +74,12 @@ export const CreateProductFormInner = () => {
               <FormControl>
                 <Input
                   {...field}
-                  type="number"
-                  placeholder="15000"
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  value={field.value ?? ""}
+                  placeholder="Rp15.000"
+                  value={field.value ? formatRupiah(field.value) : ""}
+                  onChange={(e) => {
+                    const value = parseRupiah(e.target.value);
+                    field.onChange(value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
