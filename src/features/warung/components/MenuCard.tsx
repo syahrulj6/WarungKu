@@ -17,13 +17,13 @@ export const MenuCard = ({
   category,
 }: MenuCardProps) => {
   return (
-    <Card className="flex flex-col items-center gap-2 px-4 hover:cursor-pointer">
-      <div className="relative aspect-square h-48 w-full md:h-60">
+    <Card className="md flex flex-col items-center gap-2 pt-0 pb-2 hover:cursor-pointer md:pb-3">
+      <div className="relative aspect-square h-32 w-full md:h-52">
         <Image
           src={productImage ?? ""}
           alt="product image"
           fill
-          className="object-cover"
+          className="rounded-md object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
