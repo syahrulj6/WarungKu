@@ -31,6 +31,32 @@ export const productRouter = createTRPCRouter({
     }
   }),
 
+  getAllProductByCategory: privateProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { categoryId } = input;
+
+      try {
+        const products = await db.product.findMany({
+          where: {
+            categoryId: categoryId,
+          },
+          orderBy: { stock: "desc" },
+        });
+        return products;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch products",
+        });
+      }
+    }),
+
   getTrendingProduct: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
 
@@ -66,7 +92,6 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { productPictureBase64, ...productData } = input;
 
-      // Verify user and warung
       const warung = await db.warung.findFirst({
         where: { ownerId: user?.id },
       });
@@ -78,7 +103,6 @@ export const productRouter = createTRPCRouter({
         });
       }
 
-      // Handle image upload
       let productPictureUrl: string | undefined;
       if (productPictureBase64) {
         const fileName = `product-${user!.id}-${Date.now()}.jpeg`;
@@ -104,7 +128,6 @@ export const productRouter = createTRPCRouter({
         productPictureUrl = publicUrlData.publicUrl;
       }
 
-      // Create product
       const product = await db.product.create({
         data: {
           name: productData.name,
@@ -113,7 +136,7 @@ export const productRouter = createTRPCRouter({
           costPrice: productData.costPrice ?? 0,
           minStock: productData.minStock,
           productPictureUrl,
-          warungId: warung.id, // Direct assignment
+          warungId: warung.id,
           ...(productData.categoryId && { categoryId: productData.categoryId }),
         },
       });
@@ -205,7 +228,6 @@ export const productRouter = createTRPCRouter({
         data: { productPictureUrl: null },
       });
 
-      // Create activity log
       await createProductActivity(db, {
         type: ActivityType.PRODUCT_UPDATED,
         description: `Foto produk ${product.name} dihapus`,
@@ -218,7 +240,6 @@ export const productRouter = createTRPCRouter({
     }),
 });
 
-// Helper function to handle image upload
 async function handleImageUpload(
   imageBase64: string | undefined,
   userId: string,
@@ -228,7 +249,6 @@ async function handleImageUpload(
   const fileName = `product-${userId}-${Date.now()}.jpeg`;
   const buffer = Buffer.from(imageBase64, "base64");
 
-  // Upload to Supabase storage
   const { data, error } = await supabaseAdminClient.storage
     .from(SUPABASE_BUCKET.ProductPictures)
     .upload(fileName, buffer, {
@@ -243,7 +263,6 @@ async function handleImageUpload(
     });
   }
 
-  // Get public URL with cache-busting timestamp
   const { data: publicUrlData } = supabaseAdminClient.storage
     .from(SUPABASE_BUCKET.ProductPictures)
     .getPublicUrl(data.path);
@@ -251,16 +270,13 @@ async function handleImageUpload(
   return `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
 }
 
-// Helper function to delete image from storage
 async function deleteImageFromStorage(imageUrl: string): Promise<void> {
   try {
-    // Extract file path from URL
     const url = new URL(imageUrl);
     const filePath = url.pathname.split("/").pop()?.split("?")[0];
 
     if (!filePath) return;
 
-    // Delete file from storage
     const { error } = await supabaseAdminClient.storage
       .from(SUPABASE_BUCKET.ProductPictures)
       .remove([filePath]);

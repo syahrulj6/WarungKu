@@ -6,7 +6,6 @@ interface MenuCardProps {
   productImage?: string;
   price: number;
   stock: number;
-  category?: string;
 }
 
 export const MenuCard = ({
@@ -14,7 +13,6 @@ export const MenuCard = ({
   productImage,
   price,
   stock,
-  category,
 }: MenuCardProps) => {
   return (
     <Card className="md flex flex-col items-center gap-2 pt-0 pb-2 hover:cursor-pointer md:pb-3">

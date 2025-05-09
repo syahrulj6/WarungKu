@@ -4,7 +4,11 @@ import { api } from "~/utils/api";
 import { cn } from "~/lib/utils";
 import { useState } from "react";
 
-export const CategoryList = () => {
+export const CategoryList = ({
+  onCategoryChange,
+}: {
+  onCategoryChange: (categoryId: string | null) => void;
+}) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const { data: categories, isLoading } =
     api.category.getAllCategory.useQuery();
@@ -15,11 +19,14 @@ export const CategoryList = () => {
     Snack: <Cookie className="h-4 w-4" />,
   };
 
+  const handleCategoryClick = (categoryId: string | null) => {
+    setActiveCategory(categoryId);
+    onCategoryChange(categoryId);
+  };
+
   if (isLoading) {
     return <div className="flex gap-2">Loading categories...</div>;
   }
-
-  console.log(categories);
 
   if (!categories || categories.length === 0) {
     return <div>No categories found</div>;
@@ -27,28 +34,33 @@ export const CategoryList = () => {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <Button
+        variant={activeCategory === null ? "default" : "secondary"}
+        onClick={() => handleCategoryClick(null)}
+      >
+        <span className="ml-2">All Products</span>
+      </Button>
+
       {/* Best Seller (special case) */}
       <Button
         variant={activeCategory === "best-seller" ? "default" : "secondary"}
-        onClick={() => setActiveCategory("best-seller")}
+        onClick={() => handleCategoryClick("best-seller")}
       >
         <Star className="h-4 w-4" />
         <span className="ml-2">Best Seller</span>
       </Button>
 
-      {/* Mapped categories */}
       {categories.map((category) => (
         <Button
           key={category.id}
           variant={activeCategory === category.id ? "default" : "secondary"}
-          onClick={() => setActiveCategory(category.id)}
+          onClick={() => handleCategoryClick(category.id)}
           className={cn(
             "transition-colors",
             activeCategory === category.id &&
               "bg-primary text-primary-foreground",
           )}
         >
-          {/* Show icon if it's a default category */}
           {defaultCategoryIcons[category.name] || (
             <span className="flex h-4 w-4 items-center justify-center">•</span>
           )}
