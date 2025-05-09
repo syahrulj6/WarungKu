@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { useOrderStore } from "~/stores/order-store";
 
 interface MenuCardProps {
   name: string;
@@ -29,8 +30,15 @@ export const MenuCard = ({
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
+  const { addItem } = useOrderStore();
+
   const handleAddToOrder = () => {
-    console.log(`Added ${quantity} ${name} to order`);
+    addItem({
+      id,
+      name,
+      price,
+      productImage,
+    });
     setIsOpen(false);
   };
 

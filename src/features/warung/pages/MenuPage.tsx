@@ -31,7 +31,6 @@ const MenuPage = () => {
   return (
     <WarungDashboardLayout
       withRightPanel={true}
-      rightPanelTitle="Current Order"
       headerContent={
         <MenuHeader
           refetchProductData={refetchProductData}

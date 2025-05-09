@@ -52,7 +52,6 @@ const MainDashboardPage = () => {
   return (
     <WarungDashboardLayout
       withRightPanel={true}
-      rightPanelTitle="Current Order"
       headerContent={
         <div className="flex items-center gap-2">
           <div className="flex flex-col">

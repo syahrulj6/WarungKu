@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Menu, PanelRightClose, ShoppingCart } from "lucide-react";
+import { OrderPanel } from "./OrderPanel";
 
 const menuItems = [
   {
@@ -69,16 +70,12 @@ const menuItems = [
 type WarungDashboardLayoutProps = {
   children: ReactNode;
   withRightPanel?: boolean;
-  rightPanelContent?: ReactNode;
-  rightPanelTitle?: string;
   headerContent?: ReactNode;
 };
 
 export const WarungDashboardLayout = ({
   children,
   withRightPanel = false,
-  rightPanelContent,
-  rightPanelTitle = "Current Orders",
   headerContent,
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
@@ -178,9 +175,9 @@ export const WarungDashboardLayout = ({
                 {isRightPanelOpen && (
                   <div className="h-full w-72 overflow-y-auto p-4">
                     <h3 className="mb-4 text-lg font-semibold">
-                      {rightPanelTitle}
+                      Current Order
                     </h3>
-                    {rightPanelContent}
+                    <OrderPanel />
                   </div>
                 )}
               </div>
@@ -208,12 +205,14 @@ export const WarungDashboardLayout = ({
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-0">
               <SheetHeader className="p-4">
-                <SheetTitle>{rightPanelTitle}</SheetTitle>
+                <SheetTitle>Current Order</SheetTitle>
                 <SheetDescription>
                   Panel showing current order information
                 </SheetDescription>
               </SheetHeader>
-              <div className="p-4">{rightPanelContent}</div>
+              <div className="p-4">
+                <OrderPanel />
+              </div>
             </SheetContent>
           </Sheet>
         </div>
