@@ -52,6 +52,7 @@ const MenuPage = () => {
           )}
           {productData?.map((product) => (
             <MenuCard
+              id={product.id}
               key={product.id}
               name={product.name}
               productImage={product.productPictureUrl ?? ""}
