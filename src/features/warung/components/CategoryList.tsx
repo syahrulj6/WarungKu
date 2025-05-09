@@ -1,4 +1,4 @@
-import { Coffee, Pizza, Star, Cookie } from "lucide-react";
+import { Coffee, Pizza, Star, Cookie, Grip } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { api } from "~/utils/api";
 import { cn } from "~/lib/utils";
@@ -38,7 +38,9 @@ export const CategoryList = ({
         variant={activeCategory === null ? "default" : "secondary"}
         onClick={() => handleCategoryClick(null)}
       >
-        <span className="ml-2">All Products</span>
+        <Grip className="h-4 w-4" />
+
+        <span className="ml-2">All Menu</span>
       </Button>
 
       {/* Best Seller (special case) */}

@@ -7,7 +7,6 @@ import { api } from "~/utils/api";
 import { WarungCard } from "../components/WarungCard";
 import { useDebounce } from "use-debounce";
 import { CreateWarungModal } from "../components/CreateWarungModal";
-import { PageContainer } from "~/components/layout/PageContainer";
 
 const MainDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");

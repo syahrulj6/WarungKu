@@ -4,33 +4,51 @@ import { MenuHeader } from "../components/MenuHeader";
 import { CategoryList } from "../components/CategoryList";
 import { api } from "~/utils/api";
 import { MenuCard } from "../components/MenuCard";
+import { useDebounce } from "use-debounce";
 
 const MenuPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
   const {
     data: productData,
     isLoading: productIsLoading,
     refetch: refetchProductData,
-  } = selectedCategory
-    ? api.product.getAllProductByCategory.useQuery({
-        categoryId: selectedCategory,
-      })
-    : api.product.getAllProduct.useQuery();
+  } = debouncedSearchTerm
+    ? api.product.searchMenuByNames.useQuery({ name: debouncedSearchTerm })
+    : selectedCategory
+      ? api.product.getAllProductByCategory.useQuery({
+          categoryId: selectedCategory,
+        })
+      : api.product.getAllProduct.useQuery();
+
+  const handleCategoryChange = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    setSearchTerm("");
+  };
 
   return (
     <WarungDashboardLayout
       withRightPanel={true}
       rightPanelTitle="Current Order"
-      headerContent={<MenuHeader refetchProductData={refetchProductData} />}
+      headerContent={
+        <MenuHeader
+          refetchProductData={refetchProductData}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+      }
     >
       <div className="flex flex-col gap-6">
-        <CategoryList onCategoryChange={setSelectedCategory} />
+        <CategoryList onCategoryChange={handleCategoryChange} />
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {productIsLoading && <div>Loading..</div>}
           {!productIsLoading && productData?.length === 0 && (
-            <div>No products found</div>
+            <div className="text-muted-foreground col-span-full text-center">
+              No products found
+            </div>
           )}
           {productData?.map((product) => (
             <MenuCard

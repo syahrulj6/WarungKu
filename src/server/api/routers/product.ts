@@ -38,15 +38,68 @@ export const productRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { categoryId } = input;
 
       try {
         const products = await db.product.findMany({
           where: {
-            categoryId: categoryId,
+            AND: [
+              {
+                warung: {
+                  ownerId: user!.id,
+                },
+              },
+              {
+                categoryId: categoryId,
+              },
+            ],
           },
           orderBy: { stock: "desc" },
+          include: {
+            category: true,
+          },
+        });
+        return products;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch products",
+        });
+      }
+    }),
+
+  searchMenuByNames: privateProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { name } = input;
+
+      try {
+        const products = await db.product.findMany({
+          where: {
+            AND: [
+              {
+                warung: {
+                  ownerId: user!.id,
+                },
+              },
+              {
+                name: {
+                  contains: name,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+          orderBy: { stock: "desc" },
+          include: {
+            category: true,
+          },
         });
         return products;
       } catch (error) {
