@@ -2,6 +2,7 @@ import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { type PrismaClient } from "@prisma/client";
 import { createSaleFormSchema } from "~/schemas/sale";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const saleRouter = createTRPCRouter({
   create: privateProcedure
@@ -70,6 +71,45 @@ export const saleRouter = createTRPCRouter({
       return sale;
     }),
 
+  getAllCompletedSale: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        isPaid: z.boolean(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, isPaid } = input;
+
+      try {
+        const sale = await db.sale.findMany({
+          where: {
+            warungId,
+            isPaid,
+          },
+          include: {
+            customer: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return sale;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch sale",
+        });
+      }
+    }),
+
   getByStatus: privateProcedure
     .input(
       z.object({
@@ -79,25 +119,83 @@ export const saleRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { warungId, isPaid } = input;
+      const { db } = ctx;
 
-      return ctx.db.sale.findMany({
-        where: {
-          warungId,
-          isPaid,
-        },
-        include: {
-          customer: true,
-          items: {
-            include: {
-              product: true,
+      try {
+        const sale = await db.sale.findMany({
+          where: {
+            warungId,
+            isPaid,
+          },
+          include: {
+            customer: true,
+            items: {
+              include: {
+                product: true,
+              },
             },
           },
-        },
-        take: 10,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+          take: 10,
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        return sale;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch sale",
+        });
+      }
+    }),
+
+  searchSaleByReceiptNumber: privateProcedure
+    .input(
+      z.object({
+        receiptNumber: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { receiptNumber } = input;
+
+      try {
+        const sale = await db.sale.findMany({
+          where: {
+            AND: [
+              {
+                warung: {
+                  ownerId: user?.id,
+                },
+              },
+              {
+                receiptNo: {
+                  contains: receiptNumber,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+          include: {
+            customer: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+        return sale;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch sale",
+        });
+      }
     }),
 
   markAsPaid: privateProcedure
