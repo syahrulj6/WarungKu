@@ -13,41 +13,33 @@ const HistoryPage = () => {
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  const { data: orders, isLoading } = api.sale.getByStatus.useQuery(
-    {
-      warungId: id as string,
-      isPaid: true,
-    },
-    {
-      enabled: !!id,
-    },
-  );
-
-  const { data: searchedOrders, isLoading: isSearching } =
-    api.sale.searchSaleByReceiptNumber.useQuery(
-      {
-        receiptNumber: debouncedSearchTerm,
-      },
-      {
-        enabled: !!debouncedSearchTerm && !!id,
-      },
-    );
-
-  const { data: dateFilteredOrders, isLoading: isDateLoading } =
-    api.sale.getSaleByDate.useQuery(
-      {
-        date: selectedDate as Date,
-      },
-      {
-        enabled: !!selectedDate && !!id,
-      },
-    );
-
-  const displayedOrders = debouncedSearchTerm
-    ? searchedOrders
+  const { data: saleData, isLoading } = debouncedSearchTerm
+    ? api.sale.searchSaleByReceiptNumber.useQuery(
+        {
+          receiptNumber: debouncedSearchTerm,
+        },
+        {
+          enabled: !!debouncedSearchTerm && !!id,
+        },
+      )
     : selectedDate
-      ? dateFilteredOrders
-      : orders;
+      ? api.sale.getSaleByDate.useQuery(
+          {
+            date: selectedDate as Date,
+          },
+          {
+            enabled: !!selectedDate && !!id,
+          },
+        )
+      : api.sale.getByStatus.useQuery(
+          {
+            warungId: id as string,
+            isPaid: true,
+          },
+          {
+            enabled: !!id,
+          },
+        );
 
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -64,8 +56,8 @@ const HistoryPage = () => {
 
   const textHeading = selectedDate
     ? `Riwayat Pesanan (${formattedDate})`
-    : searchTerm
-      ? `Riwayat Pesanan (${searchTerm})`
+    : debouncedSearchTerm
+      ? `Riwayat Pesanan (${debouncedSearchTerm})`
       : "Riwayat Pesanan (All time)";
 
   return (
@@ -82,10 +74,7 @@ const HistoryPage = () => {
     >
       <div className="flex flex-col gap-6">
         <h1 className="text-2xl font-bold">{textHeading}</h1>
-        <OrderList
-          orders={displayedOrders}
-          isLoading={isLoading || isSearching || isDateLoading}
-        />
+        <OrderList orders={saleData} isLoading={isLoading} />
       </div>
     </WarungDashboardLayout>
   );
