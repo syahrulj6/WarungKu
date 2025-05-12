@@ -44,7 +44,7 @@ const menuItems = [
   {
     title: "History",
     icon: <GoClockFill />,
-    url: "dashboard/warung/[id]/history",
+    url: "/dashboard/warung/[id]/history",
     path: (id: string) => `/dashboard/warung/${id}/history`,
   },
   {

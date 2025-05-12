@@ -213,7 +213,7 @@ model Sale {
   totalAmount Float
   tax         Float       @default(0)
   paymentType PaymentType
-  isPaid      Boolean     @default(true)
+  isPaid      Boolean     @default(false)
   notes       String?
   createdAt   DateTime    @default(now())
   shift       Shift?      @relation(fields: [shiftId], references: [id])

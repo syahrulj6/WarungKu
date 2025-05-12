@@ -1,6 +1,7 @@
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
 import { type PrismaClient } from "@prisma/client";
 import { createSaleFormSchema } from "~/schemas/sale";
+import { z } from "zod";
 
 export const saleRouter = createTRPCRouter({
   create: privateProcedure
@@ -12,12 +13,15 @@ export const saleRouter = createTRPCRouter({
 
       const receiptNo = await generateReceiptNumber(db, warungId);
 
+      const isPaid = paymentType === "CASH";
+
       const sale = await db.sale.create({
         data: {
           receiptNo,
           totalAmount,
           paymentType,
           notes,
+          isPaid: isPaid,
           warung: { connect: { id: warungId } },
           customer: customerId ? { connect: { id: customerId } } : undefined,
           user: { connect: { id: user?.id } },
@@ -58,6 +62,70 @@ export const saleRouter = createTRPCRouter({
             amount: totalAmount,
             paymentType,
             itemsCount: items.length,
+            status: isPaid ? "completed" : "on-process",
+          },
+        },
+      });
+
+      return sale;
+    }),
+
+  getByStatus: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        isPaid: z.boolean(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { warungId, isPaid } = input;
+
+      return ctx.db.sale.findMany({
+        where: {
+          warungId,
+          isPaid,
+        },
+        include: {
+          customer: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }),
+
+  markAsPaid: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const { id } = input;
+      const { db, user } = ctx;
+
+      const sale = await db.sale.update({
+        where: { id },
+        data: {
+          isPaid: true,
+        },
+        include: {
+          customer: true,
+        },
+      });
+
+      await db.warungActivity.create({
+        data: {
+          type: "SALE_UPDATED",
+          description: `Sale ${sale.receiptNo} marked as paid`,
+          warung: { connect: { id: sale.warungId } },
+          user: { connect: { id: user?.id } },
+          relatedSale: { connect: { id: sale.id } },
+          metadata: {
+            amount: sale.totalAmount,
+            previousStatus: "unpaid",
+            newStatus: "paid",
           },
         },
       });
