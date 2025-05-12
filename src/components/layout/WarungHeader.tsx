@@ -8,11 +8,13 @@ export const WarungHeader = ({
   toggleRightPanel,
   className = "",
   children,
+  showRightPanelButton = false,
 }: {
   toggleSidebar: () => void;
   toggleRightPanel?: () => void;
   className?: string;
   children?: React.ReactNode;
+  showRightPanelButton?: boolean;
 }) => {
   return (
     <div className={`sticky top-0 z-40 ${className}`}>
@@ -31,7 +33,8 @@ export const WarungHeader = ({
           {children && <div className="hidden md:flex">{children}</div>}
         </div>
         <div className="flex items-center gap-4">
-          {toggleRightPanel && (
+          {/* Only show if showRightPanelButton is true */}
+          {showRightPanelButton && toggleRightPanel && (
             <Button
               variant="ghost"
               size="icon"

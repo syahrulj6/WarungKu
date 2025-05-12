@@ -153,8 +153,9 @@ export const WarungDashboardLayout = ({
       <div className="flex flex-1 flex-col">
         <WarungHeader
           toggleSidebar={toggleLeftSidebar}
-          toggleRightPanel={toggleRightPanel}
+          toggleRightPanel={withRightPanel ? toggleRightPanel : undefined}
           className={!isMobile ? "ml-40" : ""}
+          showRightPanelButton={withRightPanel}
         >
           {headerContent}
         </WarungHeader>
