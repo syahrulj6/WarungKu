@@ -34,10 +34,6 @@ const OrderPage = () => {
       }
     >
       <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">
-          {activeTab === "on-process" ? "Current Orders" : "Order History"}
-        </h1>
-
         {activeTab === "on-process" ? (
           items.length === 0 ? (
             <div className="text-muted-foreground rounded-lg border p-8 text-center">

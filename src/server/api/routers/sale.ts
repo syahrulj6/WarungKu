@@ -93,6 +93,7 @@ export const saleRouter = createTRPCRouter({
             },
           },
         },
+        take: 10,
         orderBy: {
           createdAt: "desc",
         },
