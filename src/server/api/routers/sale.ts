@@ -150,6 +150,60 @@ export const saleRouter = createTRPCRouter({
       }
     }),
 
+  getSaleByDate: privateProcedure
+    .input(
+      z.object({
+        date: z.date(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { date } = input;
+
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      try {
+        const sale = await db.sale.findMany({
+          where: {
+            AND: [
+              {
+                warung: {
+                  ownerId: user?.id,
+                },
+              },
+              {
+                createdAt: {
+                  gte: startOfDay,
+                  lte: endOfDay,
+                },
+              },
+            ],
+          },
+          include: {
+            customer: true,
+            items: {
+              include: {
+                product: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+        return sale;
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch sale",
+        });
+      }
+    }),
+
   searchSaleByReceiptNumber: privateProcedure
     .input(
       z.object({

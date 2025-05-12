@@ -11,6 +11,7 @@ const HistoryPage = () => {
   const { id } = router.query;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const { data: orders, isLoading } = api.sale.getByStatus.useQuery(
     {
@@ -32,19 +33,58 @@ const HistoryPage = () => {
       },
     );
 
-  const displayedOrders = debouncedSearchTerm ? searchedOrders : orders;
+  const { data: dateFilteredOrders, isLoading: isDateLoading } =
+    api.sale.getSaleByDate.useQuery(
+      {
+        date: selectedDate as Date,
+      },
+      {
+        enabled: !!selectedDate && !!id,
+      },
+    );
+
+  const displayedOrders = debouncedSearchTerm
+    ? searchedOrders
+    : selectedDate
+      ? dateFilteredOrders
+      : orders;
+
+  const handleDateChange = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setSearchTerm("");
+  };
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
+  const formattedDate = selectedDate?.toLocaleDateString("id-ID", options);
+
+  const textHeading = selectedDate
+    ? `Riwayat Pesanan (${formattedDate})`
+    : searchTerm
+      ? `Riwayat Pesanan (${searchTerm})`
+      : "Riwayat Pesanan (All time)";
 
   return (
     <WarungDashboardLayout
       headerContent={
-        <HistoryHeader searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+        <HistoryHeader
+          formattedDate={formattedDate}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          date={selectedDate}
+          onDateChange={handleDateChange}
+        />
       }
     >
       <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">Order History</h1>
+        <h1 className="text-2xl font-bold">{textHeading}</h1>
         <OrderList
           orders={displayedOrders}
-          isLoading={isLoading || isSearching}
+          isLoading={isLoading || isSearching || isDateLoading}
         />
       </div>
     </WarungDashboardLayout>
