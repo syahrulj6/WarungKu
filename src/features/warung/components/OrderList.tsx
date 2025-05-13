@@ -5,15 +5,41 @@ import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
 import PaymentMethodBadge from "./PaymentMethodBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
+import type { Product } from "@prisma/client";
+
+interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+  };
+}
 
 interface Order {
   id: string;
   receiptNo: string;
   createdAt: Date;
-  customer: { name: string } | null;
+  customer: {
+    id: string;
+    name: string;
+    address: string | null;
+    phone: string | null;
+    email: string | null;
+  } | null;
   totalAmount: number;
   paymentType: string;
   isPaid: boolean;
+  items: OrderItem[];
 }
 
 interface OrderListProps {
@@ -23,6 +49,9 @@ interface OrderListProps {
 
 export const OrderList = ({ orders, isLoading }: OrderListProps) => {
   const utils = api.useUtils();
+
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
   const { mutate: markAsPaid } = api.sale.markAsPaid.useMutation({
     onSuccess: () => {
       toast.success("Order marked as paid");
@@ -59,8 +88,8 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
           <thead>
             <tr className="border-b text-left text-sm">
               <th className="px-4 py-3">Receipt No</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Customer</th>
+              <th className="px-4 py-3">Tanggal</th>
+              <th className="px-4 py-3">Pelanggan</th>
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Payment</th>
               <th className="px-4 py-3">Status</th>
@@ -68,7 +97,11 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-muted/50 border-b">
+              <tr
+                key={order.id}
+                className="hover:bg-muted/50 border-b"
+                onClick={() => setSelectedOrder(order)}
+              >
                 <td className="max-w-[100px] truncate px-4 py-2">
                   {order.receiptNo}
                 </td>
@@ -88,12 +121,12 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                   {order.isPaid ? (
                     <span className="flex items-center text-green-600">
                       <Check className="mr-1 h-4 w-4" />
-                      <span>Paid</span>
+                      <span>Dibayar</span>
                     </span>
                   ) : (
                     <span className="flex items-center text-yellow-600">
                       <X className="mr-1 h-4 w-4" />
-                      <span>Unpaid</span>
+                      <span>Belum dibayar</span>
                     </span>
                   )}
                 </td>
@@ -106,8 +139,12 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
       {/* Mobile Cards (shown on mobile) */}
       <div className="space-y-2 md:hidden">
         {orders.map((order) => (
-          <Card key={order.id} className="hover:bg-muted/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+          <Card
+            key={order.id}
+            className="hover:bg-muted/50"
+            onClick={() => setSelectedOrder(order)}
+          >
+            <CardHeader className="flex flex-row justify-between space-y-0 p-4 pb-2">
               <CardTitle className="text-sm font-medium">
                 {order.receiptNo}
               </CardTitle>
@@ -118,7 +155,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
             <CardContent className="p-4 pt-0">
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <p className="text-muted-foreground">Customer</p>
+                  <p className="text-muted-foreground">Pelanggan</p>
                   <p>{order.customer?.name || "Walk-in"}</p>
                 </div>
                 <div>
@@ -134,12 +171,12 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                   {order.isPaid ? (
                     <span className="flex items-center text-green-600">
                       <Check className="mr-1 h-4 w-4" />
-                      <span>Paid</span>
+                      <span>Dibayar</span>
                     </span>
                   ) : (
                     <span className="flex items-center text-yellow-600">
                       <X className="mr-1 h-4 w-4" />
-                      <span>Unpaid</span>
+                      <span>Belum dibayar</span>
                     </span>
                   )}
                 </div>
@@ -152,7 +189,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                     className="w-full"
                     onClick={() => markAsPaid({ id: order.id })}
                   >
-                    Mark as Paid
+                    Tandai telah dibayar
                   </Button>
                 </div>
               )}
@@ -160,6 +197,88 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
           </Card>
         ))}
       </div>
+      <Dialog
+        open={!!selectedOrder}
+        onOpenChange={(open) => !open && setSelectedOrder(null)}
+      >
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-2xl">
+          {selectedOrder && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Order Details</DialogTitle>
+              </DialogHeader>
+
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium">Nomer Receipt</h3>
+                    <p>{selectedOrder.receiptNo}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Tanggal</h3>
+                    <p>{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium">Pelanggan</h3>
+                  <p>{selectedOrder.customer?.name || "Walk-in"}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium">Payment Method</h3>
+                    <PaymentMethodBadge method={selectedOrder.paymentType} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium">Status</h3>
+                    {selectedOrder.isPaid ? (
+                      <span className="flex items-center text-green-600">
+                        <Check className="mr-1 h-4 w-4" />
+                        <span>Dibayar</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center text-yellow-600">
+                        <X className="mr-1 h-4 w-4" />
+                        <span>Belum dibayar</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium">Total Harga</h3>
+                  <p className="text-lg font-semibold">
+                    Rp{selectedOrder.totalAmount.toLocaleString("id-ID")}
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-medium">Items</h3>
+                  {selectedOrder.items?.map((item) => (
+                    <div key={item.id} className="flex justify-between">
+                      <span>{item.product.name}</span>
+                      <span>Rp{item.price.toLocaleString("id-ID")}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {!selectedOrder.isPaid && (
+                  <Button
+                    className="mt-4 w-full"
+                    onClick={() => {
+                      markAsPaid({ id: selectedOrder.id });
+                      setSelectedOrder(null);
+                    }}
+                  >
+                    Mark as Paid
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
