@@ -1,23 +1,10 @@
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
 import { Check, X } from "lucide-react";
 import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
 import PaymentMethodBadge from "./PaymentMethodBadge";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 interface Order {
   id: string;
@@ -46,169 +33,132 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
     },
   });
 
-  const columns: ColumnDef<Order>[] = [
-    {
-      accessorKey: "receiptNo",
-      header: "Receipt No",
-      cell: ({ row }) => (
-        <div className="max-w-[100px] min-w-[100px] truncate">
-          {row.original.receiptNo}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Date",
-      cell: ({ row }) => (
-        <div className="min-w-[120px]">
-          <span className="hidden sm:block">
-            {new Date(row.original.createdAt).toLocaleDateString()}
-          </span>
-          <span className="text-muted-foreground block text-xs sm:hidden">
-            {new Date(row.original.createdAt).toLocaleDateString()}{" "}
-            {new Date(row.original.createdAt).toLocaleTimeString()}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "customer",
-      header: "Customer",
-      cell: ({ row }) => (
-        <div className="max-w-[180px] min-w-[120px] truncate">
-          {row.original.customer?.name || "Walk-in"}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "totalAmount",
-      header: "Total",
-      cell: ({ row }) => (
-        <div className="min-w-[100px]">
-          Rp{row.original.totalAmount.toLocaleString("id-ID")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "paymentType",
-      header: "Payment",
-      cell: ({ row }) => (
-        <PaymentMethodBadge method={row.original.paymentType} />
-      ),
-    },
-    {
-      accessorKey: "isPaid",
-      header: "Status",
-      cell: ({ row }) => (
-        <div className="min-w-[80px]">
-          {row.original.isPaid ? (
-            <span className="flex items-center text-green-600">
-              <Check className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Paid</span>
-            </span>
-          ) : (
-            <span className="flex items-center text-yellow-600">
-              <X className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Unpaid</span>
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => (
-        <div className="min-w-[120px]">
-          {!row.original.isPaid && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => markAsPaid({ id: row.original.id })}
-            >
-              <span className="sm:hidden">✓</span>
-              <span className="hidden sm:inline">Mark as Paid</span>
-            </Button>
-          )}
-        </div>
-      ),
-    },
-  ];
-
-  const table = useReactTable({
-    data: orders || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   if (isLoading) {
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-12 w-full" />
+          <Skeleton key={i} className="h-20 w-full" />
         ))}
       </div>
     );
   }
 
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="flex h-24 items-center justify-center rounded-lg border">
+        <p className="text-muted-foreground">No orders found.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="inline-block min-w-full align-middle">
-        <div className="overflow-hidden rounded-lg border">
-          <Table className="w-full min-w-[800px]">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      className="px-4 py-3 text-xs whitespace-nowrap sm:text-sm"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="hover:bg-muted/50"
+    <div className="space-y-4">
+      {/* Desktop Table (hidden on mobile) */}
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[800px]">
+          <thead>
+            <tr className="border-b text-left text-sm">
+              <th className="px-4 py-3">Receipt No</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Customer</th>
+              <th className="px-4 py-3">Total</th>
+              <th className="px-4 py-3">Payment</th>
+              <th className="px-4 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr key={order.id} className="hover:bg-muted/50 border-b">
+                <td className="max-w-[100px] truncate px-4 py-2">
+                  {order.receiptNo}
+                </td>
+                <td className="min-w-[120px] px-4 py-2">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
+                <td className="max-w-[180px] truncate px-4 py-2">
+                  {order.customer?.name || "Walk-in"}
+                </td>
+                <td className="min-w-[100px] px-4 py-2">
+                  Rp{order.totalAmount.toLocaleString("id-ID")}
+                </td>
+                <td className="px-4 py-2">
+                  <PaymentMethodBadge method={order.paymentType} />
+                </td>
+                <td className="min-w-[80px] px-4 py-2">
+                  {order.isPaid ? (
+                    <span className="flex items-center text-green-600">
+                      <Check className="mr-1 h-4 w-4" />
+                      <span>Paid</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-yellow-600">
+                      <X className="mr-1 h-4 w-4" />
+                      <span>Unpaid</span>
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards (shown on mobile) */}
+      <div className="space-y-2 md:hidden">
+        {orders.map((order) => (
+          <Card key={order.id} className="hover:bg-muted/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {order.receiptNo}
+              </CardTitle>
+              <div className="text-muted-foreground text-xs">
+                {new Date(order.createdAt).toLocaleDateString()}
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Customer</p>
+                  <p>{order.customer?.name || "Walk-in"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Total</p>
+                  <p>Rp{order.totalAmount.toLocaleString("id-ID")}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Payment</p>
+                  <PaymentMethodBadge method={order.paymentType} />
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  {order.isPaid ? (
+                    <span className="flex items-center text-green-600">
+                      <Check className="mr-1 h-4 w-4" />
+                      <span>Paid</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-yellow-600">
+                      <X className="mr-1 h-4 w-4" />
+                      <span>Unpaid</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+              {!order.isPaid && (
+                <div className="mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => markAsPaid({ id: order.id })}
                   >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="px-4 py-2 text-xs whitespace-nowrap sm:text-sm"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No orders found.
-                  </TableCell>
-                </TableRow>
+                    Mark as Paid
+                  </Button>
+                </div>
               )}
-            </TableBody>
-          </Table>
-        </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

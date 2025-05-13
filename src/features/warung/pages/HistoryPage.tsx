@@ -72,8 +72,8 @@ const HistoryPage = () => {
         />
       }
     >
-      <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">{textHeading}</h1>
+      <div className="flex flex-col gap-3 md:gap-6">
+        <h1 className="font-bold md:text-2xl">{textHeading}</h1>
         <OrderList orders={saleData} isLoading={isLoading} />
       </div>
     </WarungDashboardLayout>
