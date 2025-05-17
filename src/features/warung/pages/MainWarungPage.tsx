@@ -3,13 +3,7 @@ import React from "react";
 import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
 import { api } from "~/utils/api";
 import { MetricsCard } from "../components/MetricsCard";
-import {
-  ArrowUpRight,
-  CupSoda,
-  Mail,
-  ShoppingCart,
-  Utensils,
-} from "lucide-react";
+import { ArrowUpRight, ShoppingCart, Users, Utensils } from "lucide-react";
 import { BarChartCard } from "../components/BarChartCard";
 import { PieChartCard } from "../components/PieChartCard";
 import { useWarungDashboardData } from "~/hooks/useDashboardData";
@@ -36,8 +30,10 @@ const MainDashboardPage = () => {
     sortedChartData,
     pieChartData,
     totalActivities,
-    last7DaysCount,
-    activityCounts,
+    revenue,
+    orders,
+    customers,
+    lowStock,
   } = useWarungDashboardData(id as string);
 
   const currentDate = new Date();
@@ -73,27 +69,30 @@ const MainDashboardPage = () => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
           <MetricsCard
             title="Pendapatan"
-            value="Rp 1.250.000"
+            value={`Rp${revenue?.current.toLocaleString("id-ID") || "0"}`}
             iconBg="bg-primary"
             icon={<ArrowUpRight className="h-4 w-4" />}
+            change={revenue?.change}
           />
           <MetricsCard
             title="Pesanan"
-            value={totalActivities.toString()}
+            value={orders?.current.toString() || "0"}
             iconBg="bg-yellow-500"
             icon={<ShoppingCart className="h-4 w-4" />}
+            change={orders?.change}
           />
           <MetricsCard
-            title="Aktivitas 7 Hari"
-            value={last7DaysCount.toString()}
+            title="Stok Rendah"
+            value={lowStock?.toString() || "0"}
             iconBg="bg-red-500"
             icon={<Utensils className="h-4 w-4" />}
           />
           <MetricsCard
-            title="Produk Terjual"
-            value="24"
+            title="Pelanggan Baru"
+            value={customers?.current.toString() || "0"}
             iconBg="bg-blue-500"
-            icon={<CupSoda className="h-4 w-4" />}
+            icon={<Users className="h-4 w-4" />}
+            change={customers?.change}
           />
         </div>
 

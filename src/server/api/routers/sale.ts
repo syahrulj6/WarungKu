@@ -285,6 +285,140 @@ export const saleRouter = createTRPCRouter({
 
       return sale;
     }),
+
+  // Di dalam saleRouter
+  getMonthlyMetrics: privateProcedure
+    .input(z.object({ warungId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId } = input;
+
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const currentMonthEnd = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+      );
+
+      const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+      // Query untuk bulan ini
+      const [currentRevenue, currentOrders, currentCustomers] =
+        await Promise.all([
+          // Total pendapatan bulan ini
+          db.sale.aggregate({
+            where: {
+              warungId,
+              isPaid: true,
+              createdAt: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+              },
+            },
+            _sum: {
+              totalAmount: true,
+            },
+          }),
+
+          // Total pesanan bulan ini
+          db.sale.count({
+            where: {
+              warungId,
+              createdAt: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+              },
+            },
+          }),
+
+          // Pelanggan baru bulan ini
+          db.customer.count({
+            where: {
+              warungId,
+              createdAt: {
+                gte: currentMonthStart,
+                lte: currentMonthEnd,
+              },
+            },
+          }),
+        ]);
+
+      // Query untuk bulan sebelumnya
+      const [prevRevenue, prevOrders, prevCustomers] = await Promise.all([
+        db.sale.aggregate({
+          where: {
+            warungId,
+            isPaid: true,
+            createdAt: {
+              gte: prevMonthStart,
+              lte: prevMonthEnd,
+            },
+          },
+          _sum: {
+            totalAmount: true,
+          },
+        }),
+        db.sale.count({
+          where: {
+            warungId,
+            createdAt: {
+              gte: prevMonthStart,
+              lte: prevMonthEnd,
+            },
+          },
+        }),
+        db.customer.count({
+          where: {
+            warungId,
+            createdAt: {
+              gte: prevMonthStart,
+              lte: prevMonthEnd,
+            },
+          },
+        }),
+      ]);
+
+      // Query untuk stok rendah
+      const lowStockProducts = await db.product.count({
+        where: {
+          warungId,
+          stock: {
+            lt: 5, // Threshold stok rendah
+          },
+          isActive: true,
+        },
+      });
+
+      // Hitung persentase perubahan
+      const calculatePercentageChange = (current: number, previous: number) => {
+        if (previous === 0) return 100; // Jika bulan sebelumnya 0, anggap peningkatan 100%
+        return ((current - previous) / previous) * 100;
+      };
+
+      return {
+        revenue: {
+          current: currentRevenue._sum.totalAmount || 0,
+          previous: prevRevenue._sum.totalAmount || 0,
+          change: calculatePercentageChange(
+            currentRevenue._sum.totalAmount || 0,
+            prevRevenue._sum.totalAmount || 0,
+          ),
+        },
+        orders: {
+          current: currentOrders,
+          previous: prevOrders,
+          change: calculatePercentageChange(currentOrders, prevOrders),
+        },
+        customers: {
+          current: currentCustomers,
+          previous: prevCustomers,
+          change: calculatePercentageChange(currentCustomers, prevCustomers),
+        },
+        lowStock: lowStockProducts,
+      };
+    }),
 });
 
 async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {

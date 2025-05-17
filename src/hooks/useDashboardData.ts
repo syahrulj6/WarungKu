@@ -5,8 +5,14 @@ import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 type ActivityCounts = Record<string, number>;
 
 export const useWarungDashboardData = (warungId: string) => {
-  // Fetch warung activities instead of user activities
+  // Fetch warung activities
   const { data: warungActivities } = api.warung.getWarungActivities.useQuery(
+    { warungId },
+    { enabled: !!warungId },
+  );
+
+  // Fetch monthly metrics
+  const { data: monthlyMetrics } = api.sale.getMonthlyMetrics.useQuery(
     { warungId },
     { enabled: !!warungId },
   );
@@ -60,35 +66,17 @@ export const useWarungDashboardData = (warungId: string) => {
     }),
   );
 
-  // Get last 7 activities of specific type
-  const getLast7Activities = (activityType: string) => {
-    return warungActivities
-      ?.filter((activity) => activity.type === activityType)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      .slice(0, 7);
-  };
-
-  // Get recent activities with related data
-  const getRecentActivities = (limit = 10) => {
-    return warungActivities
-      ?.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      )
-      .slice(0, limit);
-  };
-
   return {
     activityCounts,
     sortedChartData,
     pieChartData,
     warungActivities,
-    getLast7Activities,
-    getRecentActivities,
+    monthlyMetrics,
     totalActivities: warungActivities?.length || 0,
     last7DaysCount: last7DaysActivities?.length || 0,
+    revenue: monthlyMetrics?.revenue,
+    orders: monthlyMetrics?.orders,
+    customers: monthlyMetrics?.customers,
+    lowStock: monthlyMetrics?.lowStock,
   };
 };
