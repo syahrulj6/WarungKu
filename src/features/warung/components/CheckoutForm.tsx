@@ -40,13 +40,11 @@ export const CheckoutForm = () => {
     address: "",
   });
 
-  // Fetch customers
   const { data: customers, refetch: refetchCustomers } =
     api.customer.getAll.useQuery({
       warungId: id as string,
     });
 
-  // Mutation for creating a new customer
   const { mutate: createCustomer, isPending: isCreatingCustomer } =
     api.customer.create.useMutation({
       onSuccess: (customer) => {
@@ -61,7 +59,6 @@ export const CheckoutForm = () => {
       },
     });
 
-  // Mutation for creating a sale
   const { mutate: createSale } = api.sale.create.useMutation({
     onSuccess: () => {
       toast.success("Berhasil membuat order"), clearOrder();
@@ -73,13 +70,11 @@ export const CheckoutForm = () => {
     },
   });
 
-  // Calculate total
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
@@ -98,7 +93,6 @@ export const CheckoutForm = () => {
     });
   };
 
-  // Handle customer creation
   const handleCreateCustomer = () => {
     if (!newCustomer.name.trim()) {
       toast.error("Nama Customer harus ada!");

@@ -3,6 +3,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/utils/api";
 import { cn } from "~/lib/utils";
 import { useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
 
 export const CategoryList = ({
   onCategoryChange,
@@ -25,7 +26,13 @@ export const CategoryList = ({
   };
 
   if (isLoading) {
-    return <div className="flex gap-2">Loading categories...</div>;
+    return (
+      <div className="flex gap-4">
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-9 w-28" />
+        ))}
+      </div>
+    );
   }
 
   if (!categories || categories.length === 0) {
