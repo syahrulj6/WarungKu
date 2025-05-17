@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import type { Product } from "@prisma/client";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 interface OrderItem {
   id: string;
@@ -136,67 +137,54 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
         </table>
       </div>
 
-      {/* Mobile Cards (shown on mobile) */}
-      <div className="space-y-2 md:hidden">
-        {orders.map((order) => (
-          <Card
-            key={order.id}
-            className="hover:bg-muted/50"
-            onClick={() => setSelectedOrder(order)}
-          >
-            <CardHeader className="flex flex-row justify-between space-y-0 p-4 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {order.receiptNo}
-              </CardTitle>
-              <div className="text-muted-foreground text-xs">
-                {new Date(order.createdAt).toLocaleDateString()}
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Pelanggan</p>
-                  <p>{order.customer?.name || "Walk-in"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Total</p>
-                  <p>Rp{order.totalAmount.toLocaleString("id-ID")}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Payment</p>
-                  <PaymentMethodBadge method={order.paymentType} />
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Status</p>
+      {/* Mobile Table (shown on mobile) */}
+      <div className="overflow-x-auto md:hidden">
+        <table className="w-full min-w-[600px]">
+          <thead>
+            <tr className="border-b text-left text-xs">
+              <th className="px-3 py-2">Receipt</th>
+              <th className="px-3 py-2">Tanggal</th>
+              <th className="px-3 py-2">Pelanggan</th>
+              <th className="px-3 py-2">Total</th>
+              <th className="px-3 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {orders.map((order) => (
+              <tr
+                key={order.id}
+                className="hover:bg-muted/50 border-b text-xs"
+                onClick={() => setSelectedOrder(order)}
+              >
+                <td className="max-w-[80px] truncate px-3 py-2">
+                  {order.receiptNo}
+                </td>
+                <td className="min-w-[80px] px-3 py-2">
+                  {new Date(order.createdAt).toLocaleDateString()}
+                </td>
+                <td className="max-w-[120px] truncate px-3 py-2">
+                  {order.customer?.name || "Walk-in"}
+                </td>
+                <td className="min-w-[80px] px-3 py-2">
+                  Rp{order.totalAmount.toLocaleString("id-ID")}
+                </td>
+                <td className="min-w-[80px] px-3 py-2">
                   {order.isPaid ? (
                     <span className="flex items-center text-green-600">
                       <Check className="mr-1 h-4 w-4" />
-                      <span>Dibayar</span>
                     </span>
                   ) : (
                     <span className="flex items-center text-yellow-600">
                       <X className="mr-1 h-4 w-4" />
-                      <span>Belum dibayar</span>
                     </span>
                   )}
-                </div>
-              </div>
-              {!order.isPaid && (
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => markAsPaid({ id: order.id })}
-                  >
-                    Tandai telah dibayar
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
       <Dialog
         open={!!selectedOrder}
         onOpenChange={(open) => !open && setSelectedOrder(null)}
@@ -205,7 +193,10 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
           {selectedOrder && (
             <>
               <DialogHeader>
-                <DialogTitle>Order Details</DialogTitle>
+                <DialogTitle>Detail Order</DialogTitle>
+                <DialogDescription>
+                  Informasi detail tentang pesanan
+                </DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4 py-4">

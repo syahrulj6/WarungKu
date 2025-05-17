@@ -116,7 +116,7 @@ export const WarungDashboardLayout = ({
   const toggleRightPanel = () => setIsRightPanelOpen(!isRightPanelOpen);
 
   return (
-    <div className="bg-background flex min-h-screen">
+    <div className="bg-background flex min-h-screen flex-col md:flex-row">
       {/* Fixed Left Sidebar (Desktop) */}
       {!isMobile && (
         <div className="fixed top-0 left-0 z-30 h-screen w-40 border-r">
