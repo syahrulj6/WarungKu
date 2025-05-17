@@ -71,6 +71,9 @@ const HistoryPage = () => {
           onDateChange={handleDateChange}
         />
       }
+      metaTitle="Riwayat Pesanan"
+      metaDescription="Riwayat pesanan warung Anda"
+      pathname={`/dashboard/warung/${id}/history`}
     >
       <div className="flex flex-col gap-3 md:gap-6">
         <h1 className="font-bold md:text-2xl">{textHeading}</h1>

@@ -5,8 +5,11 @@ import { CategoryList } from "../components/CategoryList";
 import { api } from "~/utils/api";
 import { MenuCard } from "../components/MenuCard";
 import { useDebounce } from "use-debounce";
+import { useRouter } from "next/router";
 
 const MenuPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
@@ -38,6 +41,9 @@ const MenuPage = () => {
           onSearchChange={setSearchTerm}
         />
       }
+      metaTitle="Daftar menu"
+      metaDescription="Kelola Menu warung Anda"
+      pathname={`/dashboard/warung/${id}/menu`}
     >
       <div className="flex flex-col gap-6">
         <CategoryList onCategoryChange={handleCategoryChange} />

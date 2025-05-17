@@ -51,6 +51,9 @@ const MainDashboardPage = () => {
 
   return (
     <WarungDashboardLayout
+      metaTitle="Warung Dashboard"
+      metaDescription="Kelola warung Anda dengan mudah melalui dashboard Warung"
+      pathname={`/dashboard/warung/${id}/`}
       withRightPanel={true}
       headerContent={
         <div className="flex items-center gap-2">

@@ -15,7 +15,6 @@ const OrderPage = () => {
     "on-process",
   );
 
-  // Fetch orders based on the active tab
   const { data: orders, isLoading } = api.sale.getByStatus.useQuery(
     {
       warungId: id as string,
@@ -32,6 +31,9 @@ const OrderPage = () => {
       headerContent={
         <OrderHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       }
+      metaTitle="Pesanan"
+      metaDescription="Kelola pesanan warung Anda"
+      pathname={`/dashboard/warung/${id}/order`}
     >
       <div className="flex flex-col gap-6">
         {activeTab === "on-process" ? (

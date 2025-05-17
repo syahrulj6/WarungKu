@@ -21,6 +21,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { Menu, PanelRightClose, ShoppingCart } from "lucide-react";
 import { OrderPanel } from "./OrderPanel";
+import { HeadMetaData } from "./HeadMetaData";
 
 const menuItems = [
   {
@@ -71,12 +72,18 @@ type WarungDashboardLayoutProps = {
   children: ReactNode;
   withRightPanel?: boolean;
   headerContent?: ReactNode;
+  metaTitle?: string;
+  metaDescription?: string;
+  pathname?: string;
 };
 
 export const WarungDashboardLayout = ({
   children,
   withRightPanel = false,
   headerContent,
+  metaDescription,
+  metaTitle,
+  pathname,
 }: WarungDashboardLayoutProps) => {
   const router = useRouter();
   const { id } = router.query;
@@ -117,6 +124,11 @@ export const WarungDashboardLayout = ({
 
   return (
     <div className="bg-background flex min-h-screen flex-col md:flex-row">
+      <HeadMetaData
+        title={metaTitle}
+        metaDescription={metaDescription}
+        pathname={pathname || router.pathname}
+      />
       {/* Fixed Left Sidebar (Desktop) */}
       {!isMobile && (
         <div className="fixed top-0 left-0 z-30 h-screen w-40 border-r">
