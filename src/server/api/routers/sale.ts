@@ -286,7 +286,6 @@ export const saleRouter = createTRPCRouter({
       return sale;
     }),
 
-  // Di dalam saleRouter
   getMonthlyMetrics: privateProcedure
     .input(z.object({ warungId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -304,10 +303,8 @@ export const saleRouter = createTRPCRouter({
       const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-      // Query untuk bulan ini
       const [currentRevenue, currentOrders, currentCustomers] =
         await Promise.all([
-          // Total pendapatan bulan ini
           db.sale.aggregate({
             where: {
               warungId,
@@ -322,7 +319,6 @@ export const saleRouter = createTRPCRouter({
             },
           }),
 
-          // Total pesanan bulan ini
           db.sale.count({
             where: {
               warungId,
@@ -333,7 +329,6 @@ export const saleRouter = createTRPCRouter({
             },
           }),
 
-          // Pelanggan baru bulan ini
           db.customer.count({
             where: {
               warungId,
@@ -345,7 +340,6 @@ export const saleRouter = createTRPCRouter({
           }),
         ]);
 
-      // Query untuk bulan sebelumnya
       const [prevRevenue, prevOrders, prevCustomers] = await Promise.all([
         db.sale.aggregate({
           where: {
@@ -380,20 +374,18 @@ export const saleRouter = createTRPCRouter({
         }),
       ]);
 
-      // Query untuk stok rendah
       const lowStockProducts = await db.product.count({
         where: {
           warungId,
           stock: {
-            lt: 5, // Threshold stok rendah
+            lt: 5,
           },
           isActive: true,
         },
       });
 
-      // Hitung persentase perubahan
       const calculatePercentageChange = (current: number, previous: number) => {
-        if (previous === 0) return 100; // Jika bulan sebelumnya 0, anggap peningkatan 100%
+        if (previous === 0) return 100;
         return ((current - previous) / previous) * 100;
       };
 
