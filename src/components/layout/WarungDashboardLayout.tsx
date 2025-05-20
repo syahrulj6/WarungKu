@@ -51,7 +51,7 @@ const menuItems = [
   {
     title: "Report",
     icon: <FaBook />,
-    url: "/dashboard/warung/[id]/reports",
+    url: "/dashboard/warung/[id]/report",
     path: (id: string) => `/dashboard/warung/${id}/report`,
   },
   {
