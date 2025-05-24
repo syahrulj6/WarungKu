@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import { ReportLayout } from "~/components/layout/ReportLayout";
 import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
 
 const ReportPage = () => {
@@ -12,7 +13,9 @@ const ReportPage = () => {
       pathname={`/dashboard/warung/${id}/report`}
     >
       {/* TODO: Report Sidebar */}
-      <div className="">Report Page</div>
+      <ReportLayout>
+        <div className="">Report Page</div>
+      </ReportLayout>
     </WarungDashboardLayout>
   );
 };
