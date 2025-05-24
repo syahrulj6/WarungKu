@@ -96,6 +96,8 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
     };
   });
 
+  if (!id) return null;
+
   return (
     <div className="flex flex-1">
       {/* Report Sidebar (Desktop) */}

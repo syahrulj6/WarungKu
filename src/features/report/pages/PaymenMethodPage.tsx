@@ -11,7 +11,7 @@ const PaymenMethodPage = () => {
     <WarungDashboardLayout
       metaTitle="Laporan"
       metaDescription="Lihat laporan mengenai warung Anda"
-      pathname={`/dashboard/warung/${id}/report`}
+      pathname={`/dashboard/warung/${id}/report/payment-method`}
     >
       {/* TODO: Report Sidebar */}
       <ReportLayout>

@@ -11,7 +11,7 @@ const CategorySalespage = () => {
     <WarungDashboardLayout
       metaTitle="Laporan"
       metaDescription="Lihat laporan mengenai warung Anda"
-      pathname={`/dashboard/warung/${id}/report`}
+      pathname={`/dashboard/warung/${id}/report/category-sales`}
     >
       {/* TODO: Report Sidebar */}
       <ReportLayout>
