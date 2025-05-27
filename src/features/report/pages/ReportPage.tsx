@@ -7,6 +7,7 @@ import { useWarungDashboardData } from "~/hooks/useDashboardData";
 import { MetricsCard } from "~/features/warung/components/MetricsCard";
 import { BarChartCard } from "~/features/warung/components/BarChartCard";
 import { chartActivityConfig } from "~/utils/type";
+import { Card } from "~/components/ui/card";
 
 const ReportPage = () => {
   const router = useRouter();
@@ -24,14 +25,6 @@ const ReportPage = () => {
     );
   }
 
-  if (!id) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Invalid warung ID
-      </div>
-    );
-  }
-
   return (
     <WarungDashboardLayout
       headerContent={<ReportHeader />}
@@ -39,7 +32,6 @@ const ReportPage = () => {
       metaDescription="Lihat laporan mengenai warung Anda"
       pathname={`/dashboard/warung/${id}/report/`}
     >
-      {/* TODO: Report Sidebar */}
       <ReportLayout>
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -65,6 +57,124 @@ const ReportPage = () => {
             />
           </div>
           <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+
+          <>
+            {/* Desktop Table (hidden on mobile) */}
+            <Card className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[800px]">
+                <thead>
+                  <tr className="border-b text-left text-sm">
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3">Sales</th>
+                    <th className="px-4 py-3">Refunds</th>
+                    <th className="px-4 py-3">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Gross Sales
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">0</td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Net Sales
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">0</td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Total Collected
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[100px] truncate px-4 py-2">0</td>
+                    <td className="max-w-[100px] truncate px-4 py-2">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Card>
+
+            {/* Mobile Table (shown on mobile) */}
+            <div className="overflow-x-auto md:hidden">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b text-left text-xs">
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3">Sales</th>
+                    <th className="px-4 py-3">Refunds</th>
+                    <th className="px-4 py-3">Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Gross Sales
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      0
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Net Sales
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      0
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Total Collected
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      0
+                    </td>
+                    <td className="max-w-[70px] truncate px-4 py-2 text-xs">
+                      {" "}
+                      Rp{revenue?.current.toString() || "0"}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </>
         </div>
       </ReportLayout>
     </WarungDashboardLayout>

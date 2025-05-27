@@ -37,7 +37,6 @@ export const BarChartCard = ({
   config,
   isLoading = false,
 }: BarChartCardProps) => {
-  const isSm = useMediaQuery("(min-width: 640px)");
   const isMd = useMediaQuery("(min-width: 768px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
 
