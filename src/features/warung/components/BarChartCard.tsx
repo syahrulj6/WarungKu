@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { ChartContainer, ChartTooltipContent } from "~/components/ui/chart";
 import { Skeleton } from "~/components/ui/skeleton";
+import { useMediaQuery } from "~/hooks/useMediaQuery";
 
 interface BarChartCardProps {
   data: { date: string; count: number }[];
@@ -36,6 +37,10 @@ export const BarChartCard = ({
   config,
   isLoading = false,
 }: BarChartCardProps) => {
+  const isSm = useMediaQuery("(min-width: 640px)");
+  const isMd = useMediaQuery("(min-width: 768px)");
+  const isLg = useMediaQuery("(min-width: 1024px)");
+
   if (isLoading) {
     return (
       <Card className="flex w-full flex-col">
@@ -66,31 +71,28 @@ export const BarChartCard = ({
           7 Hari Terakhir
         </CardDescription>
       </CardHeader>
-      <CardContent className="h-32 w-full overflow-hidden md:h-40 lg:h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          <ChartContainer config={config}>
-            <BarChart
-              data={data}
-              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-            >
-              <CartesianGrid vertical={false} stroke="#eee" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) =>
-                  format(new Date(value), "d MMM", { locale: id })
-                }
-                tick={{ fill: "#666", fontSize: 10 }}
-              />
-              <Tooltip
-                content={<ChartTooltipContent hideLabel />}
-                cursor={false}
-              />
-              <Bar dataKey="count" fill={"#4D55CC"} radius={4} barSize={20} />
-            </BarChart>
-          </ChartContainer>
-        </ResponsiveContainer>
+      <CardContent className="w-full overflow-hidden">
+        <ChartContainer config={config} className="h-32 w-full md:h-40 lg:h-52">
+          <BarChart
+            data={data}
+            width={400}
+            height={isMd ? (isLg ? 192 : 160) : 128}
+            margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+            barCategoryGap={isLg ? 40 : isMd ? 24 : 12}
+          >
+            <CartesianGrid vertical={false} stroke="#eee" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) =>
+                format(new Date(value), "d MMM", { locale: id })
+              }
+            />
+            <Tooltip content={<ChartTooltipContent hideLabel />} />
+            <Bar dataKey="count" fill={"#4D55CC"} radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-1 text-xs md:gap-2 md:text-sm">
         <div className="flex gap-1 leading-none font-medium md:gap-2">

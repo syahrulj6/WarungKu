@@ -64,9 +64,7 @@ const ReportPage = () => {
               icon={<Utensils className="h-4 w-4" />}
             />
           </div>
-          <div className="flex flex-1">
-            <BarChartCard data={sortedChartData} config={chartActivityConfig} />
-          </div>
+          <BarChartCard data={sortedChartData} config={chartActivityConfig} />
         </div>
       </ReportLayout>
     </WarungDashboardLayout>
