@@ -139,10 +139,8 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
       )}
 
       {/* Main Content */}
-      <main
-        className={`bg-accent/20 flex-1 overflow-auto ${!isMobile ? "ml-52" : ""}`}
-      >
-        <div className="flex flex-col p-4">{children}</div>
+      <main className={`flex-1 overflow-auto ${!isMobile ? "ml-52" : ""}`}>
+        <div className="flex flex-col p-2">{children}</div>
       </main>
     </div>
   );
