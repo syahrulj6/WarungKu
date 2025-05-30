@@ -57,8 +57,8 @@ const menuItems = [
   {
     title: "Alert",
     icon: <FaBell />,
-    url: "/dashboard/warung/[id]/alerts",
-    path: (id: string) => `/dashboard/warung/${id}/reports`,
+    url: "/dashboard/warung/[id]/alert",
+    path: (id: string) => `/dashboard/warung/${id}/alert`,
   },
   {
     title: "Settings",
