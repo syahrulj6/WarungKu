@@ -75,7 +75,7 @@ export const saleRouter = createTRPCRouter({
     .input(
       z.object({
         warungId: z.string(),
-        isPaid: z.boolean(),
+        isPaid: z.boolean().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
