@@ -1,4 +1,3 @@
-import type { Sale } from "@prisma/client";
 import { Check, ChevronDown, X } from "lucide-react";
 import { Card } from "~/components/ui/card";
 import { formatRupiah } from "~/lib/format";
@@ -31,12 +30,12 @@ export const AlertCard = ({
   const [openDetail, setOpenDetail] = useState(false);
 
   return (
-    <Card className="flex w-full flex-col p-4">
+    <Card className="flex w-full flex-col p-4 pb-0">
       {/* Main content row */}
-      <div className="flex w-full flex-row items-center justify-between">
+      <div className="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
         <div className="flex items-center gap-4">
           <div
-            className={`${isPaid ? "bg-green-500" : "bg-red-500"} flex h-20 w-20 items-center justify-center rounded-full`}
+            className={`${isPaid ? "bg-green-500" : "bg-red-500"} flex h-10 w-10 items-center justify-center rounded-full`}
           >
             {isPaid ? (
               <Check className="text-white" />
@@ -45,13 +44,15 @@ export const AlertCard = ({
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <h2 className="font-semibold">Order {receiptNo}</h2>
-            <p className="text-muted-foreground text-sm">
+            <h2 className="text-sm font-semibold md:text-base">
+              Order {receiptNo}
+            </h2>
+            <p className="text-muted-foreground text-xs md:text-sm">
               {isPaid ? "has been paid successfully" : "unpaid"}
             </p>
             <button
               onClick={() => setOpenDetail(!openDetail)}
-              className="text-muted-foreground flex items-center gap-2 hover:text-current"
+              className="text-muted-foreground flex w-fit items-center gap-2 text-sm hover:text-current md:text-base"
             >
               See Detail{" "}
               <ChevronDown
@@ -60,13 +61,15 @@ export const AlertCard = ({
             </button>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <p className="text-muted-foreground text-sm">
+        <div className="flex gap-2 md:flex-col">
+          <p className="text-muted-foreground text-xs md:text-sm">
             {createdAt.toLocaleDateString()} at {createdAt.toLocaleTimeString()}
           </p>
           <div className="flex items-center gap-2">
-            <p className="font-semibold">{formatRupiah(totalAmount)}</p>
-            <div className="bg-muted-foreground/10 rounded p-2 text-sm">
+            <p className="text-sm font-semibold md:text-base">
+              {formatRupiah(totalAmount)}
+            </p>
+            <div className="bg-muted-foreground/10 rounded p-2 text-xs md:text-sm">
               {paymentMethod}
             </div>
           </div>
@@ -90,7 +93,7 @@ export const AlertCard = ({
               </div>
             </div>
           ))}
-          <div className="mt-2 flex justify-between font-bold">
+          <div className="mt-2 mb-4 flex justify-between font-bold">
             <p>Total Amount:</p>
             <p>{formatRupiah(totalAmount)}</p>
           </div>
