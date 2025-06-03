@@ -9,7 +9,7 @@ import { BarChartCard } from "~/features/warung/components/BarChartCard";
 import { chartActivityConfig } from "~/utils/type";
 import { Card } from "~/components/ui/card";
 import { useState } from "react";
-import { generatePDFReport, exportElementToPDF } from "~/utils/pdfExport";
+import { generatePDFReport } from "~/utils/pdfExport";
 import { toast } from "sonner";
 
 type TimePeriod = "7-days" | "30-days" | "1-year";
@@ -45,22 +45,6 @@ const ReportPage = () => {
         toast.success("Export Berhasil");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        toast.error("Export Gagal");
-      } finally {
-        setIsExporting(false);
-      }
-    } else if (value === "pdf-visual") {
-      // Alternative: Export the visual report as PDF
-      setIsExporting(true);
-      try {
-        await exportElementToPDF(
-          "report-content",
-          `laporan-visual-${new Date().toISOString().split("T")[0]}.pdf`,
-        );
-
-        toast.success("Laporan visual PDF berhasil diunduh");
-      } catch (error) {
-        console.error("Error exporting visual PDF:", error);
         toast.error("Export Gagal");
       } finally {
         setIsExporting(false);

@@ -42,8 +42,7 @@ export const ReportHeader = ({
           <SelectValue placeholder={isExporting ? "Exporting..." : "Export"} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pdf">PDF (Data)</SelectItem>
-          <SelectItem value="pdf-visual">PDF (Visual)</SelectItem>
+          <SelectItem value="pdf">PDF</SelectItem>
           <SelectItem value="excel">Excel</SelectItem>
         </SelectContent>
       </Select>
