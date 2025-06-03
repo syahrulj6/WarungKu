@@ -1,4 +1,4 @@
-import { CalendarIcon, NotebookIcon } from "lucide-react";
+import { CalendarIcon, NotebookIcon, Loader } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,11 +10,13 @@ import {
 interface ReportHeaderProps {
   onTimePeriodChange: (value: string) => void;
   onExportFormatChange: (value: string) => void;
+  isExporting?: boolean;
 }
 
 export const ReportHeader = ({
   onTimePeriodChange,
   onExportFormatChange,
+  isExporting = false,
 }: ReportHeaderProps) => {
   return (
     <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-4">
@@ -29,13 +31,19 @@ export const ReportHeader = ({
           <SelectItem value="1-year">Last 1 Year</SelectItem>
         </SelectContent>
       </Select>
-      <Select onValueChange={onExportFormatChange}>
+
+      <Select onValueChange={onExportFormatChange} disabled={isExporting}>
         <SelectTrigger className="w-fit">
-          <NotebookIcon className="mr-2 h-4 w-4" />
-          <SelectValue placeholder="Export" />
+          {isExporting ? (
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <NotebookIcon className="mr-2 h-4 w-4" />
+          )}
+          <SelectValue placeholder={isExporting ? "Exporting..." : "Export"} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="pdf">PDF</SelectItem>
+          <SelectItem value="pdf">PDF (Data)</SelectItem>
+          <SelectItem value="pdf-visual">PDF (Visual)</SelectItem>
           <SelectItem value="excel">Excel</SelectItem>
         </SelectContent>
       </Select>

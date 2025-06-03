@@ -9,6 +9,8 @@ import { BarChartCard } from "~/features/warung/components/BarChartCard";
 import { chartActivityConfig } from "~/utils/type";
 import { Card } from "~/components/ui/card";
 import { useState } from "react";
+import { generatePDFReport, exportElementToPDF } from "~/utils/pdfExport";
+import { toast } from "sonner";
 
 type TimePeriod = "7-days" | "30-days" | "1-year";
 
@@ -16,20 +18,57 @@ const ReportPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("7-days");
+  const [isExporting, setIsExporting] = useState(false);
 
-  // Fix: Pass the timePeriod state to the hook
-  const { sortedChartData, revenue, orders, lowStock } = useWarungDashboardData(
-    id as string,
-    timePeriod, // This was missing!
-  );
+  const { sortedChartData, revenue, orders, customers, lowStock } =
+    useWarungDashboardData(id as string, timePeriod);
 
   const handleTimePeriodChange = (value: string) => {
     setTimePeriod(value as TimePeriod);
   };
 
-  const handleExportFormatChange = (value: string) => {
-    // Handle export logic here
-    console.log("Export format selected:", value);
+  const handleExportFormatChange = async (value: string) => {
+    if (value === "pdf") {
+      setIsExporting(true);
+      try {
+        const reportData = {
+          revenue: revenue || { current: 0, previous: 0, change: 0 },
+          orders: orders || { current: 0, previous: 0, change: 0 },
+          customers: customers || { current: 0, previous: 0, change: 0 },
+          lowStock: lowStock || 0,
+          chartData: sortedChartData || [],
+          timePeriod: timePeriod,
+        };
+
+        await generatePDFReport(reportData, "Warung Dashboard");
+
+        toast.success("Export Berhasil");
+      } catch (error) {
+        console.error("Error exporting PDF:", error);
+        toast.error("Export Gagal");
+      } finally {
+        setIsExporting(false);
+      }
+    } else if (value === "pdf-visual") {
+      // Alternative: Export the visual report as PDF
+      setIsExporting(true);
+      try {
+        await exportElementToPDF(
+          "report-content",
+          `laporan-visual-${new Date().toISOString().split("T")[0]}.pdf`,
+        );
+
+        toast.success("Laporan visual PDF berhasil diunduh");
+      } catch (error) {
+        console.error("Error exporting visual PDF:", error);
+        toast.error("Export Gagal");
+      } finally {
+        setIsExporting(false);
+      }
+    } else if (value === "excel") {
+      // Handle Excel export here
+      console.log("Export excel");
+    }
   };
 
   if (!router.isReady) {
@@ -46,6 +85,7 @@ const ReportPage = () => {
         <ReportHeader
           onExportFormatChange={handleExportFormatChange}
           onTimePeriodChange={handleTimePeriodChange}
+          isExporting={isExporting}
         />
       }
       metaTitle="Laporan"
@@ -53,7 +93,7 @@ const ReportPage = () => {
       pathname={`/dashboard/warung/${id}/report/`}
     >
       <ReportLayout>
-        <div className="flex flex-col gap-4">
+        <div id="report-content" className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <MetricsCard
               title="Pendapatan"
@@ -76,11 +116,15 @@ const ReportPage = () => {
               icon={<Utensils className="h-4 w-4" />}
             />
           </div>
+
           <BarChartCard data={sortedChartData} config={chartActivityConfig} />
 
-          <>
-            {/* Desktop Table (hidden on mobile) */}
-            <Card className="hidden overflow-x-auto md:block">
+          {/* Sales Summary Table */}
+          <Card className="p-4">
+            <h3 className="mb-4 text-lg font-semibold">Ringkasan Penjualan</h3>
+
+            {/* Desktop Table */}
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[800px]">
                 <thead>
                   <tr className="border-b text-left text-sm">
@@ -129,9 +173,9 @@ const ReportPage = () => {
                   </tr>
                 </tbody>
               </table>
-            </Card>
+            </div>
 
-            {/* Mobile Table (shown on mobile) */}
+            {/* Mobile Table */}
             <div className="overflow-x-auto md:hidden">
               <table className="w-full min-w-[600px]">
                 <thead>
@@ -188,7 +232,7 @@ const ReportPage = () => {
                 </tbody>
               </table>
             </div>
-          </>
+          </Card>
         </div>
       </ReportLayout>
     </WarungDashboardLayout>
