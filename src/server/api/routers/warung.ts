@@ -138,19 +138,28 @@ export const warungRouter = createTRPCRouter({
     .input(
       z.object({
         warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      const { db, user } = ctx;
-      const { warungId } = input;
+    .query(async ({ input, ctx }) => {
+      const { warungId, startDate, endDate } = input;
+      const { db } = ctx;
 
-      const activities = await db.warungActivity.findMany({
+      return db.warungActivity.findMany({
         where: {
-          warungId: warungId,
-          userId: user?.id,
+          warungId,
+          ...(startDate &&
+            endDate && {
+              createdAt: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }),
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
-
-      return activities;
     }),
 });

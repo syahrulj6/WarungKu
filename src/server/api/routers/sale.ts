@@ -71,6 +71,73 @@ export const saleRouter = createTRPCRouter({
       return sale;
     }),
 
+  getMetrics: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { warungId, startDate, endDate } = input;
+      const { db } = ctx;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const [revenue, orders, customers, lowStockProducts] = await Promise.all([
+        db.sale.aggregate({
+          where: {
+            ...whereClause,
+            isPaid: true,
+          },
+          _sum: {
+            totalAmount: true,
+          },
+        }),
+        db.sale.count({
+          where: whereClause,
+        }),
+        db.customer.count({
+          where: {
+            warungId,
+            ...(startDate &&
+              endDate && {
+                createdAt: {
+                  gte: startDate,
+                  lte: endDate,
+                },
+              }),
+          },
+        }),
+        db.product.count({
+          where: {
+            warungId,
+            stock: {
+              lt: 5,
+            },
+            isActive: true,
+          },
+        }),
+      ]);
+
+      return {
+        revenue: revenue._sum.totalAmount || 0,
+        orders,
+        customers,
+        lowStock: lowStockProducts,
+      };
+    }),
+
   getAllCompletedSale: privateProcedure
     .input(
       z.object({

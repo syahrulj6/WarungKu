@@ -1,82 +1,233 @@
-import { subDays, format } from "date-fns";
+import {
+  subDays,
+  subYears,
+  format,
+  eachDayOfInterval,
+  eachMonthOfInterval,
+} from "date-fns";
+import { useMemo } from "react";
 import { api } from "~/utils/api";
 import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 
 type ActivityCounts = Record<string, number>;
+type TimePeriod = "7-days" | "30-days" | "1-year";
 
-export const useWarungDashboardData = (warungId: string) => {
-  // Fetch warung activities
+export const useWarungDashboardData = (
+  warungId: string,
+  timePeriod: TimePeriod = "7-days",
+) => {
+  // Memoize date ranges to prevent infinite loops
+  const dateRanges = useMemo(() => {
+    const now = new Date();
+
+    switch (timePeriod) {
+      case "7-days":
+        return {
+          startDate: subDays(now, 7),
+          endDate: now,
+          previousStartDate: subDays(now, 14),
+          previousEndDate: subDays(now, 7),
+        };
+      case "30-days":
+        return {
+          startDate: subDays(now, 30),
+          endDate: now,
+          previousStartDate: subDays(now, 60),
+          previousEndDate: subDays(now, 30),
+        };
+      case "1-year":
+        return {
+          startDate: subYears(now, 1),
+          endDate: now,
+          previousStartDate: subYears(now, 2),
+          previousEndDate: subYears(now, 1),
+        };
+      default:
+        return {
+          startDate: subDays(now, 7),
+          endDate: now,
+          previousStartDate: subDays(now, 14),
+          previousEndDate: subDays(now, 7),
+        };
+    }
+  }, [timePeriod]); // Only recalculate when timePeriod changes
+
+  const { startDate, endDate, previousStartDate, previousEndDate } = dateRanges;
+
+  // Fetch warung activities with date filtering
   const { data: warungActivities } = api.warung.getWarungActivities.useQuery(
-    { warungId },
-    { enabled: !!warungId },
-  );
-
-  // Fetch monthly metrics
-  const { data: monthlyMetrics } = api.sale.getMonthlyMetrics.useQuery(
-    { warungId },
-    { enabled: !!warungId },
-  );
-
-  // Count activities by type
-  const activityCounts = warungActivities?.reduce<ActivityCounts>(
-    (acc, activity) => {
-      acc[activity.type] = (acc[activity.type] || 0) + 1;
-      return acc;
+    {
+      warungId,
+      startDate,
+      endDate,
     },
-    {},
+    {
+      enabled: !!warungId && !!startDate && !!endDate,
+    },
   );
 
-  // Filter activities from last 7 days
-  const last7DaysActivities = warungActivities?.filter((activity) => {
-    const activityDate = new Date(activity.createdAt);
-    const sevenDaysAgo = subDays(new Date(), 7);
-    return activityDate >= sevenDaysAgo;
-  });
+  // Fetch previous period activities for comparison
+  const { data: previousWarungActivities } =
+    api.warung.getWarungActivities.useQuery(
+      {
+        warungId,
+        startDate: previousStartDate,
+        endDate: previousEndDate,
+      },
+      {
+        enabled: !!warungId && !!previousStartDate && !!previousEndDate,
+      },
+    );
 
-  // Count activities by day
-  const activityCountsByDay = last7DaysActivities?.reduce<
-    Record<string, number>
-  >((acc, activity) => {
-    const activityDate = format(new Date(activity.createdAt), "yyyy-MM-dd");
-    acc[activityDate] = (acc[activityDate] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Prepare chart data
-  const chartData = Object.entries(activityCountsByDay || {}).map(
-    ([date, count]) => ({
-      date,
-      count,
-    }),
+  // Fetch metrics with date filtering
+  const { data: metrics } = api.sale.getMetrics.useQuery(
+    {
+      warungId,
+      startDate,
+      endDate,
+    },
+    {
+      enabled: !!warungId && !!startDate && !!endDate,
+    },
   );
 
-  // Sort chart data by date
-  const sortedChartData = chartData.sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  // Fetch previous period metrics for comparison
+  const { data: previousMetrics } = api.sale.getMetrics.useQuery(
+    {
+      warungId,
+      startDate: previousStartDate,
+      endDate: previousEndDate,
+    },
+    {
+      enabled: !!warungId && !!previousStartDate && !!previousEndDate,
+    },
   );
 
-  // Prepare pie chart data with colors
-  const pieChartData = Object.entries(activityCounts || {}).map(
-    ([activityType, count]) => ({
+  // Memoize activity counts to prevent unnecessary recalculations
+  const activityCounts = useMemo(() => {
+    return (
+      warungActivities?.reduce<ActivityCounts>((acc, activity) => {
+        acc[activity.type] = (acc[activity.type] || 0) + 1;
+        return acc;
+      }, {}) || {}
+    );
+  }, [warungActivities]);
+
+  // Memoize chart data preparation
+  const chartData = useMemo(() => {
+    if (!warungActivities) return [];
+
+    if (timePeriod === "1-year") {
+      // Monthly data for yearly period
+      const months = eachMonthOfInterval({ start: startDate, end: endDate });
+      const monthlyCounts = months.reduce<Record<string, number>>(
+        (acc, month) => {
+          const monthKey = format(month, "yyyy-MM");
+          acc[monthKey] = 0;
+          return acc;
+        },
+        {},
+      );
+
+      warungActivities.forEach((activity) => {
+        const monthKey = format(new Date(activity.createdAt), "yyyy-MM");
+        monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
+      });
+
+      return Object.entries(monthlyCounts).map(([month, count]) => ({
+        date: format(new Date(month), "MMM yyyy"),
+        count,
+      }));
+    } else {
+      // Daily data for 7 and 30 day periods
+      const days = eachDayOfInterval({ start: startDate, end: endDate });
+      const dailyCounts = days.reduce<Record<string, number>>((acc, day) => {
+        const dayKey = format(day, "yyyy-MM-dd");
+        acc[dayKey] = 0;
+        return acc;
+      }, {});
+
+      warungActivities.forEach((activity) => {
+        const dayKey = format(new Date(activity.createdAt), "yyyy-MM-dd");
+        dailyCounts[dayKey] = (dailyCounts[dayKey] || 0) + 1;
+      });
+
+      return Object.entries(dailyCounts).map(([day, count]) => ({
+        date: format(new Date(day), "MMM dd"),
+        count,
+      }));
+    }
+  }, [warungActivities, startDate, endDate, timePeriod]);
+
+  // Sort chart data by date (memoized)
+  const sortedChartData = useMemo(() => {
+    return chartData.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+  }, [chartData]);
+
+  // Prepare pie chart data with colors (memoized)
+  const pieChartData = useMemo(() => {
+    return Object.entries(activityCounts).map(([activityType, count]) => ({
       name: activityType,
       value: count,
       fill:
         chartActivityConfig[activityType as keyof ChartActivityConfig]?.color ||
         "#000",
-    }),
-  );
+    }));
+  }, [activityCounts]);
+
+  // Calculate percentage changes (memoized)
+  const calculateChange = useMemo(() => {
+    return (current: number, previous: number) => {
+      if (previous === 0) return current === 0 ? 0 : 100;
+      return ((current - previous) / previous) * 100;
+    };
+  }, []);
+
+  // Memoize calculated values
+  const calculatedMetrics = useMemo(() => {
+    return {
+      revenue: {
+        current: metrics?.revenue || 0,
+        previous: previousMetrics?.revenue || 0,
+        change: calculateChange(
+          metrics?.revenue || 0,
+          previousMetrics?.revenue || 0,
+        ),
+      },
+      orders: {
+        current: metrics?.orders || 0,
+        previous: previousMetrics?.orders || 0,
+        change: calculateChange(
+          metrics?.orders || 0,
+          previousMetrics?.orders || 0,
+        ),
+      },
+      customers: {
+        current: metrics?.customers || 0,
+        previous: previousMetrics?.customers || 0,
+        change: calculateChange(
+          metrics?.customers || 0,
+          previousMetrics?.customers || 0,
+        ),
+      },
+    };
+  }, [metrics, previousMetrics, calculateChange]);
 
   return {
     activityCounts,
     sortedChartData,
     pieChartData,
     warungActivities,
-    monthlyMetrics,
     totalActivities: warungActivities?.length || 0,
-    last7DaysCount: last7DaysActivities?.length || 0,
-    revenue: monthlyMetrics?.revenue,
-    orders: monthlyMetrics?.orders,
-    customers: monthlyMetrics?.customers,
-    lowStock: monthlyMetrics?.lowStock,
+    previousTotalActivities: previousWarungActivities?.length || 0,
+    activitiesChange: calculateChange(
+      warungActivities?.length || 0,
+      previousWarungActivities?.length || 0,
+    ),
+    ...calculatedMetrics,
+    lowStock: metrics?.lowStock || 0,
+    timePeriod,
   };
 };

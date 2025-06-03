@@ -8,14 +8,29 @@ import { MetricsCard } from "~/features/warung/components/MetricsCard";
 import { BarChartCard } from "~/features/warung/components/BarChartCard";
 import { chartActivityConfig } from "~/utils/type";
 import { Card } from "~/components/ui/card";
+import { useState } from "react";
+
+type TimePeriod = "7-days" | "30-days" | "1-year";
 
 const ReportPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("7-days");
 
+  // Fix: Pass the timePeriod state to the hook
   const { sortedChartData, revenue, orders, lowStock } = useWarungDashboardData(
     id as string,
+    timePeriod, // This was missing!
   );
+
+  const handleTimePeriodChange = (value: string) => {
+    setTimePeriod(value as TimePeriod);
+  };
+
+  const handleExportFormatChange = (value: string) => {
+    // Handle export logic here
+    console.log("Export format selected:", value);
+  };
 
   if (!router.isReady) {
     return (
@@ -27,7 +42,12 @@ const ReportPage = () => {
 
   return (
     <WarungDashboardLayout
-      headerContent={<ReportHeader />}
+      headerContent={
+        <ReportHeader
+          onExportFormatChange={handleExportFormatChange}
+          onTimePeriodChange={handleTimePeriodChange}
+        />
+      }
       metaTitle="Laporan"
       metaDescription="Lihat laporan mengenai warung Anda"
       pathname={`/dashboard/warung/${id}/report/`}
@@ -76,12 +96,11 @@ const ReportPage = () => {
                       Gross Sales
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">0</td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                   <tr>
@@ -89,12 +108,11 @@ const ReportPage = () => {
                       Net Sales
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">0</td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                   <tr>
@@ -102,12 +120,11 @@ const ReportPage = () => {
                       Total Collected
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[100px] truncate px-4 py-2">0</td>
                     <td className="max-w-[100px] truncate px-4 py-2">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                 </tbody>
@@ -131,14 +148,13 @@ const ReportPage = () => {
                       Gross Sales
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
                       0
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                   <tr>
@@ -146,14 +162,13 @@ const ReportPage = () => {
                       Net Sales
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
                       0
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                   <tr>
@@ -161,14 +176,13 @@ const ReportPage = () => {
                       Total Collected
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
                       0
                     </td>
                     <td className="max-w-[70px] truncate px-4 py-2 text-xs">
-                      {" "}
-                      Rp{revenue?.current.toString() || "0"}
+                      Rp{revenue?.current.toLocaleString("id-ID") || "0"}
                     </td>
                   </tr>
                 </tbody>
