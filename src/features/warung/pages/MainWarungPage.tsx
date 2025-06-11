@@ -99,7 +99,11 @@ const MainDashboardPage = () => {
         {/* Charts Section */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="md:col-span-2">
-            <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+            <BarChartCard
+              data={sortedChartData}
+              config={chartActivityConfig}
+              timePeriod="7-hari"
+            />
           </div>
           <PieChartCard
             data={pieChartData}
