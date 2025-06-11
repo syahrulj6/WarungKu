@@ -20,15 +20,15 @@ export const ReportHeader = ({
 }: ReportHeaderProps) => {
   return (
     <div className="flex w-full flex-col gap-2 md:flex-row md:items-center md:gap-4">
-      <Select onValueChange={onTimePeriodChange} defaultValue="7-days">
+      <Select onValueChange={onTimePeriodChange} defaultValue="7-hari">
         <SelectTrigger className="w-fit">
           <CalendarIcon className="mr-2 h-4 w-4" />
-          <SelectValue placeholder="Last 7 Days" />
+          <SelectValue placeholder="7 Hari" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="7-days">Last 7 Days</SelectItem>
-          <SelectItem value="30-days">Last 30 Days</SelectItem>
-          <SelectItem value="1-year">Last 1 Year</SelectItem>
+          <SelectItem value="7-hari">7 Hari</SelectItem>
+          <SelectItem value="30-hari">30 Hari</SelectItem>
+          <SelectItem value="1-tahun">1 Tahun</SelectItem>
         </SelectContent>
       </Select>
 
