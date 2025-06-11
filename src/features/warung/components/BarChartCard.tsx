@@ -1,11 +1,4 @@
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, Tooltip } from "recharts";
 import {
   Card,
   CardHeader,
@@ -30,12 +23,14 @@ interface BarChartCardProps {
     };
   };
   isLoading?: boolean;
+  timePeriod?: string;
 }
 
 export const BarChartCard = ({
   data,
   config,
   isLoading = false,
+  timePeriod = "7",
 }: BarChartCardProps) => {
   const isMd = useMediaQuery("(min-width: 768px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
@@ -67,7 +62,7 @@ export const BarChartCard = ({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm md:text-base">Aktivitas Anda</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          7 Hari Terakhir
+          {timePeriod} Terakhir
         </CardDescription>
       </CardHeader>
       <CardContent className="w-full overflow-hidden">
@@ -95,11 +90,11 @@ export const BarChartCard = ({
       </CardContent>
       <CardFooter className="flex-col items-start gap-1 text-xs md:gap-2 md:text-sm">
         <div className="flex gap-1 leading-none font-medium md:gap-2">
-          Aktivitas Anda selama 7 hari terakhir{" "}
+          Aktivitas Anda selama {timePeriod} terakhir{" "}
           <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
         </div>
         <div className="text-muted-foreground leading-none">
-          Menampilkan total aktivitas untuk 7 hari terakhir
+          Menampilkan total aktivitas untuk {timePeriod} terakhir
         </div>
       </CardFooter>
     </Card>

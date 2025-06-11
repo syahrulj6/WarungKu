@@ -12,12 +12,12 @@ import { useState } from "react";
 import { generatePDFReport } from "~/utils/pdfExport";
 import { toast } from "sonner";
 
-type TimePeriod = "7-days" | "30-days" | "1-year";
+type TimePeriod = "7-hari" | "30-hari" | "1-tahun";
 
 const ReportPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("7-days");
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("7-hari");
   const [isExporting, setIsExporting] = useState(false);
 
   const { sortedChartData, revenue, orders, customers, lowStock } =
@@ -101,7 +101,11 @@ const ReportPage = () => {
             />
           </div>
 
-          <BarChartCard data={sortedChartData} config={chartActivityConfig} />
+          <BarChartCard
+            data={sortedChartData}
+            config={chartActivityConfig}
+            timePeriod={timePeriod}
+          />
 
           {/* Sales Summary Table */}
           <Card className="p-4">

@@ -10,32 +10,32 @@ import { api } from "~/utils/api";
 import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 
 type ActivityCounts = Record<string, number>;
-type TimePeriod = "7-days" | "30-days" | "1-year";
+type TimePeriod = "7-hari" | "30-hari" | "1-tahun";
 
 export const useWarungDashboardData = (
   warungId: string,
-  timePeriod: TimePeriod = "7-days",
+  timePeriod: TimePeriod = "7-hari",
 ) => {
   // Memoize date ranges to prevent infinite loops
   const dateRanges = useMemo(() => {
     const now = new Date();
 
     switch (timePeriod) {
-      case "7-days":
+      case "7-hari":
         return {
           startDate: subDays(now, 7),
           endDate: now,
           previousStartDate: subDays(now, 14),
           previousEndDate: subDays(now, 7),
         };
-      case "30-days":
+      case "30-hari":
         return {
           startDate: subDays(now, 30),
           endDate: now,
           previousStartDate: subDays(now, 60),
           previousEndDate: subDays(now, 30),
         };
-      case "1-year":
+      case "1-tahun":
         return {
           startDate: subYears(now, 1),
           endDate: now,
@@ -117,7 +117,7 @@ export const useWarungDashboardData = (
   const chartData = useMemo(() => {
     if (!warungActivities) return [];
 
-    if (timePeriod === "1-year") {
+    if (timePeriod === "1-tahun") {
       // Monthly data for yearly period
       const months = eachMonthOfInterval({ start: startDate, end: endDate });
       const monthlyCounts = months.reduce<Record<string, number>>(
