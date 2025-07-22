@@ -106,13 +106,6 @@ const VerifyMfaPage = () => {
     }
   };
 
-  // Auto-submit when OTP length reaches 6
-  useEffect(() => {
-    if (otp.length === 6) {
-      handleSubmit();
-    }
-  }, [otp]);
-
   return (
     <PageContainer metaTitle="Verify MFA" withHeader={false} withFooter={false}>
       <div className="flex min-h-screen items-center justify-center">
