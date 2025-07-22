@@ -8,7 +8,7 @@ import {
 } from "~/components/ui/card";
 import { PieChart, Pie, Label, Tooltip } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "~/components/ui/chart";
-import { TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 
 interface PieChartCardProps {
   data: { name: string; value: number; fill: string }[];
@@ -20,6 +20,7 @@ interface PieChartCardProps {
     };
   };
   isLoading?: boolean;
+  change?: number;
 }
 
 export const PieChartCard = ({
@@ -27,6 +28,7 @@ export const PieChartCard = ({
   totalActivities,
   config,
   isLoading = false,
+  change,
 }: PieChartCardProps) => {
   if (isLoading) {
     return (
@@ -49,6 +51,17 @@ export const PieChartCard = ({
       </Card>
     );
   }
+
+  const getChangeColor = () => {
+    if (!change) return "text-muted-foreground";
+    return change >= 0 ? "text-green-500" : "text-red-500";
+  };
+
+  const getChangeText = () => {
+    if (!change) return "Tidak ada perubahan";
+    const direction = change >= 0 ? "peningkatan" : "penurunan";
+    return `${Math.abs(change).toFixed(1)}% ${direction} aktivitas bulan ini`;
+  };
 
   return (
     <div className="h-full w-full md:flex-1">
@@ -112,9 +125,16 @@ export const PieChartCard = ({
           </ChartContainer>
         </CardContent>
         <CardFooter className="flex-col gap-1 text-xs md:gap-2 md:text-sm">
-          <div className="flex items-center gap-1 leading-none font-medium md:gap-2">
-            5.2% peningkatan aktivitas bulan ini{" "}
-            <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
+          <div
+            className={`flex items-center gap-1 leading-none font-medium md:gap-2 ${getChangeColor()}`}
+          >
+            {getChangeText()}
+            {change !== undefined &&
+              (change >= 0 ? (
+                <TrendingUp className="h-3 w-3 md:h-4 md:w-4" />
+              ) : (
+                <TrendingDown className="h-3 w-3 md:h-4 md:w-4" />
+              ))}
           </div>
         </CardFooter>
       </Card>

@@ -34,6 +34,7 @@ const MainDashboardPage = () => {
     orders,
     customers,
     lowStock,
+    activitiesChange,
   } = useWarungDashboardData(id as string);
 
   const currentDate = new Date();
@@ -109,6 +110,7 @@ const MainDashboardPage = () => {
             data={pieChartData}
             totalActivities={totalActivities}
             config={chartActivityConfig}
+            change={activitiesChange}
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
