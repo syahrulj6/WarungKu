@@ -121,6 +121,7 @@ const LoginPage = () => {
               <LoginFormInner
                 onLoginSubmit={handleLoginSubmit}
                 buttonText="Sign In"
+                showPassword={true}
               />
             </Form>
 
