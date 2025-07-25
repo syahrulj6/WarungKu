@@ -10,24 +10,17 @@ import { api } from "~/utils/api";
 import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 
 type ActivityCounts = Record<string, number>;
-type TimePeriod = "7-hari" | "30-hari" | "1-tahun";
+export type TimePeriod = "all-time" | "30-hari" | "1-tahun";
 
 export const useWarungDashboardData = (
   warungId: string,
-  timePeriod: TimePeriod = "7-hari",
+  timePeriod: TimePeriod = "all-time",
 ) => {
   // Memoize date ranges to prevent infinite loops
   const dateRanges = useMemo(() => {
     const now = new Date();
 
     switch (timePeriod) {
-      case "7-hari":
-        return {
-          startDate: subDays(now, 7),
-          endDate: now,
-          previousStartDate: subDays(now, 14),
-          previousEndDate: subDays(now, 7),
-        };
       case "30-hari":
         return {
           startDate: subDays(now, 30),
@@ -42,31 +35,32 @@ export const useWarungDashboardData = (
           previousStartDate: subYears(now, 2),
           previousEndDate: subYears(now, 1),
         };
+      case "all-time":
       default:
         return {
-          startDate: subDays(now, 7),
+          startDate: undefined, // No start date for all-time
           endDate: now,
-          previousStartDate: subDays(now, 14),
-          previousEndDate: subDays(now, 7),
+          previousStartDate: undefined, // No previous period for all-time
+          previousEndDate: undefined,
         };
     }
-  }, [timePeriod]); // Only recalculate when timePeriod changes
+  }, [timePeriod]);
 
   const { startDate, endDate, previousStartDate, previousEndDate } = dateRanges;
 
-  // Fetch warung activities with date filtering
+  // Fetch warung activities
   const { data: warungActivities } = api.warung.getWarungActivities.useQuery(
     {
       warungId,
-      startDate,
+      ...(timePeriod !== "all-time" && { startDate }), // Only include startDate if not all-time
       endDate,
     },
     {
-      enabled: !!warungId && !!startDate && !!endDate,
+      enabled: !!warungId && !!endDate,
     },
   );
 
-  // Fetch previous period activities for comparison
+  // Fetch previous period activities (not for all-time)
   const { data: previousWarungActivities } =
     api.warung.getWarungActivities.useQuery(
       {
@@ -75,23 +69,27 @@ export const useWarungDashboardData = (
         endDate: previousEndDate,
       },
       {
-        enabled: !!warungId && !!previousStartDate && !!previousEndDate,
+        enabled:
+          !!warungId &&
+          !!previousStartDate &&
+          !!previousEndDate &&
+          timePeriod !== "all-time",
       },
     );
 
-  // Fetch metrics with date filtering
+  // Fetch metrics
   const { data: metrics } = api.sale.getMetrics.useQuery(
     {
       warungId,
-      startDate,
+      ...(timePeriod !== "all-time" && { startDate }), // Only include startDate if not all-time
       endDate,
     },
     {
-      enabled: !!warungId && !!startDate && !!endDate,
+      enabled: !!warungId && !!endDate,
     },
   );
 
-  // Fetch previous period metrics for comparison
+  // Fetch previous period metrics (not for all-time)
   const { data: previousMetrics } = api.sale.getMetrics.useQuery(
     {
       warungId,
@@ -99,11 +97,15 @@ export const useWarungDashboardData = (
       endDate: previousEndDate,
     },
     {
-      enabled: !!warungId && !!previousStartDate && !!previousEndDate,
+      enabled:
+        !!warungId &&
+        !!previousStartDate &&
+        !!previousEndDate &&
+        timePeriod !== "all-time",
     },
   );
 
-  // Memoize activity counts to prevent unnecessary recalculations
+  // Memoize activity counts
   const activityCounts = useMemo(() => {
     return (
       warungActivities?.reduce<ActivityCounts>((acc, activity) => {
@@ -115,11 +117,29 @@ export const useWarungDashboardData = (
 
   // Memoize chart data preparation
   const chartData = useMemo(() => {
-    if (!warungActivities) return [];
+    if (!warungActivities || !endDate) return [];
 
-    if (timePeriod === "1-tahun") {
-      // Monthly data for yearly period
-      const months = eachMonthOfInterval({ start: startDate, end: endDate });
+    // For all-time period, use the first activity date or 1 year ago as fallback
+    const effectiveStartDate =
+      timePeriod === "all-time"
+        ? warungActivities.length > 0
+          ? new Date(
+              Math.min(
+                ...warungActivities.map((a) => new Date(a.createdAt).getTime()),
+              ),
+            )
+          : subYears(new Date(), 1)
+        : startDate;
+
+    if (!effectiveStartDate) return [];
+
+    if (timePeriod === "1-tahun" || timePeriod === "all-time") {
+      // For yearly and all-time periods, show monthly data
+      const months = eachMonthOfInterval({
+        start: effectiveStartDate,
+        end: endDate,
+      });
+
       const monthlyCounts = months.reduce<Record<string, number>>(
         (acc, month) => {
           const monthKey = format(month, "yyyy-MM");
@@ -139,8 +159,12 @@ export const useWarungDashboardData = (
         count,
       }));
     } else {
-      // Daily data for 7 and 30 day periods
-      const days = eachDayOfInterval({ start: startDate, end: endDate });
+      // For 30-day period, show daily data
+      const days = eachDayOfInterval({
+        start: effectiveStartDate,
+        end: endDate,
+      });
+
       const dailyCounts = days.reduce<Record<string, number>>((acc, day) => {
         const dayKey = format(day, "yyyy-MM-dd");
         acc[dayKey] = 0;
@@ -158,15 +182,14 @@ export const useWarungDashboardData = (
       }));
     }
   }, [warungActivities, startDate, endDate, timePeriod]);
-
-  // Sort chart data by date (memoized)
+  // Sort chart data by date
   const sortedChartData = useMemo(() => {
     return chartData.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
   }, [chartData]);
 
-  // Prepare pie chart data with colors (memoized)
+  // Prepare pie chart data with colors
   const pieChartData = useMemo(() => {
     return Object.entries(activityCounts).map(([activityType, count]) => ({
       name: activityType,
@@ -177,7 +200,7 @@ export const useWarungDashboardData = (
     }));
   }, [activityCounts]);
 
-  // Calculate percentage changes (memoized)
+  // Calculate percentage changes
   const calculateChange = useMemo(() => {
     return (current: number, previous: number) => {
       if (previous === 0) return current === 0 ? 0 : 100;
@@ -190,30 +213,40 @@ export const useWarungDashboardData = (
     return {
       revenue: {
         current: metrics?.revenue || 0,
-        previous: previousMetrics?.revenue || 0,
-        change: calculateChange(
-          metrics?.revenue || 0,
-          previousMetrics?.revenue || 0,
-        ),
+        previous: timePeriod === "all-time" ? 0 : previousMetrics?.revenue || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.revenue || 0,
+                previousMetrics?.revenue || 0,
+              ),
       },
       orders: {
         current: metrics?.orders || 0,
-        previous: previousMetrics?.orders || 0,
-        change: calculateChange(
-          metrics?.orders || 0,
-          previousMetrics?.orders || 0,
-        ),
+        previous: timePeriod === "all-time" ? 0 : previousMetrics?.orders || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.orders || 0,
+                previousMetrics?.orders || 0,
+              ),
       },
       customers: {
         current: metrics?.customers || 0,
-        previous: previousMetrics?.customers || 0,
-        change: calculateChange(
-          metrics?.customers || 0,
-          previousMetrics?.customers || 0,
-        ),
+        previous:
+          timePeriod === "all-time" ? 0 : previousMetrics?.customers || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.customers || 0,
+                previousMetrics?.customers || 0,
+              ),
       },
     };
-  }, [metrics, previousMetrics, calculateChange]);
+  }, [metrics, previousMetrics, calculateChange, timePeriod]);
 
   return {
     activityCounts,
@@ -221,11 +254,15 @@ export const useWarungDashboardData = (
     pieChartData,
     warungActivities,
     totalActivities: warungActivities?.length || 0,
-    previousTotalActivities: previousWarungActivities?.length || 0,
-    activitiesChange: calculateChange(
-      warungActivities?.length || 0,
-      previousWarungActivities?.length || 0,
-    ),
+    previousTotalActivities:
+      timePeriod === "all-time" ? 0 : previousWarungActivities?.length || 0,
+    activitiesChange:
+      timePeriod === "all-time"
+        ? 0
+        : calculateChange(
+            warungActivities?.length || 0,
+            previousWarungActivities?.length || 0,
+          ),
     ...calculatedMetrics,
     lowStock: metrics?.lowStock || 0,
     timePeriod,

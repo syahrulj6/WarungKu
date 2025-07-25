@@ -1,48 +1,40 @@
-import { Card } from "~/components/ui/card";
-
 interface MetricsCardProps {
   title: string;
-  value: number | string;
-  iconBg?: string;
+  value: string;
+  iconBg: string;
   icon: React.ReactNode;
   change?: number;
+  showChange?: boolean;
 }
 
 export const MetricsCard = ({
   title,
   value,
-  icon,
   iconBg,
-  change,
+  icon,
+  change = 0,
+  showChange = true,
 }: MetricsCardProps) => {
-  const getChangeColor = () => {
-    if (!change) return "text-muted-foreground";
-    return change >= 0 ? "text-green-500" : "text-red-500";
-  };
-
-  const getChangeIcon = () => {
-    if (!change) return null;
-    return change >= 0 ? "↑" : "↓";
-  };
-
   return (
-    <Card className="bg-card flex flex-col gap-3 rounded-lg px-5 py-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold md:text-base">{title}</h3>
-        {change !== undefined && (
-          <span className={`text-sm ${getChangeColor()}`}>
-            {getChangeIcon()} {Math.abs(change).toFixed(1)}%
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-fit w-fit justify-center rounded-full p-3 text-white ${iconBg ? iconBg : "bg-muted-foreground"}`}
-        >
-          {icon}
+    <div className="h-[120px] rounded-lg border p-4 shadow-sm">
+      <div className="flex h-full items-center justify-between">
+        <div className="flex h-full flex-col justify-between">
+          {" "}
+          <div>
+            <p className="text-muted-foreground text-sm font-medium">{title}</p>
+            <h3 className="text-2xl font-bold">{value}</h3>
+          </div>
+          {showChange && (
+            <p
+              className={`text-sm ${change > 0 ? "text-green-500" : "invisible"}`}
+            >
+              {change > 0 ? "+" : ""}
+              {change.toFixed(1)}% dari periode sebelumnya
+            </p>
+          )}
         </div>
-        <h3 className="text-lg font-semibold">{value}</h3>
+        <div className={`${iconBg} rounded-md p-3 text-white`}>{icon}</div>
       </div>
-    </Card>
+    </div>
   );
 };
