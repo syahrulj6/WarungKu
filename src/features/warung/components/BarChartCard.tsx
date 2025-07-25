@@ -30,10 +30,14 @@ export const BarChartCard = ({
   data,
   config,
   isLoading = false,
-  timePeriod = "7",
+  timePeriod,
 }: BarChartCardProps) => {
   const isMd = useMediaQuery("(min-width: 768px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
+
+  if (timePeriod === "all-time") {
+    timePeriod = "Semua waktu";
+  }
 
   if (isLoading) {
     return (
@@ -62,7 +66,7 @@ export const BarChartCard = ({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm md:text-base">Aktivitas Anda</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          {timePeriod} Terakhir
+          {timePeriod}
         </CardDescription>
       </CardHeader>
       <CardContent className="w-full overflow-hidden">
