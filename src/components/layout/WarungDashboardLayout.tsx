@@ -182,11 +182,11 @@ export const WarungDashboardLayout = ({
           {/* Right Sidebar (Desktop) */}
           {withRightPanel && !isMobile && (
             <div
-              className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-72" : "w-0"}`}
+              className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-64" : "w-0"}`}
             >
               <div className="bg-bacgkround absolute inset-y-0 right-0 flex h-full border-l">
                 {isRightPanelOpen && (
-                  <div className="h-full w-72 overflow-y-auto p-4">
+                  <div className="h-full w-64 overflow-y-auto p-4">
                     <h3 className="mb-4 text-lg font-semibold">
                       Current Order
                     </h3>
