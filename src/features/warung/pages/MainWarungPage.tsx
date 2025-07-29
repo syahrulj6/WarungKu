@@ -17,7 +17,7 @@ import { Button } from "~/components/ui/button";
 const MainDashboardPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [timePeriod, setTimePeriod] = useState<TimePeriod>("all-time");
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("30-hari");
 
   const { data: warung } = api.warung.getWarungById.useQuery(
     {
@@ -73,25 +73,27 @@ const MainDashboardPage = () => {
         {/* Time period selector */}
         <div className="flex gap-2">
           <Button
-            variant={timePeriod === "all-time" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTimePeriod("all-time")}
-          >
-            Semua Waktu
-          </Button>
-          <Button
             variant={timePeriod === "30-hari" ? "default" : "outline"}
             size="sm"
             onClick={() => setTimePeriod("30-hari")}
           >
             30 Hari
           </Button>
+
           <Button
             variant={timePeriod === "1-tahun" ? "default" : "outline"}
             size="sm"
             onClick={() => setTimePeriod("1-tahun")}
           >
             1 Tahun
+          </Button>
+
+          <Button
+            variant={timePeriod === "all-time" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTimePeriod("all-time")}
+          >
+            Semua Waktu
           </Button>
         </div>
 

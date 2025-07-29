@@ -10,11 +10,11 @@ import { api } from "~/utils/api";
 import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 
 type ActivityCounts = Record<string, number>;
-export type TimePeriod = "all-time" | "30-hari" | "1-tahun";
+export type TimePeriod = "30-hari" | "1-tahun" | "all-time";
 
 export const useWarungDashboardData = (
   warungId: string,
-  timePeriod: TimePeriod = "all-time",
+  timePeriod: TimePeriod = "30-hari",
 ) => {
   // Memoize date ranges to prevent infinite loops
   const dateRanges = useMemo(() => {
