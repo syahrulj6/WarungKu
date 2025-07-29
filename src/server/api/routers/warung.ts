@@ -134,6 +134,63 @@ export const warungRouter = createTRPCRouter({
       }
     }),
 
+  updateWarung: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        name: z.string().min(1).max(100),
+        address: z.string().max(255).optional(),
+        logoUrl: z.string().url().optional(),
+        phone: z.string().max(20).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+
+      const { warungId, name, address, logoUrl, phone } = input;
+      const warung = await db.warung.findUnique({
+        where: {
+          id: warungId,
+          ownerId: user?.id,
+        },
+      });
+      if (!warung) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Warung not found",
+        });
+      }
+
+      if (warung.name === name) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Warung with this name already exists",
+        });
+      }
+
+      try {
+        const updatedWarung = await db.warung.update({
+          where: {
+            id: warungId,
+          },
+          data: {
+            name,
+            address,
+            logoUrl,
+            phone,
+          },
+        });
+
+        return updatedWarung;
+      } catch (error) {
+        console.error("Failed to update warung:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update warung",
+        });
+      }
+    }),
+
   getWarungActivities: privateProcedure
     .input(
       z.object({
