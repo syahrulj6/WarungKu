@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
-import { MenuHeader } from "../components/MenuHeader";
+import { ProductHeader } from "../components/ProductHeader";
 import { CategoryList } from "../components/CategoryList";
 import { api } from "~/utils/api";
-import { MenuCard } from "../components/MenuCard";
+import { ProductCard } from "../components/ProductCard";
 import { useDebounce } from "use-debounce";
 import { useRouter } from "next/router";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -19,7 +19,7 @@ const ProductSkeleton = () => {
   );
 };
 
-const MenuPage = () => {
+const ProductPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -47,15 +47,15 @@ const MenuPage = () => {
     <WarungDashboardLayout
       withRightPanel={true}
       headerContent={
-        <MenuHeader
+        <ProductHeader
           refetchProductData={refetchProductData}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
       }
-      metaTitle="Daftar menu"
-      metaDescription="Kelola Menu Kasirium Anda"
-      pathname={`/dashboard/warung/${id}/menu`}
+      metaTitle="Daftar Produk"
+      metaDescription="Kelola Produk Kasirium Anda"
+      pathname={`/dashboard/warung/${id}/product`}
     >
       <div className="flex flex-col gap-6">
         <CategoryList onCategoryChange={handleCategoryChange} />
@@ -67,11 +67,11 @@ const MenuPage = () => {
             ))
           ) : productData?.length === 0 ? (
             <div className="text-muted-foreground col-span-full text-center">
-              No products found
+              Produk tidak ditemukan
             </div>
           ) : (
             productData?.map((product) => (
-              <MenuCard
+              <ProductCard
                 id={product.id}
                 key={product.id}
                 name={product.name}
@@ -87,5 +87,5 @@ const MenuPage = () => {
   );
 };
 
-export default MenuPage;
+export default ProductPage;
 

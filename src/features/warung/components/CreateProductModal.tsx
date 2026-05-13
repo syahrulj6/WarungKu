@@ -43,7 +43,7 @@ export const CreateProductModal = ({
       price: 0,
       costPrice: 0,
       minStock: 0,
-      categoryId: undefined,
+      categoryId: "",
       stock: 0,
     },
   });

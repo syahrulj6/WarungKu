@@ -3,7 +3,16 @@ import React, { useState } from "react";
 import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
 import { api } from "~/utils/api";
 import { MetricsCard } from "../components/MetricsCard";
-import { ArrowUpRight, ShoppingCart, Users, Utensils } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Banknote,
+  HandCoins,
+  ShoppingCart,
+  Users,
+  Utensils,
+  WalletCards,
+} from "lucide-react";
 import { BarChartCard } from "../components/BarChartCard";
 import { PieChartCard } from "../components/PieChartCard";
 import {
@@ -29,15 +38,26 @@ const MainDashboardPage = () => {
   );
 
   const { data: productData } = api.product.getTrendingProduct.useQuery();
+  const { data: lowStockProducts } = api.product.getLowStockProduct.useQuery(
+    {
+      warungId: id as string,
+      limit: 4,
+    },
+    { enabled: !!id },
+  );
 
   const {
     sortedChartData,
     pieChartData,
     totalActivities,
     revenue,
+    grossSales,
+    cogs,
     orders,
     customers,
     lowStock,
+    unpaidOrders,
+    averageOrderValue,
     activitiesChange,
   } = useWarungDashboardData(id as string, timePeriod);
 
@@ -100,12 +120,27 @@ const MainDashboardPage = () => {
         {/* Metrics Card */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
           <MetricsCard
-            title="Pendapatan"
+            title="Laba Kotor"
             value={`Rp${revenue?.current.toLocaleString("id-ID") || "0"}`}
-            iconBg="bg-primary"
+            iconBg="bg-emerald-600"
             icon={<ArrowUpRight className="h-4 w-4" />}
             change={revenue?.change}
             showChange={timePeriod !== "all-time"}
+          />
+          <MetricsCard
+            title="Omzet (Penjualan)"
+            value={`Rp${grossSales?.current.toLocaleString("id-ID") || "0"}`}
+            iconBg="bg-primary"
+            icon={<Banknote className="h-4 w-4" />}
+            change={grossSales?.change}
+            showChange={timePeriod !== "all-time"}
+          />
+          <MetricsCard
+            title="Modal Terjual"
+            value={`Rp${cogs?.current.toLocaleString("id-ID") || "0"}`}
+            iconBg="bg-orange-500"
+            icon={<ArrowDownRight className="h-4 w-4" />}
+            showChange={false}
           />
           <MetricsCard
             title="Pesanan"
@@ -120,6 +155,14 @@ const MainDashboardPage = () => {
             value={lowStock?.toString() || "0"}
             iconBg="bg-red-500"
             icon={<Utensils className="h-4 w-4" />}
+            showChange={false}
+          />
+          <MetricsCard
+            title="Pesanan Belum Dibayar"
+            value={unpaidOrders?.current.toString() || "0"}
+            iconBg="bg-amber-600"
+            icon={<WalletCards className="h-4 w-4" />}
+            showChange={false}
           />
           <MetricsCard
             title="Pelanggan Baru"
@@ -128,6 +171,13 @@ const MainDashboardPage = () => {
             icon={<Users className="h-4 w-4" />}
             change={customers?.change}
             showChange={timePeriod !== "all-time"}
+          />
+          <MetricsCard
+            title="Rata-rata Nilai Pesanan"
+            value={`Rp${averageOrderValue?.current.toLocaleString("id-ID") || "0"}`}
+            iconBg="bg-indigo-600"
+            icon={<HandCoins className="h-4 w-4" />}
+            showChange={false}
           />
         </div>
 
@@ -148,8 +198,11 @@ const MainDashboardPage = () => {
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <DishCard title="Trending Dishes" dishesData={productData} />
-          <DishCard title="Out of Stock" dishesData={productData} />
+          <DishCard title="Produk Unggulan" dishesData={productData} />
+          <DishCard
+            title="Perlu Perhatian Stok"
+            dishesData={lowStockProducts}
+          />
         </div>
       </div>
     </WarungDashboardLayout>

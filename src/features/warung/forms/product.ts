@@ -6,7 +6,9 @@ export const createProductFormSchema = z.object({
   costPrice: z.number().min(0).optional(),
   stock: z.number().min(0, "Stok tidak boleh negatif"),
   minStock: z.number().min(0).optional(),
-  categoryId: z.string().optional(),
+  categoryId: z
+    .string({ required_error: "Kategori wajib dipilih" })
+    .min(1, "Kategori wajib dipilih"),
 });
 
 export type CreateProductFormSchema = z.infer<

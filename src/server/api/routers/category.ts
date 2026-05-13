@@ -3,49 +3,75 @@ import { createTRPCRouter, privateProcedure } from "../trpc";
 import { z } from "zod";
 
 export const categoryRouter = createTRPCRouter({
-  getAllCategory: privateProcedure.query(async ({ ctx }) => {
+  getAllCategory: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
     const { db, user } = ctx;
 
     if (!user?.id) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "User not authenticated",
+        message: "Pengguna belum terautentikasi",
       });
     }
 
     try {
-      console.log("Fetching categories for user:", user.id);
-      const warungs = await db.warung.findMany({
-        where: { ownerId: user.id },
+      const warung = await db.warung.findFirst({
+        where: { id: input.warungId, ownerId: user.id },
         select: { id: true },
       });
-      console.log("User warungs:", warungs);
+      if (!warung) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Warung tidak ditemukan atau bukan milik Anda",
+        });
+      }
 
       const categories = await db.category.findMany({
         where: {
-          warungId: { in: warungs.map((w) => w.id) },
+          warungId: warung.id,
         },
         orderBy: { name: "asc" },
       });
-      console.log("Found categories:", categories);
 
       return categories;
     } catch (error) {
       console.error("Error fetching categories:", error);
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch categories",
+        message: "Gagal mengambil kategori",
       });
     }
-  }),
+    }),
 
-  createDefaultsCategory: privateProcedure.mutation(async ({ ctx }) => {
+  createDefaultsCategory: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
     const { db, user } = ctx;
 
     if (!user?.id) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
-        message: "User not authenticated",
+        message: "Pengguna belum terautentikasi",
+      });
+    }
+
+    const warung = await db.warung.findFirst({
+      where: { id: input.warungId, ownerId: user.id },
+      select: { id: true },
+    });
+    if (!warung) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Warung tidak ditemukan atau bukan milik Anda",
       });
     }
 
@@ -54,7 +80,7 @@ export const categoryRouter = createTRPCRouter({
     try {
       const existingCategories = await db.category.findMany({
         where: {
-          warungId: user.id,
+          warungId: warung.id,
           name: { in: defaultCategories },
         },
       });
@@ -62,7 +88,7 @@ export const categoryRouter = createTRPCRouter({
       const existingNames = existingCategories.map((c) => c.name);
       const categoriesToCreate = defaultCategories
         .filter((name) => !existingNames.includes(name))
-        .map((name) => ({ name, warungId: user.id }));
+        .map((name) => ({ name, warungId: warung.id }));
 
       if (categoriesToCreate.length > 0) {
         await db.category.createMany({
@@ -74,18 +100,19 @@ export const categoryRouter = createTRPCRouter({
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create default categories",
+        message: "Gagal membuat kategori default",
       });
     }
-  }),
+    }),
 
   createCategory: privateProcedure
     .input(
       z.object({
+        warungId: z.string(),
         name: z
           .string()
-          .min(2, "Category name must be at least 2 characters")
-          .max(50, "Category name cannot exceed 50 characters"),
+          .min(2, "Nama kategori minimal 2 karakter")
+          .max(50, "Nama kategori maksimal 50 karakter"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -94,7 +121,18 @@ export const categoryRouter = createTRPCRouter({
       if (!user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "User not authenticated",
+          message: "Pengguna belum terautentikasi",
+        });
+      }
+
+      const warung = await db.warung.findFirst({
+        where: { id: input.warungId, ownerId: user.id },
+        select: { id: true },
+      });
+      if (!warung) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Warung tidak ditemukan atau bukan milik Anda",
         });
       }
 
@@ -102,7 +140,7 @@ export const categoryRouter = createTRPCRouter({
         // Check if category already exists
         const existingCategory = await db.category.findFirst({
           where: {
-            warungId: user.id,
+            warungId: warung.id,
             name: input.name,
           },
         });
@@ -110,14 +148,14 @@ export const categoryRouter = createTRPCRouter({
         if (existingCategory) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Category with this name already exists",
+            message: "Kategori dengan nama tersebut sudah ada",
           });
         }
 
         const category = await db.category.create({
           data: {
             name: input.name,
-            warungId: user.id,
+            warungId: warung.id,
           },
         });
 
@@ -127,7 +165,7 @@ export const categoryRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create category",
+          message: "Gagal membuat kategori",
         });
       }
     }),
@@ -139,8 +177,8 @@ export const categoryRouter = createTRPCRouter({
         id: z.string(),
         name: z
           .string()
-          .min(2, "Category name must be at least 2 characters")
-          .max(50, "Category name cannot exceed 50 characters"),
+          .min(2, "Nama kategori minimal 2 karakter")
+          .max(50, "Nama kategori maksimal 50 karakter"),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -149,7 +187,7 @@ export const categoryRouter = createTRPCRouter({
       if (!user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "User not authenticated",
+          message: "Pengguna belum terautentikasi",
         });
       }
 
@@ -166,7 +204,7 @@ export const categoryRouter = createTRPCRouter({
         if (nameConflict) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Another category with this name already exists",
+            message: "Nama kategori sudah digunakan kategori lain",
           });
         }
 
@@ -186,7 +224,7 @@ export const categoryRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update category",
+          message: "Gagal memperbarui kategori",
         });
       }
     }),
@@ -200,7 +238,7 @@ export const categoryRouter = createTRPCRouter({
       if (!user?.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
-          message: "User not authenticated",
+          message: "Pengguna belum terautentikasi",
         });
       }
 
@@ -216,7 +254,7 @@ export const categoryRouter = createTRPCRouter({
         if (productsCount > 0) {
           throw new TRPCError({
             code: "PRECONDITION_FAILED",
-            message: "Cannot delete category with associated products",
+            message: "Kategori tidak bisa dihapus karena masih dipakai produk",
           });
         }
 
@@ -233,7 +271,7 @@ export const categoryRouter = createTRPCRouter({
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to delete category",
+          message: "Gagal menghapus kategori",
         });
       }
     }),

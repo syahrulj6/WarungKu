@@ -12,7 +12,7 @@ import {
 } from "~/components/ui/dialog";
 import { useOrderStore } from "~/stores/order-store";
 
-interface MenuCardProps {
+interface ProductCardProps {
   name: string;
   productImage?: string;
   price: number;
@@ -20,13 +20,13 @@ interface MenuCardProps {
   id: string;
 }
 
-export const MenuCard = ({
+export const ProductCard = ({
   name,
   productImage,
   price,
   stock,
   id,
-}: MenuCardProps) => {
+}: ProductCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -38,7 +38,9 @@ export const MenuCard = ({
       name,
       price,
       productImage,
+      quantity,
     });
+    setQuantity(1);
     setIsOpen(false);
   };
 
@@ -70,7 +72,7 @@ export const MenuCard = ({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add to Order</DialogTitle>
+            <DialogTitle>Tambah ke Pesanan</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
@@ -89,14 +91,14 @@ export const MenuCard = ({
                   {formatRupiah(price)}
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  {stock} available
+                  {stock} tersedia
                 </p>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
               <label htmlFor="quantity" className="text-sm font-medium">
-                Quantity
+                Jumlah
               </label>
               <Input
                 id="quantity"
@@ -117,7 +119,7 @@ export const MenuCard = ({
             </div>
 
             <Button onClick={handleAddToOrder} className="mt-2">
-              Add to Order
+              Tambah ke Pesanan
             </Button>
           </div>
         </DialogContent>

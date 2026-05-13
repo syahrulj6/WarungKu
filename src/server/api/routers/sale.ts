@@ -94,18 +94,31 @@ export const saleRouter = createTRPCRouter({
           }),
       };
 
-      const [revenue, orders, customers, lowStockProducts] = await Promise.all([
+      const [paidSales, orders, customers, products, unpaidSummary] =
+        await Promise.all([
+          db.sale.findMany({
+            where: {
+              ...whereClause,
+              isPaid: true,
+            },
+            select: {
+              totalAmount: true,
+              items: {
+                select: {
+                  quantity: true,
+                  product: {
+                    select: {
+                      costPrice: true,
+                    },
+                  },
+                },
+              },
+            },
+          }),
         db.sale.aggregate({
-          where: {
-            ...whereClause,
-            isPaid: true,
-          },
-          _sum: {
-            totalAmount: true,
-          },
-        }),
-        db.sale.count({
           where: whereClause,
+          _count: { id: true },
+          _sum: { totalAmount: true },
         }),
         db.customer.count({
           where: {
@@ -119,22 +132,52 @@ export const saleRouter = createTRPCRouter({
               }),
           },
         }),
-        db.product.count({
+        db.product.findMany({
           where: {
             warungId,
-            stock: {
-              lt: 5,
-            },
             isActive: true,
           },
+          select: {
+            stock: true,
+            minStock: true,
+          },
+        }),
+        db.sale.aggregate({
+          where: {
+            ...whereClause,
+            isPaid: false,
+          },
+          _count: { id: true },
+          _sum: { totalAmount: true },
         }),
       ]);
 
+      const omzet = paidSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
+      const modalTerjual = paidSales.reduce((sum, sale) => {
+        const totalModalPerSale = sale.items.reduce((itemSum, item) => {
+          return itemSum + item.quantity * (item.product?.costPrice ?? 0);
+        }, 0);
+        return sum + totalModalPerSale;
+      }, 0);
+      const labaKotor = omzet - modalTerjual;
+      const lowStockCount = products.filter(
+        (product) => product.stock <= (product.minStock ?? 5),
+      ).length;
+
+      const averageOrderValue =
+        orders._count.id > 0 ? (orders._sum.totalAmount ?? 0) / orders._count.id : 0;
+
       return {
-        revenue: revenue._sum.totalAmount || 0,
-        orders,
+        revenue: labaKotor,
+        grossSales: omzet,
+        cogs: modalTerjual,
+        grossProfit: labaKotor,
+        orders: orders._count.id,
         customers,
-        lowStock: lowStockProducts,
+        lowStock: lowStockCount,
+        unpaidOrders: unpaidSummary._count.id || 0,
+        unpaidAmount: unpaidSummary._sum.totalAmount || 0,
+        averageOrderValue,
       };
     }),
 

@@ -55,11 +55,11 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
 
   const { mutate: markAsPaid } = api.sale.markAsPaid.useMutation({
     onSuccess: () => {
-      toast.success("Order marked as paid");
+      toast.success("Pesanan ditandai sudah dibayar");
       void utils.sale.getByStatus.invalidate();
     },
     onError: () => {
-      toast.error("Failed to update order status");
+      toast.error("Gagal memperbarui status pesanan");
     },
   });
 
@@ -76,7 +76,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
   if (!orders || orders.length === 0) {
     return (
       <div className="flex h-24 items-center justify-center rounded-lg border">
-        <p className="text-muted-foreground">No orders found.</p>
+        <p className="text-muted-foreground">Tidak ada pesanan.</p>
       </div>
     );
   }
@@ -88,11 +88,11 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
         <table className="w-full min-w-[800px]">
           <thead>
             <tr className="border-b text-left text-sm">
-              <th className="px-4 py-3">Receipt No</th>
+              <th className="px-4 py-3">No. Struk</th>
               <th className="px-4 py-3">Tanggal</th>
               <th className="px-4 py-3">Pelanggan</th>
               <th className="px-4 py-3">Total</th>
-              <th className="px-4 py-3">Payment</th>
+              <th className="px-4 py-3">Pembayaran</th>
               <th className="px-4 py-3">Status</th>
             </tr>
           </thead>
@@ -110,7 +110,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
                 <td className="max-w-[180px] truncate px-4 py-2">
-                  {order.customer?.name || "Walk-in"}
+                  {order.customer?.name || "Umum"}
                 </td>
                 <td className="min-w-[100px] px-4 py-2">
                   Rp{order.totalAmount.toLocaleString("id-ID")}
@@ -142,7 +142,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
         <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b text-left text-xs">
-              <th className="px-3 py-2">Receipt</th>
+              <th className="px-3 py-2">Struk</th>
               <th className="px-3 py-2">Tanggal</th>
               <th className="px-3 py-2">Pelanggan</th>
               <th className="px-3 py-2">Total</th>
@@ -163,7 +163,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
                 <td className="max-w-[120px] truncate px-3 py-2">
-                  {order.customer?.name || "Walk-in"}
+                  {order.customer?.name || "Umum"}
                 </td>
                 <td className="min-w-[80px] px-3 py-2">
                   Rp{order.totalAmount.toLocaleString("id-ID")}
@@ -202,7 +202,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h3 className="font-medium">Nomer Receipt</h3>
+                    <h3 className="font-medium">Nomer Struk</h3>
                     <p>{selectedOrder.receiptNo}</p>
                   </div>
                   <div>
@@ -213,12 +213,12 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
 
                 <div>
                   <h3 className="font-medium">Pelanggan</h3>
-                  <p>{selectedOrder.customer?.name || "Walk-in"}</p>
+                  <p>{selectedOrder.customer?.name || "Umum"}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h3 className="font-medium">Payment Method</h3>
+                    <h3 className="font-medium">Metode Pembayaran</h3>
                     <PaymentMethodBadge method={selectedOrder.paymentType} />
                   </div>
                   <div>
@@ -245,7 +245,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                 </div>
 
                 <div>
-                  <h3 className="font-medium">Items</h3>
+                  <h3 className="font-medium">Item</h3>
                   {selectedOrder.items?.map((item) => (
                     <div key={item.id} className="flex justify-between">
                       <span>{item.product.name}</span>
@@ -262,7 +262,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                       setSelectedOrder(null);
                     }}
                   >
-                    Mark as Paid
+                    Tandai Sudah Dibayar
                   </Button>
                 )}
               </div>

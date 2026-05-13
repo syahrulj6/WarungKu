@@ -137,6 +137,67 @@ export const productRouter = createTRPCRouter({
     }
   }),
 
+  getLowStockProduct: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        limit: z.number().int().min(1).max(100).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+
+      try {
+        const warung = await db.warung.findFirst({
+          where: {
+            id: input.warungId,
+            ownerId: user!.id,
+          },
+          select: { id: true },
+        });
+
+        if (!warung) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Warung tidak ditemukan atau bukan milik Anda",
+          });
+        }
+
+        const products = await db.product.findMany({
+          where: {
+            warungId: input.warungId,
+            isActive: true,
+          },
+          include: {
+            category: true,
+          },
+        });
+
+        const lowStockProducts = products
+          .filter((product) => product.stock <= (product.minStock ?? 5))
+          .sort((a, b) => {
+            const aGap = (a.minStock ?? 5) - a.stock;
+            const bGap = (b.minStock ?? 5) - b.stock;
+            return bGap - aGap;
+          })
+          .slice(0, input.limit ?? 20)
+          .map((product) => ({
+            ...product,
+            threshold: product.minStock ?? 5,
+            status: product.stock <= 0 ? "OUT_OF_STOCK" : "LOW_STOCK",
+            stockGap: (product.minStock ?? 5) - product.stock,
+          }));
+
+        return lowStockProducts;
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil data stok rendah",
+        });
+      }
+    }),
+
   createProduct: privateProcedure
     .input(
       createProductFormSchema.extend({
@@ -272,6 +333,86 @@ export const productRouter = createTRPCRouter({
         warungId: product.warungId,
         userId: user!.id,
         productId: product.id,
+      });
+
+      return updatedProduct;
+    }),
+
+  adjustProductStock: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        productId: z.string(),
+        quantityToAdd: z.number().int().min(1, "Jumlah stok minimal 1"),
+        reason: z.string().max(200).optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { warungId, productId, quantityToAdd, reason } = input;
+
+      const warung = await db.warung.findFirst({
+        where: {
+          id: warungId,
+          ownerId: user!.id,
+        },
+      });
+
+      if (!warung) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Warung tidak ditemukan atau bukan milik Anda",
+        });
+      }
+
+      const product = await db.product.findFirst({
+        where: {
+          id: productId,
+          warungId,
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Produk tidak ditemukan",
+        });
+      }
+
+      const oldStock = product.stock;
+      const newStock = oldStock + quantityToAdd;
+
+      const updatedProduct = await db.product.update({
+        where: { id: productId },
+        data: {
+          stock: newStock,
+        },
+      });
+
+      await db.stockAdjustment.create({
+        data: {
+          oldStock,
+          newStock,
+          reason: reason || "Restok dari peringatan stok rendah",
+          notes: `Tambah stok ${quantityToAdd}`,
+          warungId,
+          productId,
+          userId: user!.id,
+        },
+      });
+
+      await createProductActivity(db, {
+        type: ActivityType.PRODUCT_STOCK_ADJUSTED,
+        description: `Stok produk ${product.name} ditambah ${quantityToAdd}`,
+        warungId,
+        userId: user!.id,
+        productId: product.id,
+        metadata: {
+          oldStock,
+          newStock,
+          quantityToAdd,
+          reason: reason || null,
+        },
       });
 
       return updatedProduct;

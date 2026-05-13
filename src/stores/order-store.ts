@@ -11,7 +11,7 @@ interface OrderItem {
 
 interface OrderState {
   items: OrderItem[];
-  addItem: (item: Omit<OrderItem, "quantity">) => void;
+  addItem: (item: Omit<OrderItem, "quantity"> & { quantity?: number }) => void;
   updateQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clearOrder: () => void;
@@ -23,15 +23,16 @@ export const useOrderStore = create<OrderState>()(
       items: [],
       addItem: (item) =>
         set((state) => {
+          const addQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
           const existingItem = state.items.find((i) => i.id === item.id);
           if (existingItem) {
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i,
+                i.id === item.id ? { ...i, quantity: i.quantity + addQty } : i,
               ),
             };
           }
-          return { items: [...state.items, { ...item, quantity: 1 }] };
+          return { items: [...state.items, { ...item, quantity: addQty }] };
         }),
       updateQuantity: (id, quantity) =>
         set((state) => ({

@@ -52,33 +52,33 @@ const AccountDropdown = () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/preferences">Account Preferences</Link>
+            <Link href="/preferences">Preferensi Akun</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/security">Security</Link>
+            <Link href="/security">Keamanan</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Theme</DropdownMenuLabel>
+          <DropdownMenuLabel>Tema</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
             <DropdownMenuRadioItem value="light">
               <Sun className="mr-2 h-4 w-4" />
-              <span>Light</span>
+              <span>Terang</span>
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="dark">
               <Moon className="mr-2 h-4 w-4" />
-              <span>Dark</span>
+              <span>Gelap</span>
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="system">
               <Monitor className="mr-2 h-4 w-4" />
-              <span>System</span>
+              <span>Sistem</span>
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <button onClick={handleSignOut}>Log out</button>
+          <button onClick={handleSignOut}>Keluar</button>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuContent>

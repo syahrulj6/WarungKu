@@ -23,6 +23,8 @@ export const createProductFormSchema = z.object({
     .int("Stok minimum harus bilangan bulat")
     .min(0, "Stok minimum tidak boleh negatif")
     .optional(),
-  categoryId: z.string().optional(),
+  categoryId: z
+    .string({ required_error: "Kategori wajib dipilih" })
+    .min(1, "Kategori wajib dipilih"),
   isActive: z.boolean().default(true),
 });

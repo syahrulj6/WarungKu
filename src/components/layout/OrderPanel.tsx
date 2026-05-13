@@ -18,14 +18,17 @@ export const OrderPanel = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="min-w-0 overflow-x-hidden">
       {items.length === 0 ? (
-        <p className="text-muted-foreground text-center">No items in order</p>
+        <p className="text-muted-foreground text-center">Belum ada pesanan</p>
       ) : (
         <>
           <div className="space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3">
+              <div
+                key={item.id}
+                className="grid grid-cols-[48px_minmax(0,1fr)_auto] items-center gap-2"
+              >
                 {item.productImage && (
                   <div className="relative h-12 w-12 flex-shrink-0">
                     <Image
@@ -36,13 +39,13 @@ export const OrderPanel = () => {
                     />
                   </div>
                 )}
-                <div className="flex-1">
-                  <h4 className="font-medium">{item.name}</h4>
+                <div className="min-w-0">
+                  <h4 className="truncate font-medium">{item.name}</h4>
                   <p className="text-primary text-sm font-semibold">
                     {formatRupiah(item.price)}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <Input
                     type="number"
                     min="1"
@@ -50,11 +53,12 @@ export const OrderPanel = () => {
                     onChange={(e) =>
                       updateQuantity(item.id, parseInt(e.target.value) || 1)
                     }
-                    className="w-16"
+                    className="h-9 w-14 px-2"
                   />
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="h-9 w-9 shrink-0"
                     onClick={() => removeItem(item.id)}
                   >
                     <Trash2 className="h-4 w-4 text-red-500" />
@@ -72,10 +76,10 @@ export const OrderPanel = () => {
 
             <div className="mt-4 flex gap-2">
               <Button variant="outline" className="flex-1" onClick={clearOrder}>
-                Clear
+                Bersihkan
               </Button>
               <Button className="flex-1" asChild>
-                <Link href={`/dashboard/warung/${id}/order`}>Check Out</Link>
+                <Link href={`/dashboard/warung/${id}/order`}>Checkout</Link>
               </Button>
             </div>
           </div>

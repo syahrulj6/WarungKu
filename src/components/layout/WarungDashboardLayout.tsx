@@ -25,43 +25,43 @@ import { HeadMetaData } from "./HeadMetaData";
 
 const menuItems = [
   {
-    title: "Overview",
+    title: "Ringkasan",
     icon: <GoHomeFill />,
     url: "/dashboard/warung/[id]",
     path: (id: string) => `/dashboard/warung/${id}`,
   },
   {
-    title: "Menu",
+    title: "Produk",
     icon: <FaConciergeBell />,
-    url: "/dashboard/warung/[id]/menu",
-    path: (id: string) => `/dashboard/warung/${id}/menu`,
+    url: "/dashboard/warung/[id]/product",
+    path: (id: string) => `/dashboard/warung/${id}/product`,
   },
   {
-    title: "Order",
+    title: "Pesanan",
     icon: <FaShoppingCart />,
     url: "/dashboard/warung/[id]/order",
     path: (id: string) => `/dashboard/warung/${id}/order`,
   },
   {
-    title: "History",
+    title: "Riwayat",
     icon: <GoClockFill />,
     url: "/dashboard/warung/[id]/history",
     path: (id: string) => `/dashboard/warung/${id}/history`,
   },
   {
-    title: "Report",
+    title: "Laporan",
     icon: <FaBook />,
     url: "/dashboard/warung/[id]/report",
     path: (id: string) => `/dashboard/warung/${id}/report`,
   },
   {
-    title: "Alert",
+    title: "Peringatan",
     icon: <FaBell />,
     url: "/dashboard/warung/[id]/alert",
     path: (id: string) => `/dashboard/warung/${id}/alert`,
   },
   {
-    title: "Settings",
+    title: "Pengaturan",
     icon: <IoSettingsSharp />,
     url: "/dashboard/warung/[id]/settings",
     path: (id: string) => `/dashboard/warung/${id}/settings`,
@@ -151,9 +151,9 @@ export const WarungDashboardLayout = ({
             </SheetTrigger>
             <SheetContent side="left" className="w-2/4 p-0">
               <SheetHeader className="p-4">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <SheetTitle className="sr-only">Menu Navigasi</SheetTitle>
                 <SheetDescription className="sr-only">
-                  Main navigation menu for the application
+                  Menu navigasi utama aplikasi
                 </SheetDescription>
               </SheetHeader>
               <WarungSidebar menuItems={enhancedMenuItems} />
@@ -182,13 +182,13 @@ export const WarungDashboardLayout = ({
           {/* Right Sidebar (Desktop) */}
           {withRightPanel && !isMobile && (
             <div
-              className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-64" : "w-0"}`}
+              className={`relative transition-all duration-300 ${isRightPanelOpen ? "w-72 lg:w-80" : "w-0"}`}
             >
-              <div className="bg-bacgkround absolute inset-y-0 right-0 flex h-full border-l">
+              <div className="bg-background absolute inset-y-0 right-0 flex h-full border-l">
                 {isRightPanelOpen && (
-                  <div className="h-full w-64 overflow-y-auto p-4">
+                  <div className="h-full w-72 overflow-y-auto overflow-x-hidden p-4 lg:w-80">
                     <h3 className="mb-4 text-lg font-semibold">
-                      Current Order
+                      Pesanan Saat Ini
                     </h3>
                     <OrderPanel />
                   </div>
@@ -218,9 +218,9 @@ export const WarungDashboardLayout = ({
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-0">
               <SheetHeader className="p-4">
-                <SheetTitle>Current Order</SheetTitle>
+                <SheetTitle>Pesanan Saat Ini</SheetTitle>
                 <SheetDescription>
-                  Panel showing current order information
+                  Panel yang menampilkan informasi pesanan saat ini
                 </SheetDescription>
               </SheetHeader>
               <div className="p-4">

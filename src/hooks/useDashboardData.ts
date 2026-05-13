@@ -229,6 +229,64 @@ export const useWarungDashboardData = (
                 previousMetrics?.revenue || 0,
               ),
       },
+      grossSales: {
+        current: metrics?.grossSales || 0,
+        previous:
+          timePeriod === "all-time" ? 0 : previousMetrics?.grossSales || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.grossSales || 0,
+                previousMetrics?.grossSales || 0,
+              ),
+      },
+      cogs: {
+        current: metrics?.cogs || 0,
+        previous: timePeriod === "all-time" ? 0 : previousMetrics?.cogs || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(metrics?.cogs || 0, previousMetrics?.cogs || 0),
+      },
+      unpaidOrders: {
+        current: metrics?.unpaidOrders || 0,
+        previous:
+          timePeriod === "all-time" ? 0 : previousMetrics?.unpaidOrders || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.unpaidOrders || 0,
+                previousMetrics?.unpaidOrders || 0,
+              ),
+      },
+      unpaidAmount: {
+        current: metrics?.unpaidAmount || 0,
+        previous:
+          timePeriod === "all-time" ? 0 : previousMetrics?.unpaidAmount || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.unpaidAmount || 0,
+                previousMetrics?.unpaidAmount || 0,
+              ),
+      },
+      averageOrderValue: {
+        current: metrics?.averageOrderValue || 0,
+        previous:
+          timePeriod === "all-time"
+            ? 0
+            : previousMetrics?.averageOrderValue || 0,
+        change:
+          timePeriod === "all-time"
+            ? 0
+            : calculateChange(
+                metrics?.averageOrderValue || 0,
+                previousMetrics?.averageOrderValue || 0,
+              ),
+      },
       orders: {
         current: metrics?.orders || 0,
         previous: timePeriod === "all-time" ? 0 : previousMetrics?.orders || 0,

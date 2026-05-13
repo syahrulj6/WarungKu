@@ -13,15 +13,15 @@ import { toast } from "sonner";
 
 const settingsMenu = [
   {
-    name: "Profile",
+    name: "Profil",
     href: "/dashboard/warung/[id]/settings",
   },
   {
-    name: "Menu",
+    name: "Produk",
     href: "/dashboard/warung/[id]/settings/notifications",
   },
   {
-    name: "Security",
+    name: "Keamanan",
     href: "/dashboard/warung/[id]/settings/security",
   },
 ];
@@ -68,13 +68,13 @@ const WarungSettingsPage = () => {
 
   return (
     <WarungDashboardLayout
-      metaTitle="Settings"
+      metaTitle="Pengaturan"
       metaDescription="Atur Semua mengenai Kasirium Anda"
       pathname={`/dashboard/warung/${id}/settings/`}
     >
       <div className="flex flex-col">
         <div className="flex flex-col gap-2">
-          <h1 className="text-xl font-semibold md:text-2xl">Settings</h1>
+          <h1 className="text-xl font-semibold md:text-2xl">Pengaturan</h1>
           <p className="text-muted-foreground text-xs md:text-sm">
             Atur semua mengenai Kasirium Anda
           </p>
@@ -95,7 +95,7 @@ const WarungSettingsPage = () => {
         </div>
         <div className="grid grid-cols-3 md:mt-10">
           <div className="col-span-1">
-            <h3 className="text-lg">Profile</h3>
+            <h3 className="text-lg">Profil</h3>
             <p className="text-muted-foreground text-xs md:text-sm">
               Atur detail informasi profil Kasirium Anda
             </p>

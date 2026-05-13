@@ -5,17 +5,17 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { CreateProductModal } from "./CreateProductModal";
 
-interface MenuHeaderProps {
+interface ProductHeaderProps {
   refetchProductData: () => void;
   searchTerm: string;
   onSearchChange: (value: string) => void;
 }
 
-export const MenuHeader = ({
+export const ProductHeader = ({
   refetchProductData,
   searchTerm,
   onSearchChange,
-}: MenuHeaderProps) => {
+}: ProductHeaderProps) => {
   const searchId = useId();
 
   return (
@@ -23,7 +23,7 @@ export const MenuHeader = ({
       <div className="relative w-full">
         <Input
           id={searchId}
-          placeholder="Cari menu"
+          placeholder="Cari produk"
           className="w-full pl-10 text-sm"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -36,7 +36,7 @@ export const MenuHeader = ({
       <CreateProductModal refetch={refetchProductData}>
         <Button className="w-full md:w-auto">
           <Plus className="h-4 w-4" />
-          <span className="ml-2">Tambah Menu</span>
+          <span className="ml-2">Tambah Produk</span>
         </Button>
       </CreateProductModal>
     </div>

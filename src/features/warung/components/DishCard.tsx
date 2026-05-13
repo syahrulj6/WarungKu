@@ -75,7 +75,7 @@ export const DishCard = ({
             <div className="flex flex-col">
               <h4 className="font-semibold">{dish.name}</h4>
               <p className="text-muted-foreground text-sm">
-                Pesanan: <span className="text-primary">{dish.stock}</span>
+                Stok: <span className="text-primary">{dish.stock}</span>
               </p>
             </div>
           </div>

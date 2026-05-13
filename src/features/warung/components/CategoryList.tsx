@@ -1,23 +1,31 @@
-import { Coffee, Pizza, Star, Cookie, Grip } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { api } from "~/utils/api";
-import { cn } from "~/lib/utils";
+﻿import { Coffee, Pizza, Star, Cookie, Grip, Dot } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/router";
+import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
+import { cn } from "~/lib/utils";
+import { api } from "~/utils/api";
 
 export const CategoryList = ({
   onCategoryChange,
 }: {
   onCategoryChange: (categoryId: string | null) => void;
 }) => {
+  const router = useRouter();
+  const { id } = router.query;
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const { data: categories, isLoading } =
-    api.category.getAllCategory.useQuery();
+  const { data: categories, isLoading } = api.category.getAllCategory.useQuery(
+    { warungId: id as string },
+    { enabled: !!id },
+  );
 
   const defaultCategoryIcons: Record<string, React.ReactNode> = {
     Food: <Pizza className="h-4 w-4" />,
+    Makanan: <Pizza className="h-4 w-4" />,
     Beverage: <Coffee className="h-4 w-4" />,
+    Minuman: <Coffee className="h-4 w-4" />,
     Snack: <Cookie className="h-4 w-4" />,
+    Camilan: <Cookie className="h-4 w-4" />,
   };
 
   const handleCategoryClick = (categoryId: string | null) => {
@@ -36,7 +44,7 @@ export const CategoryList = ({
   }
 
   if (!categories || categories.length === 0) {
-    return <div>No categories found</div>;
+    return <div>Kategori belum tersedia</div>;
   }
 
   return (
@@ -46,17 +54,15 @@ export const CategoryList = ({
         onClick={() => handleCategoryClick(null)}
       >
         <Grip className="h-4 w-4" />
-
-        <span className="ml-2">All Menu</span>
+        <span className="ml-2">Semua Produk</span>
       </Button>
 
-      {/* Best Seller (special case) */}
       <Button
         variant={activeCategory === "best-seller" ? "default" : "secondary"}
         onClick={() => handleCategoryClick("best-seller")}
       >
         <Star className="h-4 w-4" />
-        <span className="ml-2">Best Seller</span>
+        <span className="ml-2">Terlaris</span>
       </Button>
 
       {categories.map((category) => (
@@ -71,7 +77,9 @@ export const CategoryList = ({
           )}
         >
           {defaultCategoryIcons[category.name] || (
-            <span className="flex h-4 w-4 items-center justify-center">•</span>
+            <span className="flex h-4 w-4 items-center justify-center">
+              <Dot />
+            </span>
           )}
           <span className="ml-2">{category.name}</span>
         </Button>

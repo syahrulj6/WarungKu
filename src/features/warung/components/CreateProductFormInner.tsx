@@ -1,4 +1,6 @@
 import { useFormContext } from "react-hook-form";
+import { useState } from "react";
+import { useRouter } from "next/router";
 import {
   FormControl,
   FormField,
@@ -17,11 +19,46 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { formatRupiah, parseRupiah } from "~/lib/format";
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 
 export const CreateProductFormInner = () => {
+  const router = useRouter();
+  const { id } = router.query;
   const form = useFormContext<CreateProductFormSchema>();
-  const { data: categories, isLoading } =
-    api.category.getAllCategory.useQuery();
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [justCreatedCategory, setJustCreatedCategory] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const { data: categories, isLoading, refetch: refetchCategories } =
+    api.category.getAllCategory.useQuery(
+      { warungId: id as string },
+      { enabled: !!id },
+    );
+  const { mutateAsync: createCategory, isPending: isCreatingCategory } =
+    api.category.createCategory.useMutation();
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error("Nama kategori wajib diisi");
+      return;
+    }
+
+    try {
+      const category = await createCategory({
+        warungId: id as string,
+        name: newCategoryName.trim(),
+      });
+      form.setValue("categoryId", category.id);
+      setJustCreatedCategory({ id: category.id, name: category.name });
+      await refetchCategories();
+      setNewCategoryName("");
+      toast.success("Kategori berhasil ditambahkan");
+    } catch (error) {
+      toast.error("Gagal menambahkan kategori");
+    }
+  };
 
   return (
     <>
@@ -151,6 +188,15 @@ export const CreateProductFormInner = () => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
+                {justCreatedCategory &&
+                  !categories?.some((c) => c.id === justCreatedCategory.id) && (
+                    <SelectItem
+                      key={justCreatedCategory.id}
+                      value={justCreatedCategory.id}
+                    >
+                      {justCreatedCategory.name}
+                    </SelectItem>
+                  )}
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
@@ -162,6 +208,26 @@ export const CreateProductFormInner = () => {
           </FormItem>
         )}
       />
+
+      <FormItem className="col-span-2">
+        <FormLabel>Tambah Kategori Kustom</FormLabel>
+        <div className="flex gap-2">
+          <Input
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder="Contoh: Minuman Dingin"
+            disabled={isCreatingCategory}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void handleCreateCategory()}
+            disabled={isCreatingCategory}
+          >
+            {isCreatingCategory ? "Menyimpan..." : "Tambah"}
+          </Button>
+        </div>
+      </FormItem>
     </>
   );
 };

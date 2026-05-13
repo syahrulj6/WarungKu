@@ -5,10 +5,10 @@ import Image from "next/image";
 import { useSession } from "~/hooks/useSession";
 
 const links = [
-  { name: "Home", url: "/" },
-  { name: "Features", url: "#features" },
-  { name: "How it Works", url: "#how-it-works" },
-  { name: "Pricing", url: "#pricing" },
+  { name: "Beranda", url: "/" },
+  { name: "Fitur", url: "#features" },
+  { name: "Cara Kerja", url: "#how-it-works" },
+  { name: "Harga", url: "#pricing" },
 ];
 
 export const Header = () => {
@@ -84,19 +84,19 @@ export const Header = () => {
           ) : session ? (
             <>
               <Button asChild className="hidden md:block">
-                <Link href="/dashboard/warung">Dashboard</Link>
+                <Link href="/dashboard/warung">Dasbor</Link>
               </Button>
             </>
           ) : (
             <Button asChild variant="default" className="hidden md:flex">
-              <Link href="/login">Try for Free</Link>
+              <Link href="/login">Coba </Link>
             </Button>
           )}
 
           <button
             className="relative z-10 md:hidden"
             onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
+            aria-label="Buka tutup menu"
           >
             <div className="space-y-1.5">
               <span
@@ -141,13 +141,13 @@ export const Header = () => {
           {session ? (
             <>
               <Button asChild className="w-full">
-                <Link href="/dashboard/warung">Dashboard</Link>
+                <Link href="/dashboard/warung">Dasbor</Link>
               </Button>
             </>
           ) : (
             <Button asChild variant="default" className="w-full">
               <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                Try for Free
+                Coba Gratis
               </Link>
             </Button>
           )}
@@ -156,5 +156,3 @@ export const Header = () => {
     </>
   );
 };
-
-

@@ -114,7 +114,7 @@ export const CheckoutForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Customer Selection */}
       <div className="space-y-2">
-        <Label>Customer (Optional)</Label>
+        <Label>Pelanggan (Opsional)</Label>
         <div className="flex gap-2">
           <Select
             value={customerId ?? "none"}
@@ -123,10 +123,10 @@ export const CheckoutForm = () => {
             }
           >
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Select customer" />
+              <SelectValue placeholder="Pilih pelanggan" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">No customer</SelectItem>
+              <SelectItem value="none">Tanpa pelanggan</SelectItem>
               {customers?.map((customer) => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name} {customer.phone && `(${customer.phone})`}
@@ -144,37 +144,37 @@ export const CheckoutForm = () => {
                 type="button"
                 variant="outline"
                 size="icon"
-                aria-label="Add new customer"
+                aria-label="Tambah pelanggan baru"
               >
                 <PlusCircle className="h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add New Customer</DialogTitle>
+                <DialogTitle>Tambah pelanggan baru</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="customerName">Name *</Label>
+                  <Label htmlFor="customerName">Nama *</Label>
                   <Input
                     id="customerName"
                     value={newCustomer.name}
                     onChange={(e) =>
                       setNewCustomer({ ...newCustomer, name: e.target.value })
                     }
-                    placeholder="Customer name"
+                    placeholder="Nama pelanggan"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="customerPhone">Phone</Label>
+                  <Label htmlFor="customerPhone">Telepon</Label>
                   <Input
                     id="customerPhone"
                     value={newCustomer.phone}
                     onChange={(e) =>
                       setNewCustomer({ ...newCustomer, phone: e.target.value })
                     }
-                    placeholder="Phone number"
+                    placeholder="Nomor telepon"
                   />
                 </div>
                 <div className="space-y-2">
@@ -186,11 +186,11 @@ export const CheckoutForm = () => {
                     onChange={(e) =>
                       setNewCustomer({ ...newCustomer, email: e.target.value })
                     }
-                    placeholder="Email address"
+                    placeholder="Alamat email"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="customerAddress">Address</Label>
+                  <Label htmlFor="customerAddress">Alamat</Label>
                   <Input
                     id="customerAddress"
                     value={newCustomer.address}
@@ -200,7 +200,7 @@ export const CheckoutForm = () => {
                         address: e.target.value,
                       })
                     }
-                    placeholder="Address"
+                    placeholder="Alamat"
                   />
                 </div>
                 <Button
@@ -209,7 +209,7 @@ export const CheckoutForm = () => {
                   className="w-full"
                   disabled={isCreatingCustomer}
                 >
-                  {isCreatingCustomer ? "Adding..." : "Add Customer"}
+                  {isCreatingCustomer ? "Menambahkan..." : "Tambah Pelanggan"}
                 </Button>
               </div>
             </DialogContent>
@@ -217,9 +217,9 @@ export const CheckoutForm = () => {
         </div>
       </div>
 
-      {/* Payment Method */}
+      {/* Metode Pembayaran */}
       <div className="space-y-2">
-        <Label>Payment Method</Label>
+        <Label>Metode Pembayaran</Label>
         <RadioGroup
           value={paymentType}
           onValueChange={(value) => setPaymentType(value as PaymentType)}
@@ -227,7 +227,7 @@ export const CheckoutForm = () => {
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="CASH" id="cash" />
-            <Label htmlFor="cash">Cash</Label>
+            <Label htmlFor="cash">Tunai</Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="QRIS" id="qris" />
@@ -235,7 +235,7 @@ export const CheckoutForm = () => {
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="BANK_TRANSFER" id="transfer" />
-            <Label htmlFor="transfer">Bank Transfer</Label>
+            <Label htmlFor="transfer">Transfer Bank</Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="E_WALLET" id="ewallet" />
@@ -246,12 +246,12 @@ export const CheckoutForm = () => {
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">Catatan</Label>
         <Input
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Additional notes..."
+          placeholder="Catatan tambahan..."
         />
       </div>
 
@@ -269,7 +269,7 @@ export const CheckoutForm = () => {
         className="w-full"
         disabled={isProcessing || items.length === 0}
       >
-        {isProcessing ? "Processing..." : "Complete Order"}
+        {isProcessing ? "Memproses..." : "Selesaikan Pesanan"}
       </Button>
     </form>
   );
