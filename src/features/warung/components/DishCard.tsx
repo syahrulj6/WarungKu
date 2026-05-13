@@ -1,6 +1,7 @@
 import type { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -9,12 +10,14 @@ interface DishCardProps {
   title: string;
   dishesData: Product[] | undefined;
   isLoading?: boolean;
+  ctaHref?: string;
 }
 
 export const DishCard = ({
   title,
   dishesData,
   isLoading = false,
+  ctaHref,
 }: DishCardProps) => {
   if (isLoading) {
     return (
@@ -58,9 +61,13 @@ export const DishCard = ({
     <Card>
       <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-lg md:text-xl">{title}</CardTitle>
-        <Button variant="ghost">
-          Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        {ctaHref ? (
+          <Button variant="ghost" asChild>
+            <Link href={ctaHref}>
+              Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        ) : null}
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {dishesData.map((dish) => (

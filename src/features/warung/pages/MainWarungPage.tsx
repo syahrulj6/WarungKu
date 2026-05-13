@@ -107,14 +107,6 @@ const MainDashboardPage = () => {
           >
             1 Tahun
           </Button>
-
-          <Button
-            variant={timePeriod === "all-time" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTimePeriod("all-time")}
-          >
-            Semua Waktu
-          </Button>
         </div>
 
         {/* Metrics Card */}
@@ -125,7 +117,7 @@ const MainDashboardPage = () => {
             iconBg="bg-emerald-600"
             icon={<ArrowUpRight className="h-4 w-4" />}
             change={revenue?.change}
-            showChange={timePeriod !== "all-time"}
+            showChange={true}
           />
           <MetricsCard
             title="Omzet (Penjualan)"
@@ -133,7 +125,7 @@ const MainDashboardPage = () => {
             iconBg="bg-primary"
             icon={<Banknote className="h-4 w-4" />}
             change={grossSales?.change}
-            showChange={timePeriod !== "all-time"}
+            showChange={true}
           />
           <MetricsCard
             title="Modal Terjual"
@@ -148,7 +140,7 @@ const MainDashboardPage = () => {
             iconBg="bg-yellow-500"
             icon={<ShoppingCart className="h-4 w-4" />}
             change={orders?.change}
-            showChange={timePeriod !== "all-time"}
+            showChange={true}
           />
           <MetricsCard
             title="Stok Rendah"
@@ -170,7 +162,7 @@ const MainDashboardPage = () => {
             iconBg="bg-blue-500"
             icon={<Users className="h-4 w-4" />}
             change={customers?.change}
-            showChange={timePeriod !== "all-time"}
+            showChange={true}
           />
           <MetricsCard
             title="Rata-rata Nilai Pesanan"
@@ -198,10 +190,15 @@ const MainDashboardPage = () => {
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <DishCard title="Produk Unggulan" dishesData={productData} />
+          <DishCard
+            title="Produk Unggulan"
+            dishesData={productData}
+            ctaHref={`/dashboard/warung/${id as string}/product`}
+          />
           <DishCard
             title="Perlu Perhatian Stok"
             dishesData={lowStockProducts}
+            ctaHref={`/dashboard/warung/${id as string}/alert`}
           />
         </div>
       </div>

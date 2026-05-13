@@ -33,10 +33,6 @@ export const BarChartCard = ({
   const isMd = useMediaQuery("(min-width: 768px)");
   const isLg = useMediaQuery("(min-width: 1024px)");
 
-  if (timePeriod === "all-time") {
-    timePeriod = "Semua waktu";
-  }
-
   if (isLoading) {
     return (
       <Card className="flex w-full flex-col">
