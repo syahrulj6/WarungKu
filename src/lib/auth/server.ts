@@ -7,6 +7,7 @@ import {
 } from "./constants";
 
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "warungku-local-auth-secret";
+const EMAIL_VERIFICATION_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
 type CookieOptions = {
   httpOnly?: boolean;
@@ -18,6 +19,61 @@ type CookieOptions = {
 
 function createSignature(value: string) {
   return crypto.createHmac("sha256", AUTH_SECRET).update(value).digest("hex");
+}
+
+type EmailVerificationPayload = {
+  email: string;
+  exp: number;
+};
+
+export function createEmailVerificationToken(email: string) {
+  const payload: EmailVerificationPayload = {
+    email: email.toLowerCase(),
+    exp: Math.floor(Date.now() / 1000) + EMAIL_VERIFICATION_TTL_SECONDS,
+  };
+
+  const payloadString = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const signature = createSignature(payloadString);
+
+  return `${payloadString}.${signature}`;
+}
+
+export function verifyEmailVerificationToken(token: string) {
+  const separatorIndex = token.lastIndexOf(".");
+  if (separatorIndex <= 0) return null;
+
+  const payloadString = token.slice(0, separatorIndex);
+  const signature = token.slice(separatorIndex + 1);
+  const expectedSignature = createSignature(payloadString);
+
+  if (signature.length !== expectedSignature.length) return null;
+
+  if (
+    !crypto.timingSafeEqual(
+      Buffer.from(signature, "hex"),
+      Buffer.from(expectedSignature, "hex"),
+    )
+  ) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(payloadString, "base64url").toString("utf8"),
+    ) as EmailVerificationPayload;
+
+    if (!payload?.email || typeof payload.exp !== "number") {
+      return null;
+    }
+
+    if (payload.exp < Math.floor(Date.now() / 1000)) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
 }
 
 export function createSessionToken(userId: string) {

@@ -52,7 +52,7 @@ export const LoginFormInner = (props: LoginFormInnerProps) => {
             <FormLabel>Password</FormLabel>
             <FormControl>
               <Input
-                type={`${props.showPassword ? "text" : "password"}`}
+                type={showPassword ? "text" : "password"}
                 {...field}
               />
             </FormControl>

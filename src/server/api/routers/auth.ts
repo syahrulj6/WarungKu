@@ -5,10 +5,13 @@ import { generateFromEmail } from "unique-username-generator";
 import { z } from "zod";
 import {
   clearSessionCookies,
+  createEmailVerificationToken,
   hashPassword,
   setSessionCookies,
+  verifyEmailVerificationToken,
   verifyPassword,
 } from "~/lib/auth/server";
+import { sendVerificationEmail } from "~/lib/email";
 import { passwordSchema } from "~/schemas/auth";
 import {
   createTRPCRouter,
@@ -38,6 +41,24 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const passwordHash = await hashPassword(input.password);
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      const sendVerificationLink = async (email: string) => {
+        const token = createEmailVerificationToken(email);
+        const verificationUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(
+          token,
+        )}`;
+
+        try {
+          await sendVerificationEmail({
+            email,
+            verificationUrl,
+          });
+          return true;
+        } catch (error) {
+          console.error("Verification email send failed:", error);
+          return false;
+        }
+      };
 
       try {
         const user = await ctx.db.user.create({
@@ -45,27 +66,50 @@ export const authRouter = createTRPCRouter({
             email: input.email,
             username: generateFromEmail(input.email),
             passwordHash,
-            isActive: true,
+            isActive: false,
             mfaBackupCodes: [],
           },
         });
 
+        const emailSent = await sendVerificationLink(user.email);
+
         return {
           success: true,
           userId: user.id,
+          emailSent,
         };
       } catch (error) {
-        console.error("Registration error:", error);
-
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
           error.code === "P2002"
         ) {
+          const existingUser = await ctx.db.user.findUnique({
+            where: { email: input.email },
+            select: { id: true, email: true, isActive: true },
+          });
+
+          if (existingUser && !existingUser.isActive) {
+            await ctx.db.user.update({
+              where: { id: existingUser.id },
+              data: { passwordHash },
+            });
+
+            const emailSent = await sendVerificationLink(existingUser.email);
+
+            return {
+              success: true,
+              userId: existingUser.id,
+              emailSent,
+            };
+          }
+
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Email already registered",
           });
         }
+
+        console.error("Registration error:", error);
 
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
@@ -101,7 +145,7 @@ export const authRouter = createTRPCRouter({
       if (!user.isActive) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Akun tidak aktif",
+          message: "Akun belum terverifikasi. Silakan cek email Anda.",
         });
       }
 
@@ -201,6 +245,40 @@ export const authRouter = createTRPCRouter({
       }
 
       setSessionCookies(ctx.res, user.id, { mfaVerified: true });
+
+      return { success: true };
+    }),
+
+  verifyEmail: publicProcedure
+    .input(z.object({ token: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      const payload = verifyEmailVerificationToken(input.token);
+
+      if (!payload) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Link verifikasi tidak valid atau sudah kedaluwarsa",
+        });
+      }
+
+      const user = await ctx.db.user.findUnique({
+        where: { email: payload.email },
+        select: { id: true, isActive: true },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Akun tidak ditemukan",
+        });
+      }
+
+      if (!user.isActive) {
+        await ctx.db.user.update({
+          where: { id: user.id },
+          data: { isActive: true },
+        });
+      }
 
       return { success: true };
     }),

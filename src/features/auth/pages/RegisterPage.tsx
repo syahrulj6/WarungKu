@@ -29,11 +29,18 @@ const RegisterPage = () => {
 
   const { mutate: registerUser, isPending: registerUserIsPending } =
     api.auth.register.useMutation({
-      onSuccess: () => {
-        toast.success("Akun berhasil dibuat!", {
-          description:
-            "Silakan login menggunakan email dan password yang telah didaftarkan",
-        });
+      onSuccess: (result) => {
+        if (result.emailSent) {
+          toast.success("Akun berhasil dibuat!", {
+            description:
+              "Silakan cek email Anda untuk verifikasi akun sebelum login",
+          });
+        } else {
+          toast.warning("Akun berhasil dibuat, email belum terkirim", {
+            description:
+              "Silakan coba daftar lagi dengan email yang sama untuk kirim ulang verifikasi.",
+          });
+        }
         form.reset();
       },
       onError: (error) => {

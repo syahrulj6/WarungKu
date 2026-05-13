@@ -44,6 +44,13 @@ const LoginPage = () => {
         return;
       }
 
+      if (message.includes("Akun belum terverifikasi")) {
+        toast.error("Email belum diverifikasi", {
+          description: "Cek inbox email Anda, lalu klik link verifikasi.",
+        });
+        return;
+      }
+
       toast.error(message || "Terjadi kesalahan, silakan coba lagi");
     }
   };
