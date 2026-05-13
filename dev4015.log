@@ -1,0 +1,13 @@
+   ▲ Next.js 15.2.4 (Turbopack)
+   - Local:        http://localhost:4015
+   - Network:      http://192.168.56.1:4015
+   - Environments: .env
+
+ ✓ Starting...
+Creating turbopack project { dir: 'C:\\projects\\WarungKu', testMode: true }
+ ✓ Compiled in 189ms
+ ✓ Ready in 1632ms
+ ✓ Compiled /api/trpc/[trpc] in 116ms
+prisma:query SELECT "public"."User"."id", "public"."User"."email", "public"."User"."username", "public"."User"."passwordHash", "public"."User"."isActive", "public"."User"."createdAt", "public"."User"."updatedAt", "public"."User"."mfaEnabled", "public"."User"."mfaSecret", "public"."User"."mfaBackupCodes" FROM "public"."User" WHERE ("public"."User"."email" = $1 AND 1=1) LIMIT $2 OFFSET $3
+[TRPC] auth.login took 705ms to execute
+ POST /api/trpc/auth.login?batch=1 200 in 976ms

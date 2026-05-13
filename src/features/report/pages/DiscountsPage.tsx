@@ -10,7 +10,7 @@ const DiscountsPage = () => {
   return (
     <WarungDashboardLayout
       metaTitle="Laporan"
-      metaDescription="Lihat laporan mengenai warung Anda"
+      metaDescription="Lihat laporan mengenai Kasirium Anda"
       pathname={`/dashboard/warung/${id}/report/discounts`}
     >
       {/* TODO: Report Sidebar */}
@@ -22,3 +22,4 @@ const DiscountsPage = () => {
 };
 
 export default DiscountsPage;
+

@@ -45,3 +45,4 @@ export const WarungCard = ({ warung }: WarungCardProps) => {
     </Link>
   );
 };
+

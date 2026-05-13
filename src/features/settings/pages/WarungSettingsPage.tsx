@@ -47,12 +47,12 @@ const WarungSettingsPage = () => {
     console.log("Submitting:", data);
     updateWarung.mutate(data, {
       onSuccess: () => {
-        toast.success("Berhasil update warung");
+        toast.success("Berhasil update Kasirium");
         form.reset();
       },
       onError: (error) => {
         console.error("Error:", error);
-        toast.error(error.message || "Gagal update warung");
+        toast.error(error.message || "Gagal update Kasirium");
       },
     });
   };
@@ -69,14 +69,14 @@ const WarungSettingsPage = () => {
   return (
     <WarungDashboardLayout
       metaTitle="Settings"
-      metaDescription="Atur Semua mengenai warung Anda"
+      metaDescription="Atur Semua mengenai Kasirium Anda"
       pathname={`/dashboard/warung/${id}/settings/`}
     >
       <div className="flex flex-col">
         <div className="flex flex-col gap-2">
           <h1 className="text-xl font-semibold md:text-2xl">Settings</h1>
           <p className="text-muted-foreground text-xs md:text-sm">
-            Atur semua mengenai warung Anda
+            Atur semua mengenai Kasirium Anda
           </p>
         </div>
         <div className="flex gap-2 md:mt-4">
@@ -97,7 +97,7 @@ const WarungSettingsPage = () => {
           <div className="col-span-1">
             <h3 className="text-lg">Profile</h3>
             <p className="text-muted-foreground text-xs md:text-sm">
-              Atur detail informasi profil warung Anda
+              Atur detail informasi profil Kasirium Anda
             </p>
           </div>
         </div>
@@ -108,3 +108,4 @@ const WarungSettingsPage = () => {
 };
 
 export default WarungSettingsPage;
+

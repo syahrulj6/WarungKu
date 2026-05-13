@@ -48,8 +48,8 @@ export const CheckoutForm = () => {
   const { mutate: createCustomer, isPending: isCreatingCustomer } =
     api.customer.create.useMutation({
       onSuccess: (customer) => {
-        toast.success("Berhasil membuat customer baru"),
-          setCustomerId(customer.id);
+        toast.success("Berhasil membuat customer baru");
+        setCustomerId(customer.id);
         void refetchCustomers();
         setIsCustomerDialogOpen(false);
         setNewCustomer({ name: "", phone: "", email: "", address: "" });
@@ -61,12 +61,14 @@ export const CheckoutForm = () => {
 
   const { mutate: createSale } = api.sale.create.useMutation({
     onSuccess: () => {
-      toast.success("Berhasil membuat order"), clearOrder();
-      router.push(`/dashboard/warung/${id}/history`);
+      toast.success("Berhasil membuat order");
+      clearOrder();
+      void router.push(`/dashboard/warung/${id as string}/history`);
     },
     onError: (error) => {
       console.error("Checkout failed:", error);
-      toast.error("Gagal membuat order"), setIsProcessing(false);
+      toast.error("Gagal membuat order");
+      setIsProcessing(false);
     },
   });
 
@@ -272,3 +274,4 @@ export const CheckoutForm = () => {
     </form>
   );
 };
+

@@ -51,3 +51,4 @@ export const customerRouter = createTRPCRouter({
       return customer;
     }),
 });
+

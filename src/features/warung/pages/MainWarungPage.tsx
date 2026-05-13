@@ -52,15 +52,15 @@ const MainDashboardPage = () => {
 
   return (
     <WarungDashboardLayout
-      metaTitle="Warung Dashboard"
-      metaDescription="Kelola warung Anda dengan mudah melalui dashboard Warung"
+      metaTitle="Kasirium Dashboard"
+      metaDescription="Kelola Bisnis Anda dengan mudah melalui dashboard Kasirium"
       pathname={`/dashboard/warung/${id}/`}
       withRightPanel={true}
       headerContent={
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <h1 className="text-sm font-semibold md:text-xl">
-              Warung {warung?.name || "Warung Dashboard"}
+              Kasir {warung?.name || "Kasirium Dashboard"}
             </h1>
             <p className="text-muted-foreground text-xs md:text-sm">
               {formattedDate}

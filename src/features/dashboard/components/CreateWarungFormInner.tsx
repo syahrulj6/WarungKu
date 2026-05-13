@@ -19,9 +19,9 @@ export const CreateWarungFormInner = () => {
         name="name"
         render={({ field }) => (
           <FormItem className="col-span-2">
-            <FormLabel>Nama Warung</FormLabel>
+            <FormLabel>Nama Kasirium</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="Nama warung" />
+              <Input {...field} placeholder="Nama Kasirium" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -58,3 +58,4 @@ export const CreateWarungFormInner = () => {
     </>
   );
 };
+

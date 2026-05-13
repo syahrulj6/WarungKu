@@ -43,14 +43,14 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
     console.log("Submitting:", data);
     createWarung.mutate(data, {
       onSuccess: () => {
-        toast.success("Berhasil membuat warung");
+        toast.success("Berhasil membuat Kasir");
         refetch();
         form.reset();
         setOpen(false);
       },
       onError: (error) => {
         console.error("Error:", error);
-        toast.error(error.message || "Gagal membuat warung");
+        toast.error(error.message || "Gagal membuat Kasir");
       },
     });
   };
@@ -59,14 +59,14 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          Buat warung <Plus />
+          Buat Kasir <Plus />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Buat Warung</DialogTitle>
+          <DialogTitle>Buat Kasir</DialogTitle>
           <DialogDescription>
-            Isi form dibawah untuk membuat warung.
+            Isi form dibawah untuk membuat Kasir.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -86,7 +86,7 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
               {createWarung.isPending ? (
                 <LoaderCircleIcon className="animate-spin" />
               ) : (
-                "Buat Warung"
+                "Buat Kasir"
               )}
             </Button>
           </form>

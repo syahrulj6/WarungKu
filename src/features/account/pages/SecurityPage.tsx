@@ -21,7 +21,7 @@ const SecurityPage = () => {
       setMfaSecret(secret.secret);
       setStep("verify");
       toast.success("Verification code sent to your email");
-    } catch (error) {
+    } catch {
       toast.error("Failed to generate MFA secret");
     }
   };
@@ -40,7 +40,7 @@ const SecurityPage = () => {
       setStep("enabled");
       await refetch();
       toast.success("MFA enabled successfully");
-    } catch (error) {
+    } catch {
       toast.error("Invalid verification code");
     }
   };
@@ -50,7 +50,7 @@ const SecurityPage = () => {
       await disableMfa.mutateAsync();
       await refetch();
       toast.success("MFA disabled successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to disable MFA");
     }
   };
@@ -59,7 +59,7 @@ const SecurityPage = () => {
     try {
       await resendCode.mutateAsync();
       toast.success("New verification code sent to your email");
-    } catch (error) {
+    } catch {
       toast.error("Failed to resend code");
     }
   };
@@ -120,7 +120,7 @@ const SecurityPage = () => {
                 <div className="mt-6 space-y-4">
                   <h4 className="font-medium">Email Verification</h4>
                   <p className="text-muted-foreground text-sm">
-                    We've sent a 6-digit verification code to your email
+                    We&apos;ve sent a 6-digit verification code to your email
                     address.
                   </p>
 
@@ -158,7 +158,8 @@ const SecurityPage = () => {
                   <h4 className="font-medium">MFA enabled successfully</h4>
                   <p className="text-muted-foreground text-sm">
                     Please save these backup codes in a safe place. You can use
-                    them to access your account if you can't receive emails.
+                    them to access your account if you can&apos;t receive
+                    emails.
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {backupCodes.map((code, i) => (

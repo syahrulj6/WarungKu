@@ -32,7 +32,7 @@ const OrderPage = () => {
         <OrderHeader activeTab={activeTab} setActiveTab={setActiveTab} />
       }
       metaTitle="Pesanan"
-      metaDescription="Kelola pesanan warung Anda"
+      metaDescription="Kelola pesanan Kasirium Anda"
       pathname={`/dashboard/warung/${id}/order`}
     >
       <div className="flex flex-col gap-6">
@@ -53,3 +53,4 @@ const OrderPage = () => {
 };
 
 export default OrderPage;
+

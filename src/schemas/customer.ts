@@ -7,3 +7,4 @@ export const customerFormSchema = z.object({
   address: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
 });
+

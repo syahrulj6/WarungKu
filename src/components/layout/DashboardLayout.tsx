@@ -11,8 +11,8 @@ import { HeadMetaData } from "./HeadMetaData";
 
 const menuItems = [
   {
-    title: "Semua warung",
-    category: "Warung",
+    title: "Semua Kasir",
+    category: "Kasirium",
     url: "/dashboard",
   },
   {

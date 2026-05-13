@@ -10,7 +10,7 @@ const PaymenMethodPage = () => {
   return (
     <WarungDashboardLayout
       metaTitle="Laporan"
-      metaDescription="Lihat laporan mengenai warung Anda"
+      metaDescription="Lihat laporan mengenai Kasirium Anda"
       pathname={`/dashboard/warung/${id}/report/payment-method`}
     >
       {/* TODO: Report Sidebar */}
@@ -22,3 +22,4 @@ const PaymenMethodPage = () => {
 };
 
 export default PaymenMethodPage;
+

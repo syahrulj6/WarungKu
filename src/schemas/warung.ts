@@ -3,8 +3,8 @@ import { z } from "zod";
 export const createWarungFormSchema = z.object({
   name: z
     .string()
-    .min(1, "Warung name is required")
-    .max(100, "Warung name must be less than 100 characters"),
+    .min(1, "Kasirium name is required")
+    .max(100, "Kasirium name must be less than 100 characters"),
   address: z
     .string()
     .max(500, "Address must be less than 500 characters")
@@ -15,3 +15,4 @@ export const createWarungFormSchema = z.object({
     .optional(),
   logoUrl: z.string().url("Must be a valid URL").optional(),
 });
+

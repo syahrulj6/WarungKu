@@ -22,10 +22,10 @@ export const sendVerificationEmail = async ({
     const { data, error } = await resend.emails.send({
       from: fromDomain,
       to: email,
-      subject: "Your WarungKu Verification Code",
+      subject: "Your Kasirium Verification Code",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #4f46e5;">WarungKu Security</h1>
+          <h1 style="color: #4f46e5;">Kasirium Security</h1>
           <p>Your verification code is:</p>
           <div style="font-size: 24px; font-weight: bold; margin: 20px 0; color: #4f46e5;">
             ${token}
@@ -49,3 +49,5 @@ export const sendVerificationEmail = async ({
     throw new Error("Email service unavailable");
   }
 };
+
+

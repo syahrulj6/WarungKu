@@ -11,7 +11,7 @@ export default function Home() {
         className="mt-20 mb-4 flex min-h-[calc(100vh-144px)] w-full flex-col justify-center gap-4 md:mt-20 md:mb-0 md:gap-6"
       >
         <h1 className="text-center text-4xl font-bold tracking-tight">
-          WarungKu untuk semua kebutuhan warung Anda{" "}
+          Kasirium untuk semua kebutuhan Kasirium Anda{" "}
         </h1>
         <p className="text-muted-foreground text-center tracking-tight">
           Ucapkan selamat tinggal pada pengambilan pesanan manual dan proses
@@ -28,3 +28,5 @@ export default function Home() {
     </PageContainer>
   );
 }
+
+

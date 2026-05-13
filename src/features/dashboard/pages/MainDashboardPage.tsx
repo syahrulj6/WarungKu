@@ -32,7 +32,7 @@ const MainDashboardPage = () => {
   return (
     <DashboardLayout
       metaTitle="Dashboard"
-      metaDescription="Kelola warung Anda dengan mudah melalui dashboard WarungKu"
+      metaDescription="Kelola bussiness Anda dengan mudah melalui dashboard Kasirium"
       pathname="/dashboard/warung"
     >
       <div className="flex flex-col p-4 md:p-6">
@@ -41,7 +41,7 @@ const MainDashboardPage = () => {
           <div className="relative h-8 md:w-72">
             <Input
               id="search"
-              placeholder="Cari warung"
+              placeholder="Cari Kasir"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="h-8 pl-8 text-sm md:pl-10 md:text-sm"
@@ -68,8 +68,8 @@ const MainDashboardPage = () => {
           debouncedSearchTerm &&
           (!displayData || displayData.length === 0) && (
             <div className="text-muted-foreground mt-4 text-center text-sm">
-              Tidak ada warung yang ditemukan dengan nama "{debouncedSearchTerm}
-              "
+              Tidak ada Kasiri yang ditemukan dengan nama &quot;
+              {debouncedSearchTerm}&quot;
             </div>
           )}
       </div>

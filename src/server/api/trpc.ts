@@ -6,14 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { type User } from "@supabase/supabase-js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { createSSRClient } from "~/lib/supabase/server";
 
 import { db } from "~/server/db";
+import { readSessionUserId } from "~/lib/auth/server";
+import { type User } from "@prisma/client";
 
 /**
  * 1. CONTEXT
@@ -25,6 +25,8 @@ import { db } from "~/server/db";
 
 type CreateContextOptions = {
   user: User | null;
+  req: CreateNextContextOptions["req"];
+  res: CreateNextContextOptions["res"];
 };
 
 /**
@@ -41,6 +43,8 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
   return {
     db,
     user: _opts.user,
+    req: _opts.req,
+    res: _opts.res,
   };
 };
 
@@ -51,16 +55,15 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = async (_opts: CreateNextContextOptions) => {
-  // Dapetin user yang lagi login
-  const supabaseServerClient = createSSRClient({
-    req: _opts.req,
-    res: _opts.res,
-  });
-
-  const { data } = await supabaseServerClient.auth.getUser();
+  const userId = readSessionUserId(_opts.req.headers.cookie);
+  const user = userId
+    ? await db.user.findUnique({ where: { id: userId } })
+    : null;
 
   return createInnerTRPCContext({
-    user: data.user,
+    req: _opts.req,
+    res: _opts.res,
+    user,
   });
 };
 

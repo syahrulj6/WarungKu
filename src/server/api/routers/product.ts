@@ -1,10 +1,12 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, privateProcedure } from "../trpc";
 import { createProductFormSchema } from "~/schemas/product";
-import { SUPABASE_BUCKET } from "~/lib/supabase/bucket";
 import { z } from "zod";
-import { supabaseAdminClient } from "~/lib/supabase/server";
 import { ActivityType } from "@prisma/client";
+import {
+  deleteProductPicture,
+  saveProductPicture,
+} from "~/lib/storage/product-pictures";
 
 export const productRouter = createTRPCRouter({
   getAllProduct: privateProcedure.query(async ({ ctx }) => {
@@ -152,33 +154,16 @@ export const productRouter = createTRPCRouter({
       if (!warung) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Warung not found",
+          message: "Kasirium not found",
         });
       }
 
       let productPictureUrl: string | undefined;
       if (productPictureBase64) {
-        const fileName = `product-${user!.id}-${Date.now()}.jpeg`;
-        const buffer = Buffer.from(productPictureBase64, "base64");
-
-        const { data, error } = await supabaseAdminClient.storage
-          .from(SUPABASE_BUCKET.ProductPictures)
-          .upload(fileName, buffer, {
-            contentType: "image/jpeg",
-            upsert: false,
-          });
-
-        if (error)
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to upload image",
-          });
-
-        const { data: publicUrlData } = supabaseAdminClient.storage
-          .from(SUPABASE_BUCKET.ProductPictures)
-          .getPublicUrl(data.path);
-
-        productPictureUrl = publicUrlData.publicUrl;
+        productPictureUrl = await saveProductPicture(
+          productPictureBase64,
+          user!.id,
+        );
       }
 
       const product = await db.product.create({
@@ -299,44 +284,14 @@ async function handleImageUpload(
 ): Promise<string | undefined> {
   if (!imageBase64) return undefined;
 
-  const fileName = `product-${userId}-${Date.now()}.jpeg`;
-  const buffer = Buffer.from(imageBase64, "base64");
+  const pictureUrl = await saveProductPicture(imageBase64, userId);
 
-  const { data, error } = await supabaseAdminClient.storage
-    .from(SUPABASE_BUCKET.ProductPictures)
-    .upload(fileName, buffer, {
-      contentType: "image/jpeg",
-      upsert: true,
-    });
-
-  if (error) {
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Gagal mengupload gambar produk",
-    });
-  }
-
-  const { data: publicUrlData } = supabaseAdminClient.storage
-    .from(SUPABASE_BUCKET.ProductPictures)
-    .getPublicUrl(data.path);
-
-  return `${publicUrlData.publicUrl}?t=${new Date().getTime()}`;
+  return `${pictureUrl}?t=${new Date().getTime()}`;
 }
 
 async function deleteImageFromStorage(imageUrl: string): Promise<void> {
   try {
-    const url = new URL(imageUrl);
-    const filePath = url.pathname.split("/").pop()?.split("?")[0];
-
-    if (!filePath) return;
-
-    const { error } = await supabaseAdminClient.storage
-      .from(SUPABASE_BUCKET.ProductPictures)
-      .remove([filePath]);
-
-    if (error) {
-      console.error("Failed to delete image:", error);
-    }
+    await deleteProductPicture(imageUrl);
   } catch (error) {
     console.error("Error deleting image:", error);
   }
@@ -365,3 +320,4 @@ async function createProductActivity(
     },
   });
 }
+

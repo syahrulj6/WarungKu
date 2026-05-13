@@ -49,13 +49,13 @@ export const Header = () => {
             <div className="relative h-12 w-12 md:h-14 md:w-14">
               <Image
                 src="/warungku-notext.png"
-                alt="WarungKu Logo"
+                alt="Kasirium Logo"
                 fill
                 className="object-contain"
                 priority
               />
             </div>
-            <span className="font-semibold">WarungKu</span>
+            <span className="font-semibold">Kasirium</span>
           </Link>
         </div>
 
@@ -156,3 +156,5 @@ export const Header = () => {
     </>
   );
 };
+
+

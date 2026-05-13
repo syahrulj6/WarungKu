@@ -13,12 +13,10 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 interface PieChartCardProps {
   data: { name: string; value: number; fill: string }[];
   totalActivities: number;
-  config: {
-    [key: string]: {
+  config: Record<string, {
       label: string;
       color: string;
-    };
-  };
+    }>;
   isLoading?: boolean;
   change?: number;
 }

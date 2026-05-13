@@ -10,7 +10,7 @@ import { api } from "~/utils/api";
 import { type ChartActivityConfig, chartActivityConfig } from "~/utils/type";
 
 type ActivityCounts = Record<string, number>;
-export type TimePeriod = "30-hari" | "1-tahun" | "all-time";
+export type TimePeriod = "7-hari" | "30-hari" | "1-tahun" | "all-time";
 
 export const useWarungDashboardData = (
   warungId: string,
@@ -21,6 +21,13 @@ export const useWarungDashboardData = (
     const now = new Date();
 
     switch (timePeriod) {
+      case "7-hari":
+        return {
+          startDate: subDays(now, 7),
+          endDate: now,
+          previousStartDate: subDays(now, 14),
+          previousEndDate: subDays(now, 7),
+        };
       case "30-hari":
         return {
           startDate: subDays(now, 30),
@@ -268,3 +275,4 @@ export const useWarungDashboardData = (
     timePeriod,
   };
 };
+

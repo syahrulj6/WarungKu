@@ -16,12 +16,10 @@ import { useMediaQuery } from "~/hooks/useMediaQuery";
 
 interface BarChartCardProps {
   data: { date: string; count: number }[];
-  config: {
-    [key: string]: {
+  config: Record<string, {
       label: string;
       color: string;
-    };
-  };
+    }>;
   isLoading?: boolean;
   timePeriod?: string;
 }

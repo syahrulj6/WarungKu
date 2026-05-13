@@ -40,7 +40,7 @@ const ReportPage = () => {
           timePeriod: timePeriod,
         };
 
-        await generatePDFReport(reportData, "Warung Dashboard");
+        await generatePDFReport(reportData, "Kasirium Dashboard");
 
         toast.success("Export Berhasil");
       } catch (error) {
@@ -73,7 +73,7 @@ const ReportPage = () => {
         />
       }
       metaTitle="Laporan"
-      metaDescription="Lihat laporan mengenai warung Anda"
+      metaDescription="Lihat laporan mengenai Kasirium Anda"
       pathname={`/dashboard/warung/${id}/report/`}
     >
       <ReportLayout>
@@ -228,3 +228,4 @@ const ReportPage = () => {
 };
 
 export default ReportPage;
+

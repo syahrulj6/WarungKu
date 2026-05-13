@@ -76,8 +76,8 @@ export const LoginFormInner = (props: LoginFormInnerProps) => {
         </Link>
       </div>
 
-      <Button size="lg" className="mt-4 w-full">
-        Masuk
+      <Button disabled={props.isLoading} size="lg" className="mt-4 w-full">
+        {props.buttonText ?? "Masuk"}
       </Button>
     </form>
   );

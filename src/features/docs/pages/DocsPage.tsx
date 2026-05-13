@@ -19,7 +19,7 @@ const DocsPage = () => {
       title: "Memulai",
       icon: <IoPlayOutline className="text-primary text-xl" />,
       content: [
-        "Pengenalan WarungKu",
+        "Pengenalan Kasirium",
         "Persyaratan Sistem",
         "Tampilan Antarmuka",
       ],
@@ -36,13 +36,13 @@ const DocsPage = () => {
       ],
     },
     {
-      title: "Manajemen Warung",
+      title: "Manajemen Kasirium",
       icon: <IoStorefrontOutline className="text-primary text-xl" />,
       content: [
-        "Membuat Warung Baru",
-        "Mengelola Data Warung",
-        "Multi Warung",
-        "Hapus Warung",
+        "Membuat Kasirium Baru",
+        "Mengelola Data Kasirium",
+        "Multi Kasirium",
+        "Hapus Kasirium",
       ],
     },
     {
@@ -91,24 +91,24 @@ const DocsPage = () => {
           <Image src="/warungku-notext.png" alt="logo" width={60} height={60} />
           <div className="flex flex-col gap-2">
             <h1 className="text-2xl font-semibold md:text-3xl">
-              WarungKu Documentation
+              Kasirium Documentation
             </h1>
             <p className="text-muted-foreground text-sm">
-              Panduan lengkap untuk menggunakan Pos WarungKu
+              Panduan lengkap untuk menggunakan Pos Kasirium
             </p>
           </div>
         </div>
 
         {/* Pengenalan */}
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-semibold">Apa itu WarungKu?</h2>
+          <h2 className="mb-4 text-xl font-semibold">Apa itu Kasirium?</h2>
           <p className="text-muted-foreground mb-4">
-            WarungKu adalah aplikasi Point of Sale (POS) yang dirancang khusus
-            untuk UMKM dan warung kecil. Dengan aplikasi ini, Anda dapat dengan
+            Kasirium adalah aplikasi Point of Sale (POS) yang dirancang khusus
+            untuk UMKM dan Kasirium kecil. Dengan aplikasi ini, Anda dapat dengan
             mudah mengelola:
           </p>
           <ul className="text-muted-foreground list-disc space-y-2 pl-6">
-            <li>Data warung/usaha Anda</li>
+            <li>Data Kasirium/usaha Anda</li>
             <li>Katalog produk dengan kategori</li>
             <li>Stok dan harga produk</li>
             <li>Transaksi penjualan harian</li>
@@ -160,9 +160,9 @@ const DocsPage = () => {
                 3
               </div>
               <div>
-                <h3 className="font-medium">Buat Warung Pertama</h3>
+                <h3 className="font-medium">Buat Kasirium Pertama</h3>
                 <p className="text-muted-foreground text-sm">
-                  Isi data warung Anda seperti nama, alamat, dan informasi
+                  Isi data Kasirium Anda seperti nama, alamat, dan informasi
                   kontak.
                 </p>
               </div>
@@ -174,7 +174,7 @@ const DocsPage = () => {
               <div>
                 <h3 className="font-medium">Tambahkan Produk</h3>
                 <p className="text-muted-foreground text-sm">
-                  Mulai tambahkan produk-produk yang dijual di warung Anda
+                  Mulai tambahkan produk-produk yang dijual di Kasirium Anda
                   beserta harga dan stok.
                 </p>
               </div>
@@ -187,3 +187,5 @@ const DocsPage = () => {
 };
 
 export default DocsPage;
+
+

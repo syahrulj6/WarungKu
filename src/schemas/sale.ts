@@ -14,3 +14,4 @@ export const createSaleFormSchema = z.object({
     }),
   ),
 });
+

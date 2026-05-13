@@ -32,7 +32,7 @@ export const AppSidebar = ({ menuItems }: SidebarProps) => {
       {/* Main Menu */}
       <nav className="flex flex-1 flex-col overflow-y-auto">
         <p className="h-14 border-b-1 px-4 py-4 font-semibold text-current md:px-6">
-          WarungKu
+          Kasirium
         </p>
         {Object.entries(groupedMenuItems).map(([category, items]) => (
           <div key={category} className="border-b-1 py-5">
@@ -88,3 +88,5 @@ const SidebarItem = ({
     <button className="w-full">{content}</button>
   );
 };
+
+

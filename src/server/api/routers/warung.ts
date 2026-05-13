@@ -157,14 +157,14 @@ export const warungRouter = createTRPCRouter({
       if (!warung) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Warung not found",
+          message: "Kasirium not found",
         });
       }
 
       if (warung.name === name) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Warung with this name already exists",
+          message: "Kasirium with this name already exists",
         });
       }
 
@@ -183,10 +183,10 @@ export const warungRouter = createTRPCRouter({
 
         return updatedWarung;
       } catch (error) {
-        console.error("Failed to update warung:", error);
+        console.error("Failed to update Kasirium:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update warung",
+          message: "Failed to update Kasirium",
         });
       }
     }),
@@ -220,3 +220,4 @@ export const warungRouter = createTRPCRouter({
       });
     }),
 });
+

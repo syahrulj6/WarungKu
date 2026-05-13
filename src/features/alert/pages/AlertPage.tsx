@@ -13,8 +13,8 @@ const AlertPage = () => {
 
   return (
     <WarungDashboardLayout
-      metaTitle="Warung Alert"
-      metaDescription="Lihat semua peringatan dalam warung anda"
+      metaTitle="Kasirium Alert"
+      metaDescription="Lihat semua peringatan dalam Kasirium Anda"
       pathname={`/dashboard/warung/${id}/alert`}
     >
       <div className="flex flex-col gap-4">
@@ -35,3 +35,4 @@ const AlertPage = () => {
 };
 
 export default AlertPage;
+

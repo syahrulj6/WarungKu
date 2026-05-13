@@ -145,3 +145,4 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
     </div>
   );
 };
+

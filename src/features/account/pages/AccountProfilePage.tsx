@@ -103,7 +103,7 @@ const AccountProfilePage = () => {
           <h1 className="text-xl font-semibold md:text-2xl">Preferensi Akun</h1>
           <p className="text-muted-foreground text-sm">
             Kelola profil, pengaturan akun, dan preferensi Anda untuk pengalaman
-            Warung Anda
+            Kasirium Anda
           </p>
         </div>
 
@@ -236,3 +236,4 @@ const AccountProfilePage = () => {
 };
 
 export default AccountProfilePage;
+

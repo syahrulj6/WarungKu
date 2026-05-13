@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { PageContainer } from "~/components/layout/PageContainer";
@@ -22,25 +22,25 @@ const VerifyMfaPage = () => {
   const verifyMfa = api.auth.verifyMfaLogin.useMutation();
   const sendMfaCode = api.security.sendMfaCode.useMutation();
 
+  const sendInitialCode = useCallback(async () => {
+    if (initialCodeSent.current) return;
+
+    try {
+      setIsSendingCode(true);
+      initialCodeSent.current = true;
+      await sendMfaCode.mutateAsync();
+      toast.success("Verification code sent to your email");
+    } catch {
+      initialCodeSent.current = false;
+      toast.error("Failed to send verification code");
+    } finally {
+      setIsSendingCode(false);
+    }
+  }, [sendMfaCode]);
+
   // Send initial code and setup countdown
   useEffect(() => {
-    const sendInitialCode = async () => {
-      if (initialCodeSent.current) return;
-
-      try {
-        setIsSendingCode(true);
-        initialCodeSent.current = true;
-        await sendMfaCode.mutateAsync();
-        toast.success("Verification code sent to your email");
-      } catch (error) {
-        initialCodeSent.current = false;
-        toast.error("Failed to send verification code");
-      } finally {
-        setIsSendingCode(false);
-      }
-    };
-
-    sendInitialCode();
+    void sendInitialCode();
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -54,7 +54,7 @@ const VerifyMfaPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [sendInitialCode]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -67,9 +67,8 @@ const VerifyMfaPage = () => {
     setIsLoading(true);
     try {
       await verifyMfa.mutateAsync({ token: otp });
-      document.cookie = "mfa_verified=true; path=/; max-age=86400";
       await router.push("/dashboard/warung");
-    } catch (error) {
+    } catch {
       toast.error("Invalid verification code");
     } finally {
       setIsLoading(false);
@@ -98,7 +97,7 @@ const VerifyMfaPage = () => {
       }, 1000);
 
       toast.success("New code sent to your email");
-    } catch (error) {
+    } catch {
       toast.error("Failed to resend code");
       setCanResend(true);
     } finally {
@@ -112,7 +111,7 @@ const VerifyMfaPage = () => {
         <div className="w-full max-w-md rounded-lg border p-8">
           <h1 className="mb-4 text-2xl font-bold">Verify Your Identity</h1>
           <p className="mb-6 text-gray-600">
-            We've sent a 6-digit verification code to your email address
+            We&apos;ve sent a 6-digit verification code to your email address
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -158,3 +157,4 @@ const VerifyMfaPage = () => {
 };
 
 export default VerifyMfaPage;
+

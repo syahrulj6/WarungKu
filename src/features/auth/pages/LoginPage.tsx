@@ -6,9 +6,6 @@ import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
 import { type AuthFormSchema, authFormSchema } from "../forms/auth";
 import { toast } from "sonner";
-import { supabase } from "~/lib/supabase/client";
-import { type AuthError } from "@supabase/supabase-js";
-import { SupabaseAuthErrorCode } from "~/lib/supabase/authErrorCodes";
 import { useRouter } from "next/router";
 import { LoginFormInner } from "../components/LoginFormInner";
 import Image from "next/image";
@@ -26,44 +23,28 @@ const LoginPage = () => {
   });
 
   const router = useRouter();
-
-  const { refetch: checkMfa } = api.auth.checkMfaRequired.useQuery(undefined, {
-    enabled: false,
-  });
+  const { mutateAsync: loginUser, isPending: loginUserIsPending } =
+    api.auth.login.useMutation();
 
   const handleLoginSubmit = async (values: AuthFormSchema) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      const result = await loginUser(values);
 
-      if (error) throw error;
-
-      const { data } = await checkMfa();
-
-      if (data?.mfaRequired) {
-        // Clear any existing mfa_verified cookie
-        document.cookie =
-          "mfa_verified=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      if (result.mfaRequired) {
         await router.replace("/verify-mfa");
       } else {
-        // Set mfa_verified cookie since MFA is not required
-        document.cookie = "mfa_verified=true; path=/; max-age=86400"; // 24 hours
-        await router.replace("/dashboard");
+        await router.replace("/dashboard/warung");
       }
     } catch (error) {
-      switch ((error as AuthError).code) {
-        case SupabaseAuthErrorCode.invalid_credentials:
-          form.setError("email", { message: "Email atau password salah" });
-          form.setError("password", { message: "Email atau password salah" });
-          break;
-        case SupabaseAuthErrorCode.email_not_confirmed:
-          form.setError("email", { message: "Email belum diverifikasi" });
-          break;
-        default:
-          toast.error("Terjadi kesalahan, silakan coba lagi");
+      const message = error instanceof Error ? error.message : "";
+
+      if (message.includes("Email atau password salah")) {
+        form.setError("email", { message: "Email atau password salah" });
+        form.setError("password", { message: "Email atau password salah" });
+        return;
       }
+
+      toast.error(message || "Terjadi kesalahan, silakan coba lagi");
     }
   };
 
@@ -78,7 +59,7 @@ const LoginPage = () => {
     <>
       <PageContainer
         metaTitle="Login"
-        metaDescription="Aplikasi POS modern untuk warung Anda. Login untuk mengelola transaksi, stok, dan laporan penjualan."
+        metaDescription="Aplikasi POS modern untuk Kasirium Anda. Login untuk mengelola transaksi, stok, dan laporan penjualan."
         pathname="/login"
         withHeader={false}
         withFooter={false}
@@ -100,26 +81,27 @@ const LoginPage = () => {
               <div className="relative h-14 w-14">
                 <Image
                   src="/warungku-notext.png"
-                  alt="WarungKu Logo"
+                  alt="Kasirium Logo"
                   fill
                   sizes="80px"
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="font-bold">WarungKu</span>
+              <span className="font-bold">Kasirium</span>
             </div>
 
             <h1 className="mt-8 mb-2 text-3xl font-bold">
               Selamat Bekerja! 🏪
             </h1>
             <p className="text-muted-foreground mb-8">
-              Aplikasi Kasir Modern untuk Warung Anda
+              Aplikasi Kasir Modern untuk Kasirium Anda
             </p>
 
             <Form {...form}>
               <LoginFormInner
                 onLoginSubmit={handleLoginSubmit}
+                isLoading={loginUserIsPending}
                 buttonText="Sign In"
                 showPassword={true}
               />
@@ -173,3 +155,5 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+

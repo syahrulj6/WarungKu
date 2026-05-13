@@ -42,7 +42,7 @@ export const PageContainer = forwardRef<
         {withFooter && (
           <footer className="flex min-h-16 border-t-2 p-4">
             <p className="text-muted-foreground w-full text-center">
-              © 2025 WarungKu. All rights reserved
+              © 2026 Kasirium. All rights reserved
             </p>
           </footer>
         )}

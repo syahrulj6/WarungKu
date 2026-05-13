@@ -1,16 +1,34 @@
-import { z } from "zod";
-import { supabaseAdminClient } from "~/lib/supabase/server";
-import { passwordSchema } from "~/schemas/auth";
+import { TRPCError } from "@trpc/server";
+import { authenticator } from "otplib";
+import { Prisma } from "@prisma/client";
 import { generateFromEmail } from "unique-username-generator";
+import { z } from "zod";
+import {
+  clearSessionCookies,
+  hashPassword,
+  setSessionCookies,
+  verifyPassword,
+} from "~/lib/auth/server";
+import { passwordSchema } from "~/schemas/auth";
 import {
   createTRPCRouter,
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
-import { authenticator } from "otplib";
-import { TRPCError } from "@trpc/server";
 
 export const authRouter = createTRPCRouter({
+  currentUser: publicProcedure.query(async ({ ctx }) => {
+    if (!ctx.user) return null;
+
+    return {
+      id: ctx.user.id,
+      email: ctx.user.email,
+      username: ctx.user.username,
+      isActive: ctx.user.isActive,
+      mfaEnabled: ctx.user.mfaEnabled,
+    };
+  }),
+
   register: publicProcedure
     .input(
       z.object({
@@ -19,43 +37,83 @@ export const authRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { db } = ctx;
-      const { email, password } = input;
+      const passwordHash = await hashPassword(input.password);
 
-      return await db.$transaction(async (tx) => {
-        let userId = "";
+      try {
+        const user = await ctx.db.user.create({
+          data: {
+            email: input.email,
+            username: generateFromEmail(input.email),
+            passwordHash,
+            isActive: true,
+            mfaBackupCodes: [],
+          },
+        });
 
-        try {
-          const { data, error } = await supabaseAdminClient.auth.signUp({
-            email,
-            password,
+        return {
+          success: true,
+          userId: user.id,
+        };
+      } catch (error) {
+        console.error("Registration error:", error);
+
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Email already registered",
           });
-
-          if (data.user) userId = data.user.id;
-          if (error) throw error;
-
-          const user = await tx.user.create({
-            data: {
-              id: data.user!.id,
-              email,
-              username: generateFromEmail(email),
-              isActive: true,
-            },
-          });
-
-          return {
-            success: true,
-            userId: user.id,
-          };
-        } catch (error) {
-          console.error("Registration error:", error);
-          if (userId) {
-            await supabaseAdminClient.auth.admin.deleteUser(userId);
-          }
-          throw new Error("Registration failed. Please try again.");
         }
-      });
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Registration failed. Please try again.",
+        });
+      }
     }),
+
+  login: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email().toLowerCase(),
+        password: passwordSchema,
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+      });
+
+      const passwordIsValid = await verifyPassword(
+        input.password,
+        user?.passwordHash,
+      );
+
+      if (!user || !passwordIsValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email atau password salah",
+        });
+      }
+
+      if (!user.isActive) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Akun tidak aktif",
+        });
+      }
+
+      setSessionCookies(ctx.res, user.id, { mfaVerified: !user.mfaEnabled });
+
+      return { success: true, mfaRequired: user.mfaEnabled };
+    }),
+
+  logout: publicProcedure.mutation(async ({ ctx }) => {
+    clearSessionCookies(ctx.res);
+    return { success: true };
+  }),
 
   changePassword: privateProcedure
     .input(
@@ -75,33 +133,24 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      const userEmail = user.email;
-      const { error: signInError } =
-        await supabaseAdminClient.auth.signInWithPassword({
-          email: userEmail!,
-          password: currentPassword,
-        });
+      const passwordIsValid = await verifyPassword(
+        currentPassword,
+        user.passwordHash,
+      );
 
-      if (signInError) {
+      if (!passwordIsValid) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Current password is incorrect",
         });
       }
 
-      const { data, error: updateError } =
-        await supabaseAdminClient.auth.updateUser({
-          password: newPassword,
-        });
+      await ctx.db.user.update({
+        where: { id: user.id },
+        data: { passwordHash: await hashPassword(newPassword) },
+      });
 
-      if (updateError) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update password",
-        });
-      }
-
-      return { success: true, data };
+      return { success: true };
     }),
 
   checkMfaRequired: privateProcedure.query(async ({ ctx }) => {
@@ -140,7 +189,6 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      // Set options to allow for time skew (1 period before and after current)
       authenticator.options = { window: 1 };
 
       const verified = authenticator.check(input.token, dbUser.mfaSecret);
@@ -151,6 +199,8 @@ export const authRouter = createTRPCRouter({
           message: "Invalid verification code",
         });
       }
+
+      setSessionCookies(ctx.res, user.id, { mfaVerified: true });
 
       return { success: true };
     }),

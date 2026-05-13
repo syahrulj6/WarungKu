@@ -54,7 +54,7 @@ const MenuPage = () => {
         />
       }
       metaTitle="Daftar menu"
-      metaDescription="Kelola Menu warung Anda"
+      metaDescription="Kelola Menu Kasirium Anda"
       pathname={`/dashboard/warung/${id}/menu`}
     >
       <div className="flex flex-col gap-6">
@@ -88,3 +88,4 @@ const MenuPage = () => {
 };
 
 export default MenuPage;
+

@@ -8,12 +8,12 @@ export const HeadMetaData: React.FC<{
   // ogImageUrl?: string;
   pathname?: string;
 }> = ({
-  title = "WarungKu",
+  title = "Kasirium",
   metaDescription,
   // ogImageUrl = env.NEXT_PUBLIC_OG_IMAGE_URL,
   pathname = "",
 }) => {
-  const defaultTitle = "WarungKu";
+  const defaultTitle = "Kasirium";
 
   const baseUrl =
     process.env.NODE_ENV === "development"
@@ -46,3 +46,5 @@ export const HeadMetaData: React.FC<{
     </Head>
   );
 };
+
+

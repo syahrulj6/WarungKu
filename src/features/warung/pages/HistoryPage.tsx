@@ -25,7 +25,7 @@ const HistoryPage = () => {
     : selectedDate
       ? api.sale.getSaleByDate.useQuery(
           {
-            date: selectedDate as Date,
+            date: selectedDate,
           },
           {
             enabled: !!selectedDate && !!id,
@@ -72,7 +72,7 @@ const HistoryPage = () => {
         />
       }
       metaTitle="Riwayat Pesanan"
-      metaDescription="Riwayat pesanan warung Anda"
+      metaDescription="Riwayat pesanan Kasirium Anda"
       pathname={`/dashboard/warung/${id}/history`}
     >
       <div className="flex flex-col gap-3 md:gap-6">
@@ -84,3 +84,4 @@ const HistoryPage = () => {
 };
 
 export default HistoryPage;
+

@@ -23,7 +23,7 @@ export const WarungSidebar = ({ menuItems }: SidebarProps) => {
           <div className="relative h-12 w-12 md:h-14 md:w-14">
             <Image
               src="/warungku-notext.png"
-              alt="WarungKu Logo"
+              alt="Kasirium Logo"
               fill
               className="object-contain"
               priority
@@ -70,3 +70,5 @@ const SidebarItem = ({ label, active, icon, href }: SidebarItemProps) => {
     </Link>
   );
 };
+
+

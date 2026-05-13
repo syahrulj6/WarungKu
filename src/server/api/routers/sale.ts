@@ -495,3 +495,4 @@ async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {
 
   return `INV-${dateStr}-${(count + 1).toString().padStart(4, "0")}`;
 }
+

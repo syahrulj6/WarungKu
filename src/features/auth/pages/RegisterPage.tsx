@@ -57,7 +57,7 @@ const RegisterPage = () => {
     <>
       <PageContainer
         metaTitle="Daftar Akun"
-        metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS WarungKu"
+        metaDescription="Daftarkan akun staff baru untuk mengakses sistem POS Kasirium"
         pathname="/register"
         withHeader={false}
         withFooter={false}
@@ -79,19 +79,19 @@ const RegisterPage = () => {
               <div className="relative h-14 w-14">
                 <Image
                   src="/warungku-notext.png"
-                  alt="WarungKu Logo"
+                  alt="Kasirium Logo"
                   fill
                   sizes="80px"
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="font-bold">WarungKu</span>
+              <span className="font-bold">Kasirium</span>
             </div>
 
             <h1 className="mb-2 text-2xl font-bold">Daftar Akun Baru</h1>
             <p className="text-muted-foreground mb-8 text-sm">
-              Aplikasi Kasir Modern untuk Warung Anda
+              Aplikasi Kasir Modern untuk Kasirium Anda
             </p>
 
             <Form {...form}>
@@ -177,3 +177,5 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+
+
