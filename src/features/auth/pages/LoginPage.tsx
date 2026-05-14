@@ -16,19 +16,29 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { ArrowLeft } from "lucide-react";
 import { api } from "~/utils/api";
+import { useEffect, useState } from "react";
 
 const LoginPage = () => {
   const form = useForm<AuthFormSchema>({
     resolver: zodResolver(authFormSchema),
   });
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const router = useRouter();
   const { mutateAsync: loginUser, isPending: loginUserIsPending } =
     api.auth.login.useMutation();
+  const { mutateAsync: resendVerificationEmail, isPending: resendIsPending } =
+    api.auth.resendVerificationEmail.useMutation();
 
   const handleLoginSubmit = async (values: AuthFormSchema) => {
     try {
       const result = await loginUser(values);
+      setUnverifiedEmail(null);
 
       if (result.mfaRequired) {
         await router.replace("/verify-mfa");
@@ -45,13 +55,40 @@ const LoginPage = () => {
       }
 
       if (message.includes("Akun belum terverifikasi")) {
+        setUnverifiedEmail(values.email);
         toast.error("Email belum diverifikasi", {
-          description: "Cek inbox email Anda, lalu klik link verifikasi.",
+          description:
+            "Klik tombol kirim ulang verifikasi di bawah form login.",
         });
         return;
       }
 
       toast.error(message || "Terjadi kesalahan, silakan coba lagi");
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const email = unverifiedEmail ?? form.getValues("email");
+
+    if (!email) {
+      toast.error("Isi email terlebih dahulu");
+      return;
+    }
+
+    try {
+      const result = await resendVerificationEmail({ email });
+      if (result.emailSent) {
+        toast.success("Link verifikasi berhasil dikirim", {
+          description: "Silakan cek inbox atau folder spam email Anda.",
+        });
+      } else {
+        toast.message("Permintaan diproses", {
+          description:
+            "Jika akun belum aktif, link verifikasi akan dikirim ke email Anda.",
+        });
+      }
+    } catch {
+      toast.error("Gagal mengirim ulang verifikasi");
     }
   };
 
@@ -99,7 +136,7 @@ const LoginPage = () => {
             </div>
 
             <h1 className="mt-8 mb-2 text-3xl font-bold">
-              Selamat Bekerja! 🏪
+              Selamat Datang Kembali
             </h1>
             <p className="text-muted-foreground mb-8">
               Aplikasi Kasir Modern untuk Kasirium Anda
@@ -109,51 +146,89 @@ const LoginPage = () => {
               <LoginFormInner
                 onLoginSubmit={handleLoginSubmit}
                 isLoading={loginUserIsPending}
-                buttonText="Sign In"
+                buttonText="Masuk"
                 showPassword={true}
               />
             </Form>
+
+            {unverifiedEmail && (
+              <div className="bg-primary/10 border-primary/30 mt-4 rounded-lg border p-4">
+                <p className="text-sm font-medium">Email belum diverifikasi</p>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Kami kirim ulang link verifikasi ke <b>{unverifiedEmail}</b>.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resendIsPending}
+                  >
+                    {resendIsPending
+                      ? "Mengirim..."
+                      : "Kirim Ulang Link Verifikasi"}
+                  </Button>
+                  <Button type="button" variant="outline" asChild>
+                    <Link href="https://mail.google.com" target="_blank">
+                      Buka Inbox
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <p className="mt-6 text-center text-sm">
               Belum punya akun?{" "}
               <Link
                 href="/register"
                 className="text-primary font-bold hover:underline"
-              >
-                Sign Up
-              </Link>
+              >Daftar</Link>
             </p>
           </div>
 
           {/* Right Section - Image Swiper */}
           <div className="relative hidden w-1/2 md:flex">
-            <Swiper
-              spaceBetween={0}
-              centeredSlides={true}
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
-              }}
-              modules={[Autoplay, Pagination, Navigation]}
-              className="h-full w-full"
-            >
-              {images.map((src, index) => (
-                <SwiperSlide key={index}>
-                  <div className="relative h-full w-full">
-                    <Image
-                      src={src}
-                      alt={`Login Background ${index + 1}`}
-                      fill
-                      sizes="50vw"
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
-                    <div className="absolute inset-0 bg-black/40" />
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {isClient ? (
+              <Swiper
+                spaceBetween={0}
+                centeredSlides={true}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                }}
+                modules={[Autoplay, Pagination, Navigation]}
+                className="h-full w-full"
+              >
+                {images.map((src, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={src}
+                        alt={`Login Background ${index + 1}`}
+                        fill
+                        sizes="50vw"
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                      <div className="absolute inset-0 bg-black/40" />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            ) : (
+              <div className="relative h-full w-full">
+                <Image
+                  src={images[0] ?? "/assets/image1.jpg"}
+                  alt="Login Background"
+                  fill
+                  sizes="50vw"
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                <div className="absolute inset-0 bg-black/40" />
+              </div>
+            )}
           </div>
         </div>
       </PageContainer>
@@ -162,6 +237,7 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
 
 
 

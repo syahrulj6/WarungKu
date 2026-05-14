@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { RegisterFormInner } from "../components/RegisterFormInner";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
@@ -19,6 +20,12 @@ import "swiper/css/navigation";
 import { api } from "~/utils/api";
 
 const RegisterPage = () => {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const form = useForm<AuthFormSchema>({
     resolver: zodResolver(authFormSchema),
     defaultValues: {
@@ -149,33 +156,48 @@ const RegisterPage = () => {
 
           {/* Right Section - Image Swiper */}
           <div className="relative hidden w-1/2 md:flex">
-            <Swiper
-              spaceBetween={0}
-              centeredSlides={true}
-              autoplay={{
-                delay: 3000,
-                disableOnInteraction: false,
-              }}
-              modules={[Autoplay, Pagination, Navigation]}
-              className="h-full w-full"
-            >
-              {images.map((src, index) => (
-                <SwiperSlide key={index}>
-                  <div className="relative h-full w-full">
-                    <Image
-                      src={src}
-                      alt={`Register Background ${index + 1}`}
-                      fill
-                      sizes="50vw"
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
-                    <div className="absolute inset-0 bg-black/40" />
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            {isClient ? (
+              <Swiper
+                spaceBetween={0}
+                centeredSlides={true}
+                autoplay={{
+                  delay: 3000,
+                  disableOnInteraction: false,
+                }}
+                modules={[Autoplay, Pagination, Navigation]}
+                className="h-full w-full"
+              >
+                {images.map((src, index) => (
+                  <SwiperSlide key={index}>
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={src}
+                        alt={`Register Background ${index + 1}`}
+                        fill
+                        sizes="50vw"
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                      <div className="absolute inset-0 bg-black/40" />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            ) : (
+              <div className="relative h-full w-full">
+                <Image
+                  src={images[0] ?? "/assets/image1.jpg"}
+                  alt="Register Background"
+                  fill
+                  sizes="50vw"
+                  className="object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D3E671]/20 to-[#0D4715]/20" />
+                <div className="absolute inset-0 bg-black/40" />
+              </div>
+            )}
           </div>
         </div>
       </PageContainer>

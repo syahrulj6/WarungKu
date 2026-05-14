@@ -68,7 +68,7 @@ export const LoginFormInner = (props: LoginFormInnerProps) => {
               checked={showPassword}
               onCheckedChange={(checked) => setShowPassword(!!checked)}
             />
-            Show Password
+            Tampilkan Password
           </Label>
         )}
         <Link href={"/reset"} className="p-0">

@@ -1,6 +1,5 @@
 import {
   BadgeCheck,
-  CirclePlay,
   LayoutDashboard,
   ReceiptText,
   Sparkles,

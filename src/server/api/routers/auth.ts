@@ -282,4 +282,40 @@ export const authRouter = createTRPCRouter({
 
       return { success: true };
     }),
+
+  resendVerificationEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email().toLowerCase(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { email: input.email },
+        select: { email: true, isActive: true },
+      });
+
+      // Return generic success response to avoid exposing user existence.
+      if (!user || user.isActive) {
+        return { success: true, emailSent: false };
+      }
+
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      const token = createEmailVerificationToken(user.email);
+      const verificationUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(
+        token,
+      )}`;
+
+      try {
+        await sendVerificationEmail({
+          email: user.email,
+          verificationUrl,
+        });
+
+        return { success: true, emailSent: true };
+      } catch (error) {
+        console.error("Resend verification email failed:", error);
+        return { success: true, emailSent: false };
+      }
+    }),
 });

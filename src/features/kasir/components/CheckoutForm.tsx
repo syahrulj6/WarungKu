@@ -56,7 +56,7 @@ export const CheckoutForm = () => {
   );
 
   const { data: createdSale } = api.sale.getById.useQuery(
-    { id: createdSaleId as string },
+    { id: createdSaleId ?? "" },
     { enabled: !!createdSaleId },
   );
 

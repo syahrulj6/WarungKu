@@ -692,11 +692,12 @@ export const saleRouter = createTRPCRouter({
             paidOrders: 0,
           };
         }
-
-        acc[sale.paymentType]!.totalAmount += sale.totalAmount;
-        acc[sale.paymentType]!.orders += 1;
+        const paymentSummary = acc[sale.paymentType];
+        if (!paymentSummary) return acc;
+        paymentSummary.totalAmount += sale.totalAmount;
+        paymentSummary.orders += 1;
         if (sale.isPaid) {
-          acc[sale.paymentType]!.paidOrders += 1;
+          paymentSummary.paidOrders += 1;
         }
 
         return acc;
@@ -781,10 +782,10 @@ export const saleRouter = createTRPCRouter({
           };
         }
 
-        acc[productId]!.quantity += item.quantity;
-        acc[productId]!.grossSales += lineTotal;
-        acc[productId]!.transactions += 1;
-        acc[productId]!.averagePrice = acc[productId]!.grossSales / acc[productId]!.quantity;
+        acc[productId].quantity += item.quantity;
+        acc[productId].grossSales += lineTotal;
+        acc[productId].transactions += 1;
+        acc[productId].averagePrice = acc[productId].grossSales / acc[productId].quantity;
 
         return acc;
       }, {});
@@ -875,11 +876,11 @@ export const saleRouter = createTRPCRouter({
           };
         }
 
-        acc[categoryId]!.quantity += item.quantity;
-        acc[categoryId]!.grossSales += lineTotal;
-        acc[categoryId]!.transactions += 1;
-        acc[categoryId]!.averagePrice =
-          acc[categoryId]!.grossSales / acc[categoryId]!.quantity;
+        acc[categoryId].quantity += item.quantity;
+        acc[categoryId].grossSales += lineTotal;
+        acc[categoryId].transactions += 1;
+        acc[categoryId].averagePrice =
+          acc[categoryId].grossSales / acc[categoryId].quantity;
 
         return acc;
       }, {});
@@ -955,11 +956,12 @@ export const saleRouter = createTRPCRouter({
             effectiveRate: 0,
           };
         }
-
-        acc[sale.paymentType]!.orders += 1;
-        acc[sale.paymentType]!.grossAfterTax += sale.totalAmount;
-        acc[sale.paymentType]!.taxAmount += sale.tax;
-        acc[sale.paymentType]!.taxableSales += sale.totalAmount - sale.tax;
+        const taxSummary = acc[sale.paymentType];
+        if (!taxSummary) return acc;
+        taxSummary.orders += 1;
+        taxSummary.grossAfterTax += sale.totalAmount;
+        taxSummary.taxAmount += sale.tax;
+        taxSummary.taxableSales += sale.totalAmount - sale.tax;
 
         return acc;
       }, {});
@@ -1055,11 +1057,12 @@ export const saleRouter = createTRPCRouter({
             discountRate: 0,
           };
         }
-
-        acc[sale.paymentType]!.orders += 1;
-        acc[sale.paymentType]!.grossBeforeDiscount += grossBeforeDiscount;
-        acc[sale.paymentType]!.discountAmount += sale.discount;
-        acc[sale.paymentType]!.netBeforeTax += netBeforeTax;
+        const discountSummary = acc[sale.paymentType];
+        if (!discountSummary) return acc;
+        discountSummary.orders += 1;
+        discountSummary.grossBeforeDiscount += grossBeforeDiscount;
+        discountSummary.discountAmount += sale.discount;
+        discountSummary.netBeforeTax += netBeforeTax;
         return acc;
       }, {});
 
@@ -1103,7 +1106,7 @@ export const saleRouter = createTRPCRouter({
 
 async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {
   const today = new Date();
-  const dateStr = today.toISOString().split("T")[0]!.replace(/-/g, "");
+  const dateStr = today.toISOString().split("T")[0]?.replace(/-/g, "") ?? "";
   const count = await prisma.sale.count({
     where: {
       warungId,

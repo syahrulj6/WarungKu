@@ -1,5 +1,6 @@
 import { Button } from "~/components/ui/button";
 import { Check, X } from "lucide-react";
+import type { PaymentType } from "@prisma/client";
 import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -40,7 +41,7 @@ interface Order {
   totalAmount: number;
   discount: number;
   tax: number;
-  paymentType: string;
+  paymentType: PaymentType;
   isPaid: boolean;
   notes: string | null;
   items: OrderItem[];

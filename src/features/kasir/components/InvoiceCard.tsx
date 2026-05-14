@@ -1,4 +1,3 @@
-import type { PaymentType } from "@prisma/client";
 import { formatRupiah } from "~/lib/format";
 
 type InvoiceItem = {
@@ -13,7 +12,7 @@ type InvoiceItem = {
 type InvoiceData = {
   receiptNo: string;
   createdAt: Date;
-  paymentType: PaymentType | string;
+  paymentType: string;
   isPaid: boolean;
   totalAmount: number;
   discount: number;

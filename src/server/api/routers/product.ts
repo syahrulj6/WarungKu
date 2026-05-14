@@ -184,7 +184,10 @@ export const productRouter = createTRPCRouter({
           .map((product) => ({
             ...product,
             threshold: product.minStock ?? 5,
-            status: product.stock <= 0 ? "OUT_OF_STOCK" : "LOW_STOCK",
+            status:
+              product.stock <= 0
+                ? ("OUT_OF_STOCK" as const)
+                : ("LOW_STOCK" as const),
             stockGap: (product.minStock ?? 5) - product.stock,
           }));
 
