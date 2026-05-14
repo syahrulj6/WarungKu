@@ -32,7 +32,7 @@ const AccountDropdown = () => {
   if (!mounted) {
     return (
       <Button variant="outline" size="sm" disabled>
-        Account
+        Akun
       </Button>
     );
   }
@@ -41,7 +41,7 @@ const AccountDropdown = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
-          Account
+          Akun
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -52,10 +52,10 @@ const AccountDropdown = () => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href="/preferences">Preferensi Akun</Link>
+            <Link href="/dashboard/account/me">Preferensi Akun</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/security">Keamanan</Link>
+            <Link href="/dashboard/account/security">Keamanan</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

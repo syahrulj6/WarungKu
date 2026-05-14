@@ -155,10 +155,11 @@ export const LowStockAlertCard = ({ warungId, product }: LowStockAlertCardProps)
             </DialogContent>
           </Dialog>
           <Button asChild size="sm" variant="outline">
-            <Link href={`/dashboard/warung/${warungId}/product`}>Kelola Produk</Link>
+            <Link href={`/dashboard/kasir/${warungId}/product`}>Kelola Produk</Link>
           </Button>
         </div>
       </div>
     </Card>
   );
 };
+

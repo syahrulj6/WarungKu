@@ -1,0 +1,28 @@
+import { z } from "zod";
+
+const optionalUrl = z
+  .string()
+  .optional()
+  .transform((value) => (value?.trim() ? value.trim() : undefined))
+  .refine((value) => !value || /^https?:\/\/.+/.test(value), {
+    message: "Must be a valid URL",
+  });
+
+export const createKasirFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Kasirium name is required")
+    .max(100, "Kasirium name must be less than 100 characters"),
+  address: z
+    .string()
+    .max(500, "Address must be less than 500 characters")
+    .optional(),
+  phone: z
+    .string()
+    .max(20, "Phone number must be less than 20 characters")
+    .optional(),
+  logoUrl: optionalUrl,
+});
+
+export type CreateKasirFormSchema = z.infer<typeof createKasirFormSchema>;
+

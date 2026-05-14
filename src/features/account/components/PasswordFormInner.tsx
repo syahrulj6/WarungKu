@@ -45,6 +45,22 @@ export const PasswordFormInner = () => {
           </FormItem>
         )}
       />
+
+      <FormField
+        control={form.control}
+        name="confirmNewPassword"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-muted-foreground">
+              Konfirmasi Password Baru
+            </FormLabel>
+            <FormControl>
+              <Input {...field} type="password" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 };

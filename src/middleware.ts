@@ -14,7 +14,7 @@ export default async function middleware(request: NextRequest) {
 
   if (isAuthRoute && sessionCookie) {
     const url = nextUrl.clone();
-    url.pathname = mfaVerified ? "/dashboard/warung" : "/verify-mfa";
+    url.pathname = mfaVerified ? "/dashboard/kasir" : "/verify-mfa";
     return NextResponse.redirect(url);
   }
 
@@ -27,7 +27,7 @@ export default async function middleware(request: NextRequest) {
 
     if (mfaVerified) {
       const url = nextUrl.clone();
-      url.pathname = "/dashboard/warung";
+      url.pathname = "/dashboard/kasir";
       return NextResponse.redirect(url);
     }
   }
@@ -47,7 +47,7 @@ export default async function middleware(request: NextRequest) {
 
     if (path === "/dashboard") {
       const url = nextUrl.clone();
-      url.pathname = "/dashboard/warung";
+      url.pathname = "/dashboard/kasir";
       return NextResponse.redirect(url);
     }
   }
@@ -60,4 +60,5 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+
 

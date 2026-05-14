@@ -4,28 +4,28 @@ import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { api } from "~/utils/api";
-import { WarungCard } from "../components/WarungCard";
+import { KasirCard } from "../components/KasirCard";
 import { useDebounce } from "use-debounce";
-import { CreateWarungModal } from "../components/CreateWarungModal";
+import { CreateKasirModal } from "../components/CreateKasirModal";
 
 const MainDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
 
   const {
-    data: allWarungData,
+    data: allKasirData,
     isLoading: isAllLoading,
     refetch,
-  } = api.warung.getWarung.useQuery();
+  } = api.kasir.getKasir.useQuery();
 
-  const { data: searchWarungData, isLoading: isSearchLoading } =
-    api.warung.searchWarungByName.useQuery(
+  const { data: searchKasirData, isLoading: isSearchLoading } =
+    api.kasir.searchKasirByName.useQuery(
       { name: debouncedSearchTerm },
       { enabled: debouncedSearchTerm.length > 0 },
     );
 
   const displayData =
-    debouncedSearchTerm.length > 0 ? searchWarungData : allWarungData;
+    debouncedSearchTerm.length > 0 ? searchKasirData : allKasirData;
   const isLoading =
     debouncedSearchTerm.length > 0 ? isSearchLoading : isAllLoading;
 
@@ -33,11 +33,11 @@ const MainDashboardPage = () => {
     <DashboardLayout
       metaTitle="Dashboard"
       metaDescription="Kelola bussiness Anda dengan mudah melalui dashboard Kasirium"
-      pathname="/dashboard/warung"
+      pathname="/dashboard/kasir"
     >
       <div className="flex flex-col p-4 md:p-6">
         <div className="flex flex-col gap-2 md:flex-row">
-          <CreateWarungModal refetch={refetch} />
+          <CreateKasirModal refetch={refetch} />
           <div className="relative h-8 md:w-72">
             <Input
               id="search"
@@ -59,8 +59,8 @@ const MainDashboardPage = () => {
         )}
 
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {displayData?.map((warung) => (
-            <WarungCard key={warung.id} warung={warung} />
+          {displayData?.map((Kasir) => (
+            <KasirCard key={Kasir.id} Kasir={Kasir} />
           ))}
         </div>
 
@@ -68,7 +68,7 @@ const MainDashboardPage = () => {
           debouncedSearchTerm &&
           (!displayData || displayData.length === 0) && (
             <div className="text-muted-foreground mt-4 text-center text-sm">
-              Tidak ada Kasiri yang ditemukan dengan nama &quot;
+              Tidak ada kasir yang ditemukan dengan nama &quot;
               {debouncedSearchTerm}&quot;
             </div>
           )}
@@ -78,3 +78,5 @@ const MainDashboardPage = () => {
 };
 
 export default MainDashboardPage;
+
+

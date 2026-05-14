@@ -4,7 +4,6 @@ import { api } from "~/utils/api";
 import { toast } from "sonner";
 import { Skeleton } from "~/components/ui/skeleton";
 import PaymentMethodBadge from "./PaymentMethodBadge";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { useState } from "react";
 import {
   Dialog,
@@ -12,8 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import type { Product } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import { useRouter } from "next/router";
+import { InvoiceCard } from "./InvoiceCard";
 
 interface OrderItem {
   id: string;
@@ -38,8 +38,11 @@ interface Order {
     email: string | null;
   } | null;
   totalAmount: number;
+  discount: number;
+  tax: number;
   paymentType: string;
   isPaid: boolean;
+  notes: string | null;
   items: OrderItem[];
 }
 
@@ -49,9 +52,15 @@ interface OrderListProps {
 }
 
 export const OrderList = ({ orders, isLoading }: OrderListProps) => {
+  const router = useRouter();
+  const { id } = router.query;
   const utils = api.useUtils();
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const { data: Kasir } = api.kasir.getKasirById.useQuery(
+    { warungId: id as string },
+    { enabled: !!id },
+  );
 
   const { mutate: markAsPaid } = api.sale.markAsPaid.useMutation({
     onSuccess: () => {
@@ -83,6 +92,24 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
 
   return (
     <div className="space-y-4">
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .invoice-printable,
+          .invoice-printable * {
+            visibility: visible;
+          }
+          .invoice-printable {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+          }
+        }
+      `}</style>
+
       {/* Desktop Table (hidden on mobile) */}
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[800px]">
@@ -254,17 +281,33 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                   ))}
                 </div>
 
-                {!selectedOrder.isPaid && (
-                  <Button
-                    className="mt-4 w-full"
-                    onClick={() => {
-                      markAsPaid({ id: selectedOrder.id });
-                      setSelectedOrder(null);
-                    }}
-                  >
-                    Tandai Sudah Dibayar
-                  </Button>
+                {Kasir && (
+                  <div className="invoice-printable rounded-lg border p-4">
+                    <InvoiceCard invoice={selectedOrder} Kasir={Kasir} />
+                  </div>
                 )}
+
+                <div className="mt-4 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => window.print()}
+                  >
+                    Cetak Invoice
+                  </Button>
+                  {!selectedOrder.isPaid && (
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        markAsPaid({ id: selectedOrder.id });
+                        setSelectedOrder(null);
+                      }}
+                    >
+                      Tandai Sudah Dibayar
+                    </Button>
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -273,3 +316,4 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
     </div>
   );
 };
+

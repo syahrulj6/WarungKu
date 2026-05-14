@@ -1,7 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { authRouter } from "./routers/auth";
 import { profileRouter } from "./routers/profile";
-import { warungRouter } from "./routers/warung";
+import { kasirRouter } from "./routers/kasir";
 import { securityRouter } from "./routers/security";
 import { productRouter } from "./routers/product";
 import { categoryRouter } from "./routers/category";
@@ -16,7 +16,7 @@ import { customerRouter } from "./routers/customer";
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   profile: profileRouter,
-  warung: warungRouter,
+  kasir: kasirRouter,
   security: securityRouter,
   product: productRouter,
   category: categoryRouter,
@@ -35,4 +35,5 @@ export type AppRouter = typeof appRouter;
  *       ^? Post[]
  */
 export const createCaller = createCallerFactory(appRouter);
+
 

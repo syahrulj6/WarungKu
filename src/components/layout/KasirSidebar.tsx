@@ -14,12 +14,12 @@ type SidebarProps = {
   menuItems: SidebarMenuItem[];
 };
 
-export const WarungSidebar = ({ menuItems }: SidebarProps) => {
+export const KasirSidebar = ({ menuItems }: SidebarProps) => {
   return (
     <aside className="bg-background flex h-screen w-full flex-col items-center border-r md:py-6 lg:w-40">
       {/* Logo */}
       <div className="mb-5 md:mb-8">
-        <Link href="/dashboard/warung">
+        <Link href="/dashboard/kasir">
           <div className="relative h-12 w-12 md:h-14 md:w-14">
             <Image
               src="/warungku-notext.png"
@@ -70,5 +70,6 @@ const SidebarItem = ({ label, active, icon, href }: SidebarItemProps) => {
     </Link>
   );
 };
+
 
 

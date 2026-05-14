@@ -1,7 +1,14 @@
 import { z } from "zod";
 
-export const updateWarungFormSchema = z.object({
-  warungId: z.string().uuid("Invalid warung ID"),
+const optionalUrl = z
+  .string()
+  .optional()
+  .transform((value) => (value?.trim() ? value.trim() : undefined))
+  .refine((value) => !value || /^https?:\/\/.+/.test(value), {
+    message: "Must be a valid URL",
+  });
+
+export const createKasirFormSchema = z.object({
   name: z
     .string()
     .min(1, "Kasirium name is required")
@@ -14,8 +21,6 @@ export const updateWarungFormSchema = z.object({
     .string()
     .max(20, "Phone number must be less than 20 characters")
     .optional(),
-  logoUrl: z.string().url("Must be a valid URL").optional(),
+  logoUrl: optionalUrl,
 });
-
-export type UpdateWarungFormSchema = z.infer<typeof updateWarungFormSchema>;
 

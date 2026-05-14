@@ -22,40 +22,40 @@ import { Button } from "../ui/button";
 
 const menuItems = [
   {
-    title: "Sales Summary",
+    title: "Ringkasan Penjualan",
     icon: <ChartColumnBig size={18} />,
-    url: "/dashboard/warung/[id]/report",
-    path: (id: string) => `/dashboard/warung/${id}/report`,
+    url: "/dashboard/kasir/[id]/report",
+    path: (id: string) => `/dashboard/kasir/${id}/report`,
   },
   {
-    title: "Payment Method",
+    title: "Metode Pembayaran",
     icon: <CreditCard size={18} />,
-    url: "/dashboard/warung/[id]/report/payment-method",
-    path: (id: string) => `/dashboard/warung/${id}/report/payment-method`,
+    url: "/dashboard/kasir/[id]/report/payment-method",
+    path: (id: string) => `/dashboard/kasir/${id}/report/payment-method`,
   },
   {
-    title: "Item Sales",
+    title: "Penjualan Produk",
     icon: <LayoutGrid size={18} />,
-    url: "/dashboard/warung/[id]/report/item-sales",
-    path: (id: string) => `/dashboard/warung/${id}/report/item-sales`,
+    url: "/dashboard/kasir/[id]/report/item-sales",
+    path: (id: string) => `/dashboard/kasir/${id}/report/item-sales`,
   },
   {
-    title: "Category Sales",
+    title: "Penjualan Kategori",
     icon: <List size={18} />,
-    url: "/dashboard/warung/[id]/report/category-sales",
-    path: (id: string) => `/dashboard/warung/${id}/report/category-sales`,
+    url: "/dashboard/kasir/[id]/report/category-sales",
+    path: (id: string) => `/dashboard/kasir/${id}/report/category-sales`,
   },
   {
-    title: "Discounts",
+    title: "Diskon",
     icon: <BadgeDollarSign size={18} />,
-    url: "/dashboard/warung/[id]/report/discounts",
-    path: (id: string) => `/dashboard/warung/${id}/report/discounts`,
+    url: "/dashboard/kasir/[id]/report/discounts",
+    path: (id: string) => `/dashboard/kasir/${id}/report/discounts`,
   },
   {
-    title: "Taxes",
+    title: "Pajak",
     icon: <NotebookText size={18} />,
-    url: "/dashboard/warung/[id]/report/taxes",
-    path: (id: string) => `/dashboard/warung/${id}/report/taxes`,
+    url: "/dashboard/kasir/[id]/report/taxes",
+    path: (id: string) => `/dashboard/kasir/${id}/report/taxes`,
   },
 ];
 
@@ -86,7 +86,7 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
   const enhancedMenuItems = menuItems.map((item) => {
     const isActive =
       router.pathname === item.url ||
-      (item.url !== "/dashboard/warung/[id]/report" &&
+      (item.url !== "/dashboard/kasir/[id]/report" &&
         router.pathname.startsWith(item.url));
 
     return {
@@ -126,10 +126,10 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
             <SheetContent side="left" className="w-48 p-0">
               <SheetHeader className="p-4">
                 <SheetTitle className="text-lg font-semibold">
-                  Report Menu
+                  Menu Laporan
                 </SheetTitle>
                 <SheetDescription className="sr-only">
-                  Navigation menu for report sections
+                  Menu navigasi untuk bagian laporan
                 </SheetDescription>
               </SheetHeader>
               <ReportSidebar menuItems={enhancedMenuItems} />
@@ -145,4 +145,5 @@ export const ReportLayout = ({ children }: ReportLayoutProps) => {
     </div>
   );
 };
+
 

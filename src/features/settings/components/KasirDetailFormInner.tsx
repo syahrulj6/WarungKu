@@ -7,10 +7,10 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import type { CreateWarungFormSchema } from "../forms/warung";
+import type { UpdateKasirFormSchema } from "../forms/kasir-detail";
 
-export const CreateWarungFormInner = () => {
-  const form = useFormContext<CreateWarungFormSchema>();
+export const CreateKasirFormInner = () => {
+  const form = useFormContext<UpdateKasirFormSchema>();
 
   return (
     <>
@@ -18,10 +18,24 @@ export const CreateWarungFormInner = () => {
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem className="col-span-2">
+          <FormItem className="col-span-1">
             <FormLabel>Nama Kasirium</FormLabel>
             <FormControl>
               <Input {...field} placeholder="Nama Kasirium" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="phone"
+        render={({ field }) => (
+          <FormItem className="col-span-1">
+            <FormLabel>No Telp {"(Optional)"}</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="No telp" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -41,21 +55,8 @@ export const CreateWarungFormInner = () => {
           </FormItem>
         )}
       />
-
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem className="col-span-2">
-            <FormLabel>No Telp {"(Optional)"}</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="Alamat" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </>
   );
 };
+
 

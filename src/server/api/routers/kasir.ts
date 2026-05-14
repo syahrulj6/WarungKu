@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { createWarungFormSchema } from "~/schemas/warung";
+import { createKasirFormSchema } from "~/schemas/kasir";
 
-export const warungRouter = createTRPCRouter({
-  getWarung: privateProcedure.query(async ({ ctx }) => {
+export const kasirRouter = createTRPCRouter({
+  getKasir: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
 
-    const warung = await db.warung.findMany({
+    return db.warung.findMany({
       where: {
         ownerId: user?.id,
       },
@@ -15,11 +15,9 @@ export const warungRouter = createTRPCRouter({
         subscriptions: true,
       },
     });
-
-    return warung;
   }),
 
-  getWarungById: privateProcedure
+  getKasirById: privateProcedure
     .input(
       z.object({
         warungId: z.string(),
@@ -29,17 +27,15 @@ export const warungRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { warungId } = input;
 
-      const warung = await db.warung.findUnique({
+      return db.warung.findFirst({
         where: {
           id: warungId,
           ownerId: user?.id,
         },
       });
-
-      return warung;
     }),
 
-  searchWarungByName: privateProcedure
+  searchKasirByName: privateProcedure
     .input(
       z.object({
         name: z.string().min(1, "Search term cannot be empty").max(100),
@@ -50,24 +46,22 @@ export const warungRouter = createTRPCRouter({
       const { name } = input;
 
       try {
-        const warungs = await db.warung.findMany({
+        return await db.warung.findMany({
           where: {
-            ownerId: user?.id, // Ensure we only search user's warungs
+            ownerId: user?.id,
             name: {
               contains: name,
               mode: "insensitive",
             },
           },
           include: {
-            subscriptions: true, // Include subscriptions
+            subscriptions: true,
           },
           take: 10,
           orderBy: {
             name: "asc",
           },
         });
-
-        return warungs; // Return array directly to match getWarung format
       } catch (error) {
         console.error("Search failed:", error);
         throw new TRPCError({
@@ -77,29 +71,29 @@ export const warungRouter = createTRPCRouter({
       }
     }),
 
-  createWarung: privateProcedure
-    .input(createWarungFormSchema)
+  createKasir: privateProcedure
+    .input(createKasirFormSchema)
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
       const { name, address, logoUrl, phone } = input;
 
       try {
-        const existingWarung = await db.warung.findFirst({
+        const existingKasir = await db.warung.findFirst({
           where: {
             ownerId: user?.id,
-            name: name,
+            name,
           },
         });
 
-        if (existingWarung) {
+        if (existingKasir) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "You already have a warung with this name",
+            message: "You already have a kasir with this name",
           });
         }
 
-        const result = await db.$transaction(async (tx) => {
-          const newWarung = await tx.warung.create({
+        return await db.$transaction(async (tx) => {
+          const newKasir = await tx.warung.create({
             data: {
               name,
               address,
@@ -112,86 +106,96 @@ export const warungRouter = createTRPCRouter({
 
           await tx.category.createMany({
             data: [
-              { name: "Food", warungId: newWarung.id },
-              { name: "Beverage", warungId: newWarung.id },
-              { name: "Snack", warungId: newWarung.id },
+              { name: "Food", warungId: newKasir.id },
+              { name: "Beverage", warungId: newKasir.id },
+              { name: "Snack", warungId: newKasir.id },
             ],
           });
 
-          return newWarung;
+          return newKasir;
         });
-
-        return result;
       } catch (error) {
         if (error instanceof TRPCError) {
           throw error;
         }
-        console.error("Failed to create warung:", error);
+        console.error("Failed to create kasir:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create warung",
+          message: "Failed to create kasir",
         });
       }
     }),
 
-  updateWarung: privateProcedure
+  updateKasir: privateProcedure
     .input(
       z.object({
         warungId: z.string(),
-        name: z.string().min(1).max(100),
+        name: z.string().min(1).max(100).optional(),
         address: z.string().max(255).optional(),
         logoUrl: z.string().url().optional(),
         phone: z.string().max(20).optional(),
+        isActive: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
+      const { warungId, name, address, logoUrl, phone, isActive } = input;
 
-      const { warungId, name, address, logoUrl, phone } = input;
-      const warung = await db.warung.findUnique({
+      const kasir = await db.warung.findFirst({
         where: {
           id: warungId,
           ownerId: user?.id,
         },
       });
-      if (!warung) {
+      if (!kasir) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Kasirium not found",
+          message: "Kasir not found",
         });
       }
 
-      if (warung.name === name) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Kasirium with this name already exists",
+      if (name && name !== kasir.name) {
+        const existingKasir = await db.warung.findFirst({
+          where: {
+            ownerId: user?.id,
+            name,
+            id: {
+              not: warungId,
+            },
+          },
         });
+
+        if (existingKasir) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Kasir with this name already exists",
+          });
+        }
       }
 
       try {
-        const updatedWarung = await db.warung.update({
+        return await db.warung.update({
           where: {
             id: warungId,
           },
           data: {
-            name,
+            ...(name !== undefined ? { name } : {}),
             address,
             logoUrl,
             phone,
+            ...(isActive !== undefined ? { isActive } : {}),
           },
         });
-
-        return updatedWarung;
       } catch (error) {
-        console.error("Failed to update Kasirium:", error);
+        console.error("Failed to update kasir:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update Kasirium",
+          message: "Failed to update kasir",
         });
       }
     }),
 
-  getWarungActivities: privateProcedure
+  getKasirActivities: privateProcedure
     .input(
       z.object({
         warungId: z.string(),
@@ -220,4 +224,3 @@ export const warungRouter = createTRPCRouter({
       });
     }),
 });
-

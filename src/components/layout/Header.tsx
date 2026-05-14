@@ -84,7 +84,7 @@ export const Header = () => {
           ) : session ? (
             <>
               <Button asChild className="hidden md:block">
-                <Link href="/dashboard/warung">Dasbor</Link>
+                <Link href="/dashboard/kasir">Dasbor</Link>
               </Button>
             </>
           ) : (
@@ -141,7 +141,7 @@ export const Header = () => {
           {session ? (
             <>
               <Button asChild className="w-full">
-                <Link href="/dashboard/warung">Dasbor</Link>
+                <Link href="/dashboard/kasir">Dasbor</Link>
               </Button>
             </>
           ) : (
@@ -156,3 +156,4 @@ export const Header = () => {
     </>
   );
 };
+

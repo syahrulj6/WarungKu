@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
+import { KasirDashboardLayout } from "~/components/layout/KasirDashboardLayout";
 import { api } from "~/utils/api";
 import { LowStockAlertCard } from "../components/LowStockAlertCard";
 import { Card } from "~/components/ui/card";
@@ -21,10 +21,10 @@ const AlertPage = () => {
     );
 
   return (
-    <WarungDashboardLayout
+    <KasirDashboardLayout
       metaTitle="Kasirium Alert"
       metaDescription="Lihat semua peringatan dalam Kasirium Anda"
-      pathname={`/dashboard/warung/${id}/alert`}
+      pathname={`/dashboard/kasir/${id}/alert`}
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -60,9 +60,10 @@ const AlertPage = () => {
           </Card>
         )}
       </div>
-    </WarungDashboardLayout>
+    </KasirDashboardLayout>
   );
 };
 
 export default AlertPage;
+
 

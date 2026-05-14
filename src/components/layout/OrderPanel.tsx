@@ -79,7 +79,7 @@ export const OrderPanel = () => {
                 Bersihkan
               </Button>
               <Button className="flex-1" asChild>
-                <Link href={`/dashboard/warung/${id}/order`}>Checkout</Link>
+                <Link href={`/dashboard/kasir/${id}/order`}>Checkout</Link>
               </Button>
             </div>
           </div>
@@ -88,4 +88,5 @@ export const OrderPanel = () => {
     </div>
   );
 };
+
 

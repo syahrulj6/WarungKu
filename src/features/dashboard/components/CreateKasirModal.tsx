@@ -11,24 +11,24 @@ import {
 } from "~/components/ui/dialog";
 
 import {
-  createWarungFormSchema,
-  type CreateWarungFormSchema,
-} from "../forms/warung";
+  createKasirFormSchema,
+  type CreateKasirFormSchema,
+} from "../forms/kasir";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/utils/api";
 import { Form } from "~/components/ui/form";
-import { CreateWarungFormInner } from "./CreateWarungFormInner";
+import { CreateKasirFormInner } from "./CreateKasirFormInner";
 import { toast } from "sonner";
 import { useState } from "react";
 
-type CreateWarungModalProps = {
+type CreateKasirModalProps = {
   refetch: () => void;
 };
 
-export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
+export const CreateKasirModal = ({ refetch }: CreateKasirModalProps) => {
   const [open, setOpen] = useState(false);
-  const form = useForm<CreateWarungFormSchema>({
-    resolver: zodResolver(createWarungFormSchema),
+  const form = useForm<CreateKasirFormSchema>({
+    resolver: zodResolver(createKasirFormSchema),
     defaultValues: {
       name: "",
       address: undefined,
@@ -37,11 +37,11 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
     },
   });
 
-  const createWarung = api.warung.createWarung.useMutation();
+  const createKasir = api.kasir.createKasir.useMutation();
 
-  const handleCreateWarung = (data: CreateWarungFormSchema) => {
+  const handleCreateKasir = (data: CreateKasirFormSchema) => {
     console.log("Submitting:", data);
-    createWarung.mutate(data, {
+    createKasir.mutate(data, {
       onSuccess: () => {
         toast.success("Berhasil membuat Kasir");
         refetch();
@@ -73,17 +73,17 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              void form.handleSubmit(handleCreateWarung)(e);
+              void form.handleSubmit(handleCreateKasir)(e);
             }}
             className="mt-2 grid grid-cols-2 space-y-2 gap-x-2"
           >
-            <CreateWarungFormInner />
+            <CreateKasirFormInner />
             <Button
               type="submit"
               className="col-span-2 w-full"
-              disabled={createWarung.isPending}
+              disabled={createKasir.isPending}
             >
-              {createWarung.isPending ? (
+              {createKasir.isPending ? (
                 <LoaderCircleIcon className="animate-spin" />
               ) : (
                 "Buat Kasir"
@@ -95,3 +95,4 @@ export const CreateWarungModal = ({ refetch }: CreateWarungModalProps) => {
     </Dialog>
   );
 };
+

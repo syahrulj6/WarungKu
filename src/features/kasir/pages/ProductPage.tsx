@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
+import { KasirDashboardLayout } from "~/components/layout/KasirDashboardLayout";
 import { ProductHeader } from "../components/ProductHeader";
 import { CategoryList } from "../components/CategoryList";
 import { api } from "~/utils/api";
@@ -44,7 +44,7 @@ const ProductPage = () => {
   };
 
   return (
-    <WarungDashboardLayout
+    <KasirDashboardLayout
       withRightPanel={true}
       headerContent={
         <ProductHeader
@@ -55,7 +55,7 @@ const ProductPage = () => {
       }
       metaTitle="Daftar Produk"
       metaDescription="Kelola Produk Kasirium Anda"
-      pathname={`/dashboard/warung/${id}/product`}
+      pathname={`/dashboard/kasir/${id}/product`}
     >
       <div className="flex flex-col gap-6">
         <CategoryList onCategoryChange={handleCategoryChange} />
@@ -83,9 +83,10 @@ const ProductPage = () => {
           )}
         </div>
       </div>
-    </WarungDashboardLayout>
+    </KasirDashboardLayout>
   );
 };
 
 export default ProductPage;
+
 

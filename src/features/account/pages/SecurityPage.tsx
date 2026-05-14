@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import { api } from "~/utils/api";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Skeleton } from "~/components/ui/skeleton";
+import { Separator } from "~/components/ui/separator";
+import { Loader2, ShieldCheck, ShieldAlert, Mail } from "lucide-react";
 
 const SecurityPage = () => {
   const [step, setStep] = useState<"initial" | "verify" | "enabled">("initial");
@@ -9,7 +15,7 @@ const SecurityPage = () => {
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
   const [mfaSecret, setMfaSecret] = useState<string | null>(null);
 
-  const { data: mfaData, refetch } = api.security.getMfaStatus.useQuery();
+  const { data: mfaData, refetch, isLoading } = api.security.getMfaStatus.useQuery();
   const generateSecret = api.security.generateMfaSecret.useMutation();
   const enableMfa = api.security.enableMfa.useMutation();
   const disableMfa = api.security.disableMfa.useMutation();
@@ -20,9 +26,9 @@ const SecurityPage = () => {
       const secret = await generateSecret.mutateAsync();
       setMfaSecret(secret.secret);
       setStep("verify");
-      toast.success("Verification code sent to your email");
+      toast.success("Kode verifikasi sudah dikirim ke email Anda");
     } catch {
-      toast.error("Failed to generate MFA secret");
+      toast.error("Gagal memulai aktivasi MFA");
     }
   };
 
@@ -39,9 +45,9 @@ const SecurityPage = () => {
       setBackupCodes(result.backupCodes);
       setStep("enabled");
       await refetch();
-      toast.success("MFA enabled successfully");
+      toast.success("MFA berhasil diaktifkan");
     } catch {
-      toast.error("Invalid verification code");
+      toast.error("Kode verifikasi tidak valid");
     }
   };
 
@@ -49,20 +55,30 @@ const SecurityPage = () => {
     try {
       await disableMfa.mutateAsync();
       await refetch();
-      toast.success("MFA disabled successfully");
+      setStep("initial");
+      setToken("");
+      setMfaSecret(null);
+      setBackupCodes([]);
+      toast.success("MFA berhasil dinonaktifkan");
     } catch {
-      toast.error("Failed to disable MFA");
+      toast.error("Gagal menonaktifkan MFA");
     }
   };
 
   const handleResendCode = async () => {
     try {
       await resendCode.mutateAsync();
-      toast.success("New verification code sent to your email");
+      toast.success("Kode verifikasi baru telah dikirim");
     } catch {
-      toast.error("Failed to resend code");
+      toast.error("Gagal mengirim ulang kode");
     }
   };
+
+  const isMutating =
+    generateSecret.isPending ||
+    enableMfa.isPending ||
+    disableMfa.isPending ||
+    resendCode.isPending;
 
   return (
     <DashboardLayout
@@ -76,112 +92,139 @@ const SecurityPage = () => {
             Multi-Factor Authentication
           </h1>
           <p className="text-muted-foreground text-sm">
-            Tambahkan lapisan keamanan tambahan ke akun Anda dengan meminta
-            lebih dari sekadar kata sandi untuk masuk.
+            Tambahkan verifikasi email saat login untuk meningkatkan keamanan akun.
           </p>
         </div>
 
-        <div className="rounded-lg border p-4">
-          {mfaData?.mfaEnabled ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">MFA is enabled</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Your account is protected with email verification
-                  </p>
-                </div>
-                <button
-                  onClick={handleDisableMfa}
-                  className="rounded-md bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                >
-                  Disable MFA
-                </button>
+        <Card>
+          <CardHeader className="-mb-2">
+            <CardTitle className="text-base font-semibold">Status Keamanan</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent className="space-y-4 pt-6">
+            {isLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-9 w-36" />
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">MFA is disabled</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Enable email verification for extra security
-                  </p>
-                </div>
-                <button
-                  onClick={handleGenerateMfa}
-                  className="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white"
-                >
-                  Enable MFA
-                </button>
-              </div>
-
-              {step === "verify" && (
-                <div className="mt-6 space-y-4">
-                  <h4 className="font-medium">Email Verification</h4>
-                  <p className="text-muted-foreground text-sm">
-                    We&apos;ve sent a 6-digit verification code to your email
-                    address.
-                  </p>
-
-                  <div className="mt-4 space-y-2">
-                    <label className="block text-sm font-medium">
-                      Verification code
-                    </label>
-                    <input
-                      type="text"
-                      value={token}
-                      onChange={(e) => setToken(e.target.value)}
-                      className="w-full rounded-md border p-2"
-                      placeholder="Enter 6-digit code"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleEnableMfa}
-                        className="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white"
-                      >
-                        Verify and enable
-                      </button>
-                      <button
-                        onClick={handleResendCode}
-                        className="text-primary hover:text-primary-dark rounded-md px-4 py-2"
-                      >
-                        Resend code
-                      </button>
-                    </div>
+            ) : mfaData?.mfaEnabled ? (
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <h3 className="flex items-center gap-2 font-medium">
+                      <ShieldCheck className="h-4 w-4 text-green-600" />
+                      MFA Aktif
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      Akun Anda sudah dilindungi verifikasi email saat proses login.
+                    </p>
                   </div>
-                </div>
-              )}
-
-              {step === "enabled" && (
-                <div className="mt-6 space-y-4">
-                  <h4 className="font-medium">MFA enabled successfully</h4>
-                  <p className="text-muted-foreground text-sm">
-                    Please save these backup codes in a safe place. You can use
-                    them to access your account if you can&apos;t receive
-                    emails.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {backupCodes.map((code, i) => (
-                      <div
-                        key={i}
-                        className="rounded-md bg-gray-100 p-2 text-center font-mono"
-                      >
-                        {code}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => setStep("initial")}
-                    className="bg-primary hover:bg-primary-dark rounded-md px-4 py-2 text-white"
+                  <Button
+                    variant="destructive"
+                    onClick={handleDisableMfa}
+                    disabled={isMutating}
                   >
-                    Done
-                  </button>
+                    {disableMfa.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Nonaktifkan MFA"
+                    )}
+                  </Button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <h3 className="flex items-center gap-2 font-medium">
+                    <ShieldAlert className="h-4 w-4 text-amber-600" />
+                    MFA Belum Aktif
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Aktifkan MFA untuk mengurangi risiko akses akun yang tidak sah.
+                  </p>
+                </div>
+                <Button onClick={handleGenerateMfa} disabled={isMutating}>
+                  {generateSecret.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Aktifkan MFA"
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {step === "verify" && !mfaData?.mfaEnabled && (
+              <div className="space-y-4 rounded-md border p-4">
+                <h4 className="font-medium">Verifikasi Email</h4>
+                <p className="text-muted-foreground text-sm">
+                  Masukkan kode 6 digit yang dikirim ke email Anda untuk
+                  menyelesaikan aktivasi MFA.
+                </p>
+
+                <div className="space-y-2">
+                  <label htmlFor="mfa-token" className="text-sm font-medium">
+                    Kode Verifikasi
+                  </label>
+                  <Input
+                    id="mfa-token"
+                    type="text"
+                    value={token}
+                    maxLength={6}
+                    onChange={(e) =>
+                      setToken(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    placeholder="Contoh: 123456"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={handleEnableMfa}
+                    disabled={isMutating || token.length !== 6}
+                  >
+                    {enableMfa.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Verifikasi dan Aktifkan"
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleResendCode}
+                    disabled={isMutating}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Kirim Ulang Kode
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === "enabled" && backupCodes.length > 0 && (
+              <div className="space-y-4 rounded-md border p-4">
+                <h4 className="font-medium">Backup Codes</h4>
+                <p className="text-muted-foreground text-sm">
+                  Simpan kode ini di tempat aman. Kode dapat dipakai jika Anda
+                  tidak bisa menerima email verifikasi.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {backupCodes.map((code) => (
+                    <div
+                      key={code}
+                      className="bg-muted rounded-md p-2 text-center font-mono text-sm"
+                    >
+                      {code}
+                    </div>
+                  ))}
+                </div>
+                <Button variant="outline" onClick={() => setStep("initial")}>
+                  Selesai
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

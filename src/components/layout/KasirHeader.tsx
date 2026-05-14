@@ -3,7 +3,7 @@ import { Menu, ShoppingCart } from "lucide-react";
 import AccountDropdown from "./AccountDropdown";
 import type React from "react";
 
-export const WarungHeader = ({
+export const KasirHeader = ({
   toggleSidebar,
   toggleRightPanel,
   className = "",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { DashboardLayout } from "~/components/layout/DashboardLayout";
 import {
   Card,
@@ -21,7 +21,7 @@ import { ProfileSettingFormInner } from "../components/ProfileSettingFormInner";
 import { Button } from "~/components/ui/button";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
-import { Edit, Loader } from "lucide-react";
+import { Loader } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 
 import { MdOutlineEmail } from "react-icons/md";
@@ -43,6 +43,7 @@ const AccountProfilePage = () => {
     defaultValues: {
       currentPassword: "",
       newPassword: "",
+      confirmNewPassword: "",
     },
   });
 
@@ -102,14 +103,14 @@ const AccountProfilePage = () => {
         <div className="flex flex-col gap-1 md:gap-2">
           <h1 className="text-xl font-semibold md:text-2xl">Preferensi Akun</h1>
           <p className="text-muted-foreground text-sm">
-            Kelola profil, pengaturan akun, dan preferensi Anda untuk pengalaman
-            Kasirium Anda
+            Kelola profil dan keamanan akun Anda agar data tetap aman dan mudah
+            digunakan setiap hari.
           </p>
         </div>
 
         <Card>
           <CardHeader className="-mt-2 -mb-3">
-            <CardTitle className="font-normal">Informasi Profile</CardTitle>
+            <CardTitle className="font-normal">Informasi Profil</CardTitle>
           </CardHeader>
           <Separator />
           <CardContent>
@@ -179,9 +180,6 @@ const AccountProfilePage = () => {
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" className="flex-shrink-0">
-                <Edit />
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -206,9 +204,7 @@ const AccountProfilePage = () => {
                   passwordForm.reset();
                 }}
                 disabled={
-                  changePasswordMutation.isPending ||
-                  !passwordForm.formState.isDirty ||
-                  changePasswordMutation.isPending
+                  changePasswordMutation.isPending || !passwordForm.formState.isDirty
                 }
               >
                 Batal

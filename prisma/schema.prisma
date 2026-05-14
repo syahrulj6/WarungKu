@@ -211,6 +211,7 @@ model Sale {
   id          String      @id @default(uuid())
   receiptNo   String
   totalAmount Float
+  discount    Float       @default(0)
   tax         Float       @default(0)
   paymentType PaymentType
   isPaid      Boolean     @default(false)

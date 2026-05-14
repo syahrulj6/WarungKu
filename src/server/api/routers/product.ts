@@ -159,7 +159,7 @@ export const productRouter = createTRPCRouter({
         if (!warung) {
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Warung tidak ditemukan atau bukan milik Anda",
+            message: "warung tidak ditemukan atau bukan milik Anda",
           });
         }
 
@@ -361,7 +361,7 @@ export const productRouter = createTRPCRouter({
       if (!warung) {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "Warung tidak ditemukan atau bukan milik Anda",
+          message: "warung tidak ditemukan atau bukan milik Anda",
         });
       }
 
@@ -461,4 +461,5 @@ async function createProductActivity(
     },
   });
 }
+
 

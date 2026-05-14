@@ -47,8 +47,9 @@ export const useOrderStore = create<OrderState>()(
       clearOrder: () => set({ items: [] }),
     }),
     {
-      name: "warung-order-storage",
+      name: "Kasir-order-storage",
     },
   ),
 );
+
 

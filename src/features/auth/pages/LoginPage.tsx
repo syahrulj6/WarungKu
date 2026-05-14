@@ -33,7 +33,7 @@ const LoginPage = () => {
       if (result.mfaRequired) {
         await router.replace("/verify-mfa");
       } else {
-        await router.replace("/dashboard/warung");
+        await router.replace("/dashboard/kasir");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
@@ -162,5 +162,6 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
 
 

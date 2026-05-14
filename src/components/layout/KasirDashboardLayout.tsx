@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useEffect } from "react";
-import { WarungSidebar } from "./WarungSidebar";
-import { WarungHeader } from "./WarungHeader";
+import { KasirSidebar } from "./KasirSidebar";
+import { KasirHeader } from "./KasirHeader";
 import { GoHomeFill, GoClockFill } from "react-icons/go";
 import {
   FaConciergeBell,
@@ -27,48 +27,48 @@ const menuItems = [
   {
     title: "Ringkasan",
     icon: <GoHomeFill />,
-    url: "/dashboard/warung/[id]",
-    path: (id: string) => `/dashboard/warung/${id}`,
+    url: "/dashboard/kasir/[id]",
+    path: (id: string) => `/dashboard/kasir/${id}`,
   },
   {
     title: "Produk",
     icon: <FaConciergeBell />,
-    url: "/dashboard/warung/[id]/product",
-    path: (id: string) => `/dashboard/warung/${id}/product`,
+    url: "/dashboard/kasir/[id]/product",
+    path: (id: string) => `/dashboard/kasir/${id}/product`,
   },
   {
     title: "Pesanan",
     icon: <FaShoppingCart />,
-    url: "/dashboard/warung/[id]/order",
-    path: (id: string) => `/dashboard/warung/${id}/order`,
+    url: "/dashboard/kasir/[id]/order",
+    path: (id: string) => `/dashboard/kasir/${id}/order`,
   },
   {
     title: "Riwayat",
     icon: <GoClockFill />,
-    url: "/dashboard/warung/[id]/history",
-    path: (id: string) => `/dashboard/warung/${id}/history`,
+    url: "/dashboard/kasir/[id]/history",
+    path: (id: string) => `/dashboard/kasir/${id}/history`,
   },
   {
     title: "Laporan",
     icon: <FaBook />,
-    url: "/dashboard/warung/[id]/report",
-    path: (id: string) => `/dashboard/warung/${id}/report`,
+    url: "/dashboard/kasir/[id]/report",
+    path: (id: string) => `/dashboard/kasir/${id}/report`,
   },
   {
     title: "Peringatan",
     icon: <FaBell />,
-    url: "/dashboard/warung/[id]/alert",
-    path: (id: string) => `/dashboard/warung/${id}/alert`,
+    url: "/dashboard/kasir/[id]/alert",
+    path: (id: string) => `/dashboard/kasir/${id}/alert`,
   },
   {
     title: "Pengaturan",
     icon: <IoSettingsSharp />,
-    url: "/dashboard/warung/[id]/settings",
-    path: (id: string) => `/dashboard/warung/${id}/settings`,
+    url: "/dashboard/kasir/[id]/settings",
+    path: (id: string) => `/dashboard/kasir/${id}/settings`,
   },
 ];
 
-type WarungDashboardLayoutProps = {
+type KasirDashboardLayoutProps = {
   children: ReactNode;
   withRightPanel?: boolean;
   headerContent?: ReactNode;
@@ -77,14 +77,14 @@ type WarungDashboardLayoutProps = {
   pathname?: string;
 };
 
-export const WarungDashboardLayout = ({
+export const KasirDashboardLayout = ({
   children,
   withRightPanel = false,
   headerContent,
   metaDescription,
   metaTitle,
   pathname,
-}: WarungDashboardLayoutProps) => {
+}: KasirDashboardLayoutProps) => {
   const router = useRouter();
   const { id } = router.query;
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
@@ -109,7 +109,7 @@ export const WarungDashboardLayout = ({
   const enhancedMenuItems = menuItems.map((item) => {
     const isActive =
       router.pathname === item.url ||
-      (item.url !== "/dashboard/warung/[id]" &&
+      (item.url !== "/dashboard/kasir/[id]" &&
         router.pathname.startsWith(item.url));
 
     return {
@@ -132,7 +132,7 @@ export const WarungDashboardLayout = ({
       {/* Fixed Left Sidebar (Desktop) */}
       {!isMobile && (
         <div className="fixed top-0 left-0 z-30 h-screen w-40 border-r">
-          <WarungSidebar menuItems={enhancedMenuItems} />
+          <KasirSidebar menuItems={enhancedMenuItems} />
         </div>
       )}
 
@@ -156,21 +156,21 @@ export const WarungDashboardLayout = ({
                   Menu navigasi utama aplikasi
                 </SheetDescription>
               </SheetHeader>
-              <WarungSidebar menuItems={enhancedMenuItems} />
+              <KasirSidebar menuItems={enhancedMenuItems} />
             </SheetContent>
           </Sheet>
         </div>
       )}
 
       <div className="flex flex-1 flex-col">
-        <WarungHeader
+        <KasirHeader
           toggleSidebar={toggleLeftSidebar}
           toggleRightPanel={withRightPanel ? toggleRightPanel : undefined}
           className={!isMobile ? "ml-40" : ""}
           showRightPanelButton={withRightPanel}
         >
           {headerContent}
-        </WarungHeader>
+        </KasirHeader>
 
         <div className="flex flex-1">
           <main
@@ -233,4 +233,5 @@ export const WarungDashboardLayout = ({
     </div>
   );
 };
+
 

@@ -12,5 +12,9 @@ export type ProfileSettingFormSchema = z.infer<typeof profileSettingFormSchema>;
 export const changePasswordFormSchema = z.object({
   currentPassword: passwordSchema,
   newPassword: passwordSchema,
+  confirmNewPassword: z.string(),
+}).refine((values) => values.newPassword === values.confirmNewPassword, {
+  path: ["confirmNewPassword"],
+  message: "Konfirmasi password baru tidak sama",
 });
 export type changePasswordFormSchema = z.infer<typeof changePasswordFormSchema>;

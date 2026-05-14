@@ -67,7 +67,7 @@ const VerifyMfaPage = () => {
     setIsLoading(true);
     try {
       await verifyMfa.mutateAsync({ token: otp });
-      await router.push("/dashboard/warung");
+      await router.push("/dashboard/kasir");
     } catch {
       toast.error("Invalid verification code");
     } finally {
@@ -157,4 +157,5 @@ const VerifyMfaPage = () => {
 };
 
 export default VerifyMfaPage;
+
 

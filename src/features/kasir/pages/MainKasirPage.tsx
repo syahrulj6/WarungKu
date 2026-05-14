@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { WarungDashboardLayout } from "~/components/layout/WarungDashboardLayout";
+import { KasirDashboardLayout } from "~/components/layout/KasirDashboardLayout";
 import { api } from "~/utils/api";
 import { MetricsCard } from "../components/MetricsCard";
 import {
@@ -16,7 +16,7 @@ import {
 import { BarChartCard } from "../components/BarChartCard";
 import { PieChartCard } from "../components/PieChartCard";
 import {
-  useWarungDashboardData,
+  useKasirDashboardData,
   type TimePeriod,
 } from "~/hooks/useDashboardData";
 import { chartActivityConfig } from "~/utils/type";
@@ -28,7 +28,7 @@ const MainDashboardPage = () => {
   const { id } = router.query;
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("30-hari");
 
-  const { data: warung } = api.warung.getWarungById.useQuery(
+  const { data: Kasir } = api.kasir.getKasirById.useQuery(
     {
       warungId: id as string,
     },
@@ -59,7 +59,7 @@ const MainDashboardPage = () => {
     unpaidOrders,
     averageOrderValue,
     activitiesChange,
-  } = useWarungDashboardData(id as string, timePeriod);
+  } = useKasirDashboardData(id as string, timePeriod);
 
   const currentDate = new Date();
   const options: Intl.DateTimeFormatOptions = {
@@ -71,16 +71,16 @@ const MainDashboardPage = () => {
   const formattedDate = currentDate.toLocaleDateString("id-ID", options);
 
   return (
-    <WarungDashboardLayout
+    <KasirDashboardLayout
       metaTitle="Kasirium Dashboard"
       metaDescription="Kelola Bisnis Anda dengan mudah melalui dashboard Kasirium"
-      pathname={`/dashboard/warung/${id}/`}
+      pathname={`/dashboard/kasir/${id}/`}
       withRightPanel={true}
       headerContent={
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <h1 className="text-sm font-semibold md:text-xl">
-              Kasir {warung?.name || "Kasirium Dashboard"}
+              Kasir {Kasir?.name || "Kasirium Dashboard"}
             </h1>
             <p className="text-muted-foreground text-xs md:text-sm">
               {formattedDate}
@@ -193,17 +193,19 @@ const MainDashboardPage = () => {
           <DishCard
             title="Produk Unggulan"
             dishesData={productData}
-            ctaHref={`/dashboard/warung/${id as string}/product`}
+            ctaHref={`/dashboard/kasir/${id as string}/product`}
           />
           <DishCard
             title="Perlu Perhatian Stok"
             dishesData={lowStockProducts}
-            ctaHref={`/dashboard/warung/${id as string}/alert`}
+            ctaHref={`/dashboard/kasir/${id as string}/alert`}
           />
         </div>
       </div>
-    </WarungDashboardLayout>
+    </KasirDashboardLayout>
   );
 };
 
 export default MainDashboardPage;
+
+

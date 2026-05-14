@@ -8,18 +8,50 @@ export const saleRouter = createTRPCRouter({
   create: privateProcedure
     .input(createSaleFormSchema)
     .mutation(async ({ input, ctx }) => {
-      const { warungId, customerId, paymentType, totalAmount, notes, items } =
+      const {
+        warungId,
+        customerId,
+        paymentType,
+        totalAmount,
+        discountPercent,
+        applyTax,
+        taxPercent,
+        notes,
+        items,
+      } =
         input;
       const { db, user } = ctx;
 
       const receiptNo = await generateReceiptNumber(db, warungId);
+      const subTotal = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0,
+      );
+      const normalizedDiscountPercent = Math.max(0, discountPercent ?? 0);
+      const normalizedTaxPercent = Math.max(0, taxPercent ?? 0);
+      const discountAmount =
+        Math.round(((subTotal * normalizedDiscountPercent) / 100) * 100) / 100;
+      const dpp = Math.max(0, subTotal - discountAmount);
+      const taxAmount = applyTax
+        ? Math.round(((dpp * normalizedTaxPercent) / 100) * 100) / 100
+        : 0;
+      const calculatedTotal = dpp + taxAmount;
+
+      if (Math.abs(totalAmount - calculatedTotal) > 0.01) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Total pesanan tidak valid.",
+        });
+      }
 
       const isPaid = paymentType === "CASH";
 
       const sale = await db.sale.create({
         data: {
           receiptNo,
-          totalAmount,
+          totalAmount: calculatedTotal,
+          discount: discountAmount,
+          tax: taxAmount,
           paymentType,
           notes,
           isPaid: isPaid,
@@ -35,7 +67,13 @@ export const saleRouter = createTRPCRouter({
           },
         },
         include: {
-          items: true,
+          warung: true,
+          customer: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
         },
       });
 
@@ -60,13 +98,55 @@ export const saleRouter = createTRPCRouter({
           user: { connect: { id: user?.id } },
           relatedSale: { connect: { id: sale.id } },
           metadata: {
-            amount: totalAmount,
+            amount: calculatedTotal,
+            discount: discountAmount,
+            discountPercent: normalizedDiscountPercent,
+            dpp,
+            tax: taxAmount,
+            taxPercent: applyTax ? normalizedTaxPercent : 0,
             paymentType,
             itemsCount: items.length,
             status: isPaid ? "completed" : "on-process",
           },
         },
       });
+
+      return sale;
+    }),
+  getById: privateProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { id } = input;
+      const { db, user } = ctx;
+
+      const sale = await db.sale.findFirst({
+        where: {
+          id,
+          warung: {
+            ownerId: user?.id,
+          },
+        },
+        include: {
+          warung: true,
+          customer: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+
+      if (!sale) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Sale not found",
+        });
+      }
 
       return sale;
     }),
@@ -521,6 +601,504 @@ export const saleRouter = createTRPCRouter({
         lowStock: lowStockProducts,
       };
     }),
+  getHistory: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        isPaid: z.boolean().default(true),
+        searchTerm: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const { warungId, isPaid, searchTerm, startDate, endDate } = input;
+      const { db } = ctx;
+
+      return db.sale.findMany({
+        where: {
+          warungId,
+          isPaid,
+          ...(searchTerm && {
+            receiptNo: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          }),
+          ...(startDate &&
+            endDate && {
+              createdAt: {
+                gte: startDate,
+                lte: endDate,
+              },
+            }),
+        },
+        include: {
+          customer: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }),
+  getPaymentMethodSummary: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, startDate, endDate } = input;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const sales = await db.sale.findMany({
+        where: whereClause,
+        select: {
+          paymentType: true,
+          totalAmount: true,
+          isPaid: true,
+        },
+      });
+
+      const grouped = sales.reduce<
+        Record<
+          string,
+          { paymentType: string; totalAmount: number; orders: number; paidOrders: number }
+        >
+      >((acc, sale) => {
+        if (!acc[sale.paymentType]) {
+          acc[sale.paymentType] = {
+            paymentType: sale.paymentType,
+            totalAmount: 0,
+            orders: 0,
+            paidOrders: 0,
+          };
+        }
+
+        acc[sale.paymentType]!.totalAmount += sale.totalAmount;
+        acc[sale.paymentType]!.orders += 1;
+        if (sale.isPaid) {
+          acc[sale.paymentType]!.paidOrders += 1;
+        }
+
+        return acc;
+      }, {});
+
+      const summary = Object.values(grouped).sort(
+        (a, b) => b.totalAmount - a.totalAmount,
+      );
+      const totalAmount = summary.reduce((sum, item) => sum + item.totalAmount, 0);
+      const totalOrders = summary.reduce((sum, item) => sum + item.orders, 0);
+
+      return {
+        summary,
+        totalAmount,
+        totalOrders,
+      };
+    }),
+  getItemSalesSummary: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, startDate, endDate } = input;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const sales = await db.sale.findMany({
+        where: whereClause,
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              price: true,
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const grouped = sales.flatMap((sale) => sale.items).reduce<
+        Record<
+          string,
+          {
+            productId: string;
+            productName: string;
+            quantity: number;
+            grossSales: number;
+            transactions: number;
+            averagePrice: number;
+          }
+        >
+      >((acc, item) => {
+        const productId = item.product.id;
+        const lineTotal = item.quantity * item.price;
+        if (!acc[productId]) {
+          acc[productId] = {
+            productId,
+            productName: item.product.name,
+            quantity: 0,
+            grossSales: 0,
+            transactions: 0,
+            averagePrice: 0,
+          };
+        }
+
+        acc[productId]!.quantity += item.quantity;
+        acc[productId]!.grossSales += lineTotal;
+        acc[productId]!.transactions += 1;
+        acc[productId]!.averagePrice = acc[productId]!.grossSales / acc[productId]!.quantity;
+
+        return acc;
+      }, {});
+
+      const summary = Object.values(grouped).sort(
+        (a, b) => b.grossSales - a.grossSales,
+      );
+      const totalGrossSales = summary.reduce((sum, item) => sum + item.grossSales, 0);
+      const totalQuantity = summary.reduce((sum, item) => sum + item.quantity, 0);
+
+      return {
+        summary,
+        totalGrossSales,
+        totalQuantity,
+        totalItems: summary.length,
+      };
+    }),
+  getCategorySalesSummary: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, startDate, endDate } = input;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const sales = await db.sale.findMany({
+        where: whereClause,
+        select: {
+          items: {
+            select: {
+              quantity: true,
+              price: true,
+              product: {
+                select: {
+                  category: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const grouped = sales.flatMap((sale) => sale.items).reduce<
+        Record<
+          string,
+          {
+            categoryId: string;
+            categoryName: string;
+            quantity: number;
+            grossSales: number;
+            transactions: number;
+            averagePrice: number;
+          }
+        >
+      >((acc, item) => {
+        const categoryId = item.product.category?.id ?? "uncategorized";
+        const categoryName = item.product.category?.name ?? "Tanpa Kategori";
+        const lineTotal = item.quantity * item.price;
+
+        if (!acc[categoryId]) {
+          acc[categoryId] = {
+            categoryId,
+            categoryName,
+            quantity: 0,
+            grossSales: 0,
+            transactions: 0,
+            averagePrice: 0,
+          };
+        }
+
+        acc[categoryId]!.quantity += item.quantity;
+        acc[categoryId]!.grossSales += lineTotal;
+        acc[categoryId]!.transactions += 1;
+        acc[categoryId]!.averagePrice =
+          acc[categoryId]!.grossSales / acc[categoryId]!.quantity;
+
+        return acc;
+      }, {});
+
+      const summary = Object.values(grouped).sort(
+        (a, b) => b.grossSales - a.grossSales,
+      );
+      const totalGrossSales = summary.reduce(
+        (sum, item) => sum + item.grossSales,
+        0,
+      );
+      const totalQuantity = summary.reduce((sum, item) => sum + item.quantity, 0);
+
+      return {
+        summary,
+        totalGrossSales,
+        totalQuantity,
+        totalCategories: summary.length,
+      };
+    }),
+  getTaxSummary: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, startDate, endDate } = input;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const sales = await db.sale.findMany({
+        where: whereClause,
+        select: {
+          paymentType: true,
+          totalAmount: true,
+          tax: true,
+        },
+      });
+
+      const grouped = sales.reduce<
+        Record<
+          string,
+          {
+            paymentType: string;
+            orders: number;
+            taxableSales: number;
+            taxAmount: number;
+            grossAfterTax: number;
+            effectiveRate: number;
+          }
+        >
+      >((acc, sale) => {
+        if (!acc[sale.paymentType]) {
+          acc[sale.paymentType] = {
+            paymentType: sale.paymentType,
+            orders: 0,
+            taxableSales: 0,
+            taxAmount: 0,
+            grossAfterTax: 0,
+            effectiveRate: 0,
+          };
+        }
+
+        acc[sale.paymentType]!.orders += 1;
+        acc[sale.paymentType]!.grossAfterTax += sale.totalAmount;
+        acc[sale.paymentType]!.taxAmount += sale.tax;
+        acc[sale.paymentType]!.taxableSales += sale.totalAmount - sale.tax;
+
+        return acc;
+      }, {});
+
+      const summary = Object.values(grouped)
+        .map((item) => ({
+          ...item,
+          effectiveRate:
+            item.taxableSales > 0 ? (item.taxAmount / item.taxableSales) * 100 : 0,
+        }))
+        .sort((a, b) => b.taxAmount - a.taxAmount);
+
+      const totalOrders = summary.reduce((sum, item) => sum + item.orders, 0);
+      const totalTaxableSales = summary.reduce(
+        (sum, item) => sum + item.taxableSales,
+        0,
+      );
+      const totalTaxAmount = summary.reduce((sum, item) => sum + item.taxAmount, 0);
+      const totalGrossAfterTax = summary.reduce(
+        (sum, item) => sum + item.grossAfterTax,
+        0,
+      );
+      const taxedOrders = sales.filter((sale) => sale.tax > 0).length;
+      const overallEffectiveRate =
+        totalTaxableSales > 0 ? (totalTaxAmount / totalTaxableSales) * 100 : 0;
+
+      return {
+        summary,
+        totalOrders,
+        taxedOrders,
+        totalTaxableSales,
+        totalTaxAmount,
+        totalGrossAfterTax,
+        overallEffectiveRate,
+      };
+    }),
+  getDiscountSummary: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { warungId, startDate, endDate } = input;
+
+      const whereClause = {
+        warungId,
+        ...(startDate &&
+          endDate && {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+      };
+
+      const sales = await db.sale.findMany({
+        where: whereClause,
+        select: {
+          paymentType: true,
+          totalAmount: true,
+          tax: true,
+          discount: true,
+        },
+      });
+
+      const grouped = sales.reduce<
+        Record<
+          string,
+          {
+            paymentType: string;
+            orders: number;
+            grossBeforeDiscount: number;
+            discountAmount: number;
+            netBeforeTax: number;
+            discountRate: number;
+          }
+        >
+      >((acc, sale) => {
+        const grossBeforeDiscount = sale.totalAmount - sale.tax + sale.discount;
+        const netBeforeTax = sale.totalAmount - sale.tax;
+
+        if (!acc[sale.paymentType]) {
+          acc[sale.paymentType] = {
+            paymentType: sale.paymentType,
+            orders: 0,
+            grossBeforeDiscount: 0,
+            discountAmount: 0,
+            netBeforeTax: 0,
+            discountRate: 0,
+          };
+        }
+
+        acc[sale.paymentType]!.orders += 1;
+        acc[sale.paymentType]!.grossBeforeDiscount += grossBeforeDiscount;
+        acc[sale.paymentType]!.discountAmount += sale.discount;
+        acc[sale.paymentType]!.netBeforeTax += netBeforeTax;
+        return acc;
+      }, {});
+
+      const summary = Object.values(grouped)
+        .map((item) => ({
+          ...item,
+          discountRate:
+            item.grossBeforeDiscount > 0
+              ? (item.discountAmount / item.grossBeforeDiscount) * 100
+              : 0,
+        }))
+        .sort((a, b) => b.discountAmount - a.discountAmount);
+
+      const totalOrders = summary.reduce((sum, item) => sum + item.orders, 0);
+      const discountedOrders = sales.filter((sale) => sale.discount > 0).length;
+      const totalGrossBeforeDiscount = summary.reduce(
+        (sum, item) => sum + item.grossBeforeDiscount,
+        0,
+      );
+      const totalDiscountAmount = summary.reduce(
+        (sum, item) => sum + item.discountAmount,
+        0,
+      );
+      const totalNetBeforeTax = summary.reduce((sum, item) => sum + item.netBeforeTax, 0);
+      const overallDiscountRate =
+        totalGrossBeforeDiscount > 0
+          ? (totalDiscountAmount / totalGrossBeforeDiscount) * 100
+          : 0;
+
+      return {
+        summary,
+        totalOrders,
+        discountedOrders,
+        totalGrossBeforeDiscount,
+        totalDiscountAmount,
+        totalNetBeforeTax,
+        overallDiscountRate,
+      };
+    }),
 });
 
 async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {
@@ -538,4 +1116,5 @@ async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {
 
   return `INV-${dateStr}-${(count + 1).toString().padStart(4, "0")}`;
 }
+
 
