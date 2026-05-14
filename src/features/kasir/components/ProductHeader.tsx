@@ -3,18 +3,18 @@ import { useId } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { CreateProductModal } from "./CreateProductModal";
+import { ProductFormModal } from "./ProductFormModal";
 
 interface ProductHeaderProps {
-  refetchProductData: () => void;
   searchTerm: string;
   onSearchChange: (value: string) => void;
+  onCreateSuccess?: () => Promise<void> | void;
 }
 
 export const ProductHeader = ({
-  refetchProductData,
   searchTerm,
   onSearchChange,
+  onCreateSuccess,
 }: ProductHeaderProps) => {
   const searchId = useId();
 
@@ -33,12 +33,12 @@ export const ProductHeader = ({
         </Label>
       </div>
 
-      <CreateProductModal refetch={refetchProductData}>
+      <ProductFormModal mode="create" onSuccess={onCreateSuccess}>
         <Button className="w-full md:w-auto">
           <Plus className="h-4 w-4" />
           <span className="ml-2">Tambah Produk</span>
         </Button>
-      </CreateProductModal>
+      </ProductFormModal>
     </div>
   );
 };

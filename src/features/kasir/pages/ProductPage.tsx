@@ -7,6 +7,18 @@ import { ProductCard } from "../components/ProductCard";
 import { useDebounce } from "use-debounce";
 import { useRouter } from "next/router";
 import { Skeleton } from "~/components/ui/skeleton";
+import { ProductFormModal } from "../components/ProductFormModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const ProductSkeleton = () => {
   return (
@@ -22,21 +34,92 @@ const ProductSkeleton = () => {
 const ProductPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const utils = api.useUtils();
+
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [editingProduct, setEditingProduct] = useState<{
+    id: string;
+    name: string;
+    price: number;
+    costPrice: number;
+    stock: number;
+    minStock: number | null;
+    categoryId: string | null;
+    productPictureUrl: string | null;
+  } | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
-  const {
-    data: productData,
-    isLoading: productIsLoading,
-    refetch: refetchProductData,
-  } = debouncedSearchTerm
-    ? api.product.searchMenuByNames.useQuery({ name: debouncedSearchTerm })
-    : selectedCategory
-      ? api.product.getAllProductByCategory.useQuery({
-          categoryId: selectedCategory,
-        })
-      : api.product.getAllProduct.useQuery();
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const isSearchActive = debouncedSearchTerm.trim().length > 0;
+  const isBestSellerCategory = selectedCategory === "best-seller";
+
+  const searchProductQuery = api.product.searchMenuByNames.useQuery(
+    { name: debouncedSearchTerm },
+    { enabled: isSearchActive },
+  );
+
+  const categoryProductQuery = api.product.getAllProductByCategory.useQuery(
+    { categoryId: selectedCategory ?? "" },
+    {
+      enabled: !isSearchActive && !!selectedCategory && !isBestSellerCategory,
+    },
+  );
+
+  const trendingProductQuery = api.product.getTrendingProduct.useQuery(
+    undefined,
+    {
+      enabled: !isSearchActive && isBestSellerCategory,
+    },
+  );
+
+  const allProductQuery = api.product.getAllProduct.useQuery(undefined, {
+    enabled: !isSearchActive && !selectedCategory,
+  });
+
+  const deleteProduct = api.product.deleteProduct.useMutation();
+
+  const activeQuery = isSearchActive
+    ? searchProductQuery
+    : isBestSellerCategory
+      ? trendingProductQuery
+      : selectedCategory
+        ? categoryProductQuery
+        : allProductQuery;
+
+  const productData = activeQuery.data;
+  const productIsLoading = activeQuery.isLoading;
+
+  const refreshProductData = async () => {
+    await Promise.all([
+      utils.product.getAllProduct.invalidate(),
+      utils.product.getAllProductByCategory.invalidate(),
+      utils.product.searchMenuByNames.invalidate(),
+      utils.product.getTrendingProduct.invalidate(),
+      utils.product.getLowStockProduct.invalidate(),
+      utils.sale.getMetrics.invalidate(),
+    ]);
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!deletingProduct) {
+      return;
+    }
+
+    try {
+      await deleteProduct.mutateAsync({ productId: deletingProduct.id });
+      toast.success("Produk berhasil dihapus");
+      setDeletingProduct(null);
+      await refreshProductData();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus produk",
+      );
+    }
+  };
 
   const handleCategoryChange = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
@@ -48,9 +131,9 @@ const ProductPage = () => {
       withRightPanel={true}
       headerContent={
         <ProductHeader
-          refetchProductData={refetchProductData}
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
+          onCreateSuccess={refreshProductData}
         />
       }
       metaTitle="Daftar Produk"
@@ -78,15 +161,63 @@ const ProductPage = () => {
                 productImage={product.productPictureUrl ?? ""}
                 price={product.price}
                 stock={product.stock}
+                onEdit={() => setEditingProduct(product)}
+                onDelete={() =>
+                  setDeletingProduct({ id: product.id, name: product.name })
+                }
               />
             ))
           )}
         </div>
       </div>
+
+      <ProductFormModal
+        mode="edit"
+        product={editingProduct ?? undefined}
+        open={!!editingProduct}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingProduct(null);
+          }
+        }}
+        onSuccess={async () => {
+          setEditingProduct(null);
+          await refreshProductData();
+        }}
+      />
+
+      <AlertDialog
+        open={!!deletingProduct}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingProduct(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Produk</AlertDialogTitle>
+            <AlertDialogDescription>
+              Produk {deletingProduct?.name} akan disembunyikan dari daftar dan
+              tidak bisa dipilih lagi di kasir.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDeleteProduct();
+              }}
+              disabled={deleteProduct.isPending}
+            >
+              {deleteProduct.isPending ? "Menghapus..." : "Ya, Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </KasirDashboardLayout>
   );
 };
 
 export default ProductPage;
-
-

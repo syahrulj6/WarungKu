@@ -15,6 +15,7 @@ export const productRouter = createTRPCRouter({
     try {
       const products = await db.product.findMany({
         where: {
+          isActive: true,
           warung: {
             ownerId: user!.id,
           },
@@ -47,6 +48,9 @@ export const productRouter = createTRPCRouter({
         const products = await db.product.findMany({
           where: {
             AND: [
+              {
+                isActive: true,
+              },
               {
                 warung: {
                   ownerId: user!.id,
@@ -86,6 +90,9 @@ export const productRouter = createTRPCRouter({
           where: {
             AND: [
               {
+                isActive: true,
+              },
+              {
                 warung: {
                   ownerId: user!.id,
                 },
@@ -118,6 +125,7 @@ export const productRouter = createTRPCRouter({
     try {
       const products = await db.product.findMany({
         where: {
+          isActive: true,
           warung: {
             ownerId: user!.id,
           },
@@ -222,6 +230,23 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      if (productData.categoryId) {
+        const category = await db.category.findFirst({
+          where: {
+            id: productData.categoryId,
+            warungId: warung.id,
+          },
+          select: { id: true },
+        });
+
+        if (!category) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Kategori tidak valid",
+          });
+        }
+      }
+
       let productPictureUrl: string | undefined;
       if (productPictureBase64) {
         productPictureUrl = await saveProductPicture(
@@ -243,7 +268,171 @@ export const productRouter = createTRPCRouter({
         },
       });
 
+      await createProductActivity(db, {
+        type: ActivityType.PRODUCT_ADDED,
+        description: `Produk ${product.name} ditambahkan`,
+        warungId: warung.id,
+        userId: user!.id,
+        productId: product.id,
+      });
+
       return product;
+    }),
+
+  updateProduct: privateProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+        name: z
+          .string()
+          .min(3, "Nama produk minimal 3 karakter")
+          .max(100, "Nama produk maksimal 100 karakter"),
+        price: z
+          .number()
+          .min(0, "Harga tidak boleh negatif")
+          .max(100000000, "Harga terlalu besar"),
+        costPrice: z
+          .number()
+          .min(0, "Harga modal tidak boleh negatif")
+          .max(100000000, "Harga modal terlalu besar")
+          .optional(),
+        stock: z
+          .number()
+          .int("Stok harus bilangan bulat")
+          .min(0, "Stok tidak boleh negatif"),
+        minStock: z
+          .number()
+          .int("Stok minimum harus bilangan bulat")
+          .min(0, "Stok minimum tidak boleh negatif")
+          .optional(),
+        categoryId: z
+          .string({ required_error: "Kategori wajib dipilih" })
+          .min(1, "Kategori wajib dipilih"),
+        productPictureBase64: z.string().base64().optional(),
+        removeProductPicture: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+
+      const product = await db.product.findFirst({
+        where: {
+          id: input.productId,
+          isActive: true,
+          warung: { ownerId: user!.id },
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Produk tidak ditemukan",
+        });
+      }
+
+      const category = await db.category.findFirst({
+        where: {
+          id: input.categoryId,
+          warungId: product.warungId,
+        },
+        select: { id: true },
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Kategori tidak valid",
+        });
+      }
+
+      let nextProductPictureUrl: string | null = product.productPictureUrl;
+
+      if (input.removeProductPicture && product.productPictureUrl) {
+        await deleteImageFromStorage(product.productPictureUrl);
+        nextProductPictureUrl = null;
+      }
+
+      if (input.productPictureBase64) {
+        const uploadedPicture = await handleImageUpload(
+          input.productPictureBase64,
+          user!.id,
+        );
+        if (product.productPictureUrl) {
+          await deleteImageFromStorage(product.productPictureUrl);
+        }
+        nextProductPictureUrl = uploadedPicture ?? null;
+      }
+
+      const updatedProduct = await db.product.update({
+        where: { id: product.id },
+        data: {
+          name: input.name,
+          price: input.price,
+          costPrice: input.costPrice ?? 0,
+          stock: input.stock,
+          minStock: input.minStock,
+          categoryId: input.categoryId,
+          productPictureUrl: nextProductPictureUrl,
+        },
+      });
+
+      await createProductActivity(db, {
+        type: ActivityType.PRODUCT_UPDATED,
+        description: `Produk ${product.name} diupdate`,
+        warungId: product.warungId,
+        userId: user!.id,
+        productId: product.id,
+      });
+
+      return updatedProduct;
+    }),
+
+  deleteProduct: privateProcedure
+    .input(
+      z.object({
+        productId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+
+      const product = await db.product.findFirst({
+        where: {
+          id: input.productId,
+          warung: { ownerId: user!.id },
+        },
+      });
+
+      if (!product) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Produk tidak ditemukan",
+        });
+      }
+
+      if (!product.isActive) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Produk sudah dihapus",
+        });
+      }
+
+      const deletedProduct = await db.product.update({
+        where: { id: product.id },
+        data: {
+          isActive: false,
+        },
+      });
+
+      await createProductActivity(db, {
+        type: ActivityType.PRODUCT_UPDATED,
+        description: `Produk ${product.name} dihapus`,
+        warungId: product.warungId,
+        userId: user!.id,
+        productId: product.id,
+      });
+
+      return deletedProduct;
     }),
 
   updateProductPicture: privateProcedure
@@ -464,5 +653,3 @@ async function createProductActivity(
     },
   });
 }
-
-
