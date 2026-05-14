@@ -8,6 +8,7 @@ import {
 import { PageContainer } from "~/components/layout/PageContainer";
 import { SectionContainer } from "~/components/layout/SectionContainer";
 import { Button } from "~/components/ui/button";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
 
@@ -127,8 +128,8 @@ export default function Home() {
                 className="animate-reveal-up mt-7 flex flex-col gap-3 sm:flex-row"
                 style={{ animationDelay: "0.4s" }}
               >
-                <Button size="lg" className="sm:min-w-44">
-                  Coba Gratis
+                <Button asChild size="lg" className="sm:min-w-44">
+                  <Link href="/login">Coba Gratis</Link>
                 </Button>
                 {/* <Button size="lg" variant="outline" className="sm:min-w-44">
                   <CirclePlay />
@@ -271,10 +272,11 @@ export default function Home() {
                   ))}
                 </ul>
                 <Button
+                  asChild
                   className="mt-auto w-full"
                   variant={plan.highlighted ? "default" : "outline"}
                 >
-                  {plan.cta}
+                  <Link href="/login">{plan.cta}</Link>
                 </Button>
               </CardContent>
             </Card>
