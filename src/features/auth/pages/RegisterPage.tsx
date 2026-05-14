@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
 import { PageContainer } from "~/components/layout/PageContainer";
 import { Button } from "~/components/ui/button";
 import { Form } from "~/components/ui/form";
@@ -116,25 +115,6 @@ const RegisterPage = () => {
                 buttonText="Daftar"
               />
             </Form>
-
-            <div className="mt-6 flex w-full items-center justify-between gap-x-4">
-              <div className="bg-border h-[1px] w-full" />
-              <p className="text-muted-foreground flex-1 text-center text-sm text-nowrap">
-                Atau daftar dengan
-              </p>
-              <div className="bg-border h-[1px] w-full" />
-            </div>
-
-            <Button
-              variant="outline"
-              className="mt-4 w-full gap-2"
-              size="lg"
-              type="button"
-              onClick={() => void (window.location.href = "/api/auth/google/start")}
-            >
-              <FcGoogle className="text-lg" />
-              Google
-            </Button>
 
             <p className="mt-6 text-center text-sm">
               Sudah memiliki akun?{" "}
