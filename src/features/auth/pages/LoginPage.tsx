@@ -18,6 +18,7 @@ import { ArrowLeft } from "lucide-react";
 import { api } from "~/utils/api";
 import { useEffect, useState } from "react";
 
+
 const LoginPage = () => {
   const form = useForm<AuthFormSchema>({
     resolver: zodResolver(authFormSchema),
@@ -150,6 +151,8 @@ const LoginPage = () => {
                 showPassword={true}
               />
             </Form>
+
+            {/* OAuth providers removed - Google OAuth disabled */}
 
             {unverifiedEmail && (
               <div className="bg-primary/10 border-primary/30 mt-4 rounded-lg border p-4">

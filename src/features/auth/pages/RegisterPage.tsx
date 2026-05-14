@@ -130,6 +130,7 @@ const RegisterPage = () => {
               className="mt-4 w-full gap-2"
               size="lg"
               type="button"
+              onClick={() => void (window.location.href = "/api/auth/google/start")}
             >
               <FcGoogle className="text-lg" />
               Google

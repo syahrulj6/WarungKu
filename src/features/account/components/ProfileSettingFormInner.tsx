@@ -15,7 +15,7 @@ type SettingsFormInnerProps = {
   };
 };
 
-export const ProfileSettingFormInner = (props: SettingsFormInnerProps) => {
+export const ProfileSettingFormInner = (_props: SettingsFormInnerProps) => {
   const form = useFormContext<ProfileSettingFormSchema>();
 
   return (

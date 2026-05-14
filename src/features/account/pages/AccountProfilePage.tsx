@@ -88,7 +88,7 @@ const AccountProfilePage = () => {
 
       toast.success("Password berhasil diubah!");
       passwordForm.reset();
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengubah password");
     }
   };
@@ -204,7 +204,8 @@ const AccountProfilePage = () => {
                   passwordForm.reset();
                 }}
                 disabled={
-                  changePasswordMutation.isPending || !passwordForm.formState.isDirty
+                  changePasswordMutation.isPending ||
+                  !passwordForm.formState.isDirty
                 }
               >
                 Batal
@@ -232,4 +233,3 @@ const AccountProfilePage = () => {
 };
 
 export default AccountProfilePage;
-

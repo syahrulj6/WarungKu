@@ -55,7 +55,7 @@ export const CreateProductFormInner = () => {
       await refetchCategories();
       setNewCategoryName("");
       toast.success("Kategori berhasil ditambahkan");
-    } catch (error) {
+    } catch {
       toast.error("Gagal menambahkan kategori");
     }
   };

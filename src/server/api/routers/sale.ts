@@ -18,8 +18,7 @@ export const saleRouter = createTRPCRouter({
         taxPercent,
         notes,
         items,
-      } =
-        input;
+      } = input;
       const { db, user } = ctx;
 
       const receiptNo = await generateReceiptNumber(db, warungId);
@@ -195,42 +194,42 @@ export const saleRouter = createTRPCRouter({
               },
             },
           }),
-        db.sale.aggregate({
-          where: whereClause,
-          _count: { id: true },
-          _sum: { totalAmount: true },
-        }),
-        db.customer.count({
-          where: {
-            warungId,
-            ...(startDate &&
-              endDate && {
-                createdAt: {
-                  gte: startDate,
-                  lte: endDate,
-                },
-              }),
-          },
-        }),
-        db.product.findMany({
-          where: {
-            warungId,
-            isActive: true,
-          },
-          select: {
-            stock: true,
-            minStock: true,
-          },
-        }),
-        db.sale.aggregate({
-          where: {
-            ...whereClause,
-            isPaid: false,
-          },
-          _count: { id: true },
-          _sum: { totalAmount: true },
-        }),
-      ]);
+          db.sale.aggregate({
+            where: whereClause,
+            _count: { id: true },
+            _sum: { totalAmount: true },
+          }),
+          db.customer.count({
+            where: {
+              warungId,
+              ...(startDate &&
+                endDate && {
+                  createdAt: {
+                    gte: startDate,
+                    lte: endDate,
+                  },
+                }),
+            },
+          }),
+          db.product.findMany({
+            where: {
+              warungId,
+              isActive: true,
+            },
+            select: {
+              stock: true,
+              minStock: true,
+            },
+          }),
+          db.sale.aggregate({
+            where: {
+              ...whereClause,
+              isPaid: false,
+            },
+            _count: { id: true },
+            _sum: { totalAmount: true },
+          }),
+        ]);
 
       const omzet = paidSales.reduce((sum, sale) => sum + sale.totalAmount, 0);
       const modalTerjual = paidSales.reduce((sum, sale) => {
@@ -245,7 +244,9 @@ export const saleRouter = createTRPCRouter({
       ).length;
 
       const averageOrderValue =
-        orders._count.id > 0 ? (orders._sum.totalAmount ?? 0) / orders._count.id : 0;
+        orders._count.id > 0
+          ? (orders._sum.totalAmount ?? 0) / orders._count.id
+          : 0;
 
       return {
         revenue: labaKotor,
@@ -292,7 +293,7 @@ export const saleRouter = createTRPCRouter({
         });
 
         return sale;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -332,7 +333,7 @@ export const saleRouter = createTRPCRouter({
         });
 
         return sale;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -386,7 +387,7 @@ export const saleRouter = createTRPCRouter({
           },
         });
         return sale;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -434,7 +435,7 @@ export const saleRouter = createTRPCRouter({
           },
         });
         return sale;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -681,7 +682,12 @@ export const saleRouter = createTRPCRouter({
       const grouped = sales.reduce<
         Record<
           string,
-          { paymentType: string; totalAmount: number; orders: number; paidOrders: number }
+          {
+            paymentType: string;
+            totalAmount: number;
+            orders: number;
+            paidOrders: number;
+          }
         >
       >((acc, sale) => {
         if (!acc[sale.paymentType]) {
@@ -706,7 +712,10 @@ export const saleRouter = createTRPCRouter({
       const summary = Object.values(grouped).sort(
         (a, b) => b.totalAmount - a.totalAmount,
       );
-      const totalAmount = summary.reduce((sum, item) => sum + item.totalAmount, 0);
+      const totalAmount = summary.reduce(
+        (sum, item) => sum + item.totalAmount,
+        0,
+      );
       const totalOrders = summary.reduce((sum, item) => sum + item.orders, 0);
 
       return {
@@ -756,45 +765,54 @@ export const saleRouter = createTRPCRouter({
         },
       });
 
-      const grouped = sales.flatMap((sale) => sale.items).reduce<
-        Record<
-          string,
-          {
-            productId: string;
-            productName: string;
-            quantity: number;
-            grossSales: number;
-            transactions: number;
-            averagePrice: number;
+      const grouped = sales
+        .flatMap((sale) => sale.items)
+        .reduce<
+          Record<
+            string,
+            {
+              productId: string;
+              productName: string;
+              quantity: number;
+              grossSales: number;
+              transactions: number;
+              averagePrice: number;
+            }
+          >
+        >((acc, item) => {
+          const productId = item.product.id;
+          const lineTotal = item.quantity * item.price;
+          if (!acc[productId]) {
+            acc[productId] = {
+              productId,
+              productName: item.product.name,
+              quantity: 0,
+              grossSales: 0,
+              transactions: 0,
+              averagePrice: 0,
+            };
           }
-        >
-      >((acc, item) => {
-        const productId = item.product.id;
-        const lineTotal = item.quantity * item.price;
-        if (!acc[productId]) {
-          acc[productId] = {
-            productId,
-            productName: item.product.name,
-            quantity: 0,
-            grossSales: 0,
-            transactions: 0,
-            averagePrice: 0,
-          };
-        }
 
-        acc[productId].quantity += item.quantity;
-        acc[productId].grossSales += lineTotal;
-        acc[productId].transactions += 1;
-        acc[productId].averagePrice = acc[productId].grossSales / acc[productId].quantity;
+          acc[productId].quantity += item.quantity;
+          acc[productId].grossSales += lineTotal;
+          acc[productId].transactions += 1;
+          acc[productId].averagePrice =
+            acc[productId].grossSales / acc[productId].quantity;
 
-        return acc;
-      }, {});
+          return acc;
+        }, {});
 
       const summary = Object.values(grouped).sort(
         (a, b) => b.grossSales - a.grossSales,
       );
-      const totalGrossSales = summary.reduce((sum, item) => sum + item.grossSales, 0);
-      const totalQuantity = summary.reduce((sum, item) => sum + item.quantity, 0);
+      const totalGrossSales = summary.reduce(
+        (sum, item) => sum + item.grossSales,
+        0,
+      );
+      const totalQuantity = summary.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      );
 
       return {
         summary,
@@ -848,42 +866,44 @@ export const saleRouter = createTRPCRouter({
         },
       });
 
-      const grouped = sales.flatMap((sale) => sale.items).reduce<
-        Record<
-          string,
-          {
-            categoryId: string;
-            categoryName: string;
-            quantity: number;
-            grossSales: number;
-            transactions: number;
-            averagePrice: number;
+      const grouped = sales
+        .flatMap((sale) => sale.items)
+        .reduce<
+          Record<
+            string,
+            {
+              categoryId: string;
+              categoryName: string;
+              quantity: number;
+              grossSales: number;
+              transactions: number;
+              averagePrice: number;
+            }
+          >
+        >((acc, item) => {
+          const categoryId = item.product.category?.id ?? "uncategorized";
+          const categoryName = item.product.category?.name ?? "Tanpa Kategori";
+          const lineTotal = item.quantity * item.price;
+
+          if (!acc[categoryId]) {
+            acc[categoryId] = {
+              categoryId,
+              categoryName,
+              quantity: 0,
+              grossSales: 0,
+              transactions: 0,
+              averagePrice: 0,
+            };
           }
-        >
-      >((acc, item) => {
-        const categoryId = item.product.category?.id ?? "uncategorized";
-        const categoryName = item.product.category?.name ?? "Tanpa Kategori";
-        const lineTotal = item.quantity * item.price;
 
-        if (!acc[categoryId]) {
-          acc[categoryId] = {
-            categoryId,
-            categoryName,
-            quantity: 0,
-            grossSales: 0,
-            transactions: 0,
-            averagePrice: 0,
-          };
-        }
+          acc[categoryId].quantity += item.quantity;
+          acc[categoryId].grossSales += lineTotal;
+          acc[categoryId].transactions += 1;
+          acc[categoryId].averagePrice =
+            acc[categoryId].grossSales / acc[categoryId].quantity;
 
-        acc[categoryId].quantity += item.quantity;
-        acc[categoryId].grossSales += lineTotal;
-        acc[categoryId].transactions += 1;
-        acc[categoryId].averagePrice =
-          acc[categoryId].grossSales / acc[categoryId].quantity;
-
-        return acc;
-      }, {});
+          return acc;
+        }, {});
 
       const summary = Object.values(grouped).sort(
         (a, b) => b.grossSales - a.grossSales,
@@ -892,7 +912,10 @@ export const saleRouter = createTRPCRouter({
         (sum, item) => sum + item.grossSales,
         0,
       );
-      const totalQuantity = summary.reduce((sum, item) => sum + item.quantity, 0);
+      const totalQuantity = summary.reduce(
+        (sum, item) => sum + item.quantity,
+        0,
+      );
 
       return {
         summary,
@@ -970,7 +993,9 @@ export const saleRouter = createTRPCRouter({
         .map((item) => ({
           ...item,
           effectiveRate:
-            item.taxableSales > 0 ? (item.taxAmount / item.taxableSales) * 100 : 0,
+            item.taxableSales > 0
+              ? (item.taxAmount / item.taxableSales) * 100
+              : 0,
         }))
         .sort((a, b) => b.taxAmount - a.taxAmount);
 
@@ -979,7 +1004,10 @@ export const saleRouter = createTRPCRouter({
         (sum, item) => sum + item.taxableSales,
         0,
       );
-      const totalTaxAmount = summary.reduce((sum, item) => sum + item.taxAmount, 0);
+      const totalTaxAmount = summary.reduce(
+        (sum, item) => sum + item.taxAmount,
+        0,
+      );
       const totalGrossAfterTax = summary.reduce(
         (sum, item) => sum + item.grossAfterTax,
         0,
@@ -1086,7 +1114,10 @@ export const saleRouter = createTRPCRouter({
         (sum, item) => sum + item.discountAmount,
         0,
       );
-      const totalNetBeforeTax = summary.reduce((sum, item) => sum + item.netBeforeTax, 0);
+      const totalNetBeforeTax = summary.reduce(
+        (sum, item) => sum + item.netBeforeTax,
+        0,
+      );
       const overallDiscountRate =
         totalGrossBeforeDiscount > 0
           ? (totalDiscountAmount / totalGrossBeforeDiscount) * 100
@@ -1119,5 +1150,3 @@ async function generateReceiptNumber(prisma: PrismaClient, warungId: string) {
 
   return `INV-${dateStr}-${(count + 1).toString().padStart(4, "0")}`;
 }
-
-

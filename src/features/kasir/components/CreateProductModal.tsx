@@ -1,4 +1,4 @@
-import { LoaderCircleIcon, Image } from "lucide-react";
+import { LoaderCircleIcon, Image as ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import {
@@ -136,7 +136,7 @@ export const CreateProductModal = ({
               <AvatarImage src={previewImage} className="object-cover" />
             ) : (
               <AvatarFallback className="bg-gray-100">
-                <Image className="size-8 text-gray-400" />
+                <ImageIcon className="size-8 text-gray-400" />
               </AvatarFallback>
             )}
           </Avatar>

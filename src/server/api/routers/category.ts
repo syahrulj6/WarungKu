@@ -97,7 +97,7 @@ export const categoryRouter = createTRPCRouter({
       }
 
       return { success: true, created: categoriesToCreate.length };
-    } catch (error) {
+    } catch {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Gagal membuat kategori default",

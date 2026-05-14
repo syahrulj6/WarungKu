@@ -25,7 +25,7 @@ export const productRouter = createTRPCRouter({
         },
       });
       return products;
-    } catch (error) {
+    } catch {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch products",
@@ -63,7 +63,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         return products;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch products",
@@ -104,7 +104,7 @@ export const productRouter = createTRPCRouter({
           },
         });
         return products;
-      } catch (error) {
+      } catch {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch products",
@@ -129,7 +129,7 @@ export const productRouter = createTRPCRouter({
         },
       });
       return products;
-    } catch (error) {
+    } catch {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch trending products",

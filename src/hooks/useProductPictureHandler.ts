@@ -67,7 +67,7 @@ export const useProductPictureHandler = () => {
 
       toast.success("Foto produk berhasil diupdate");
       handleRemoveSelectedImage();
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengupdate foto produk");
     }
   };
@@ -76,7 +76,7 @@ export const useProductPictureHandler = () => {
     try {
       await deleteProductPicture({ productId });
       toast.success("Foto produk berhasil dihapus");
-    } catch (error) {
+    } catch {
       toast.error("Gagal menghapus foto produk");
     }
   };

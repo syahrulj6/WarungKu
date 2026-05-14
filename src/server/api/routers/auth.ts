@@ -12,6 +12,7 @@ import {
   verifyPassword,
 } from "~/lib/auth/server";
 import { sendVerificationEmail } from "~/lib/email";
+import { getAppBaseUrl } from "~/lib/url";
 import { passwordSchema } from "~/schemas/auth";
 import {
   createTRPCRouter,
@@ -41,7 +42,7 @@ export const authRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const passwordHash = await hashPassword(input.password);
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      const baseUrl = getAppBaseUrl(ctx.req);
       const sendVerificationLink = async (email: string) => {
         const token = createEmailVerificationToken(email);
         const verificationUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(
@@ -300,7 +301,7 @@ export const authRouter = createTRPCRouter({
         return { success: true, emailSent: false };
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      const baseUrl = getAppBaseUrl(ctx.req);
       const token = createEmailVerificationToken(user.email);
       const verificationUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(
         token,

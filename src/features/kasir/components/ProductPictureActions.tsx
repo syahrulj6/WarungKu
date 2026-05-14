@@ -1,7 +1,7 @@
 // components/ProductActions.tsx
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { Image } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 
 type ProductActionsProps = {
   selectedImage: File | null;
@@ -33,8 +33,8 @@ export const ProductActions = ({
           {productPictureUrl ? (
             <AvatarImage src={productPictureUrl} className="object-cover" />
           ) : (
-            <div className="flex size-full items-center justify-center bg-gray-100">
-              <Image className="size-8 text-gray-400" />
+              <div className="flex size-full items-center justify-center bg-gray-100">
+              <ImageIcon className="size-8 text-gray-400" />
             </div>
           )}
           <AvatarFallback>PR</AvatarFallback>
