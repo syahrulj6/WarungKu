@@ -5,7 +5,6 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 import { Button } from "~/components/ui/button";
 import { Menu } from "lucide-react";
 import AccountDropdown from "./AccountDropdown";
-import { IoMailOutline } from "react-icons/io5";
 import { MdOutlineArrowOutward } from "react-icons/md";
 import { HeadMetaData } from "./HeadMetaData";
 
@@ -103,9 +102,6 @@ export const DashboardLayout = ({
       <main className="bg-background flex flex-1 flex-col overflow-auto">
         <div className="flex h-14 justify-end border-b px-4 py-4 md:px-6">
           <div className="flex items-center gap-4">
-            <button className="hover:bg-muted-foreground/15 group rounded-md p-1 transition-colors hover:cursor-pointer">
-              <IoMailOutline className="text-muted-foreground text-lg group-hover:text-current" />
-            </button>
             <AccountDropdown />
           </div>
         </div>
