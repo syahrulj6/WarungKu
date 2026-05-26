@@ -25,6 +25,9 @@ export const saleRouter = createTRPCRouter({
       } = input;
       const { db, user } = ctx;
 
+      // require staff or above (cashier/staff/manager/owner) to create sales
+      await assertStaffOrAbove(db, warungId, user?.id);
+
       const receiptNo = await generateReceiptNumber(db, warungId);
       const subTotal = items.reduce(
         (sum, item) => sum + item.price * item.quantity,

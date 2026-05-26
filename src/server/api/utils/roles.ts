@@ -57,3 +57,39 @@ export async function getAuthorizedWarungIds(
 
   return Array.from(ids);
 }
+
+export async function hasStaffOrAbove(
+  db: PrismaClient,
+  warungId: string,
+  userId: string | undefined,
+) {
+  if (!userId) return false;
+
+  const warung = await db.warung.findUnique({
+    where: { id: warungId },
+    select: { ownerId: true },
+  });
+  if (warung?.ownerId === userId) return true;
+
+  const staff = await db.warungStaff.findFirst({
+    where: {
+      warungId,
+      userId,
+      role: { in: ["OWNER", "MANAGER", "STAFF", "CASHIER"] },
+    } as any,
+  });
+  return !!staff;
+}
+
+export async function assertStaffOrAbove(
+  db: PrismaClient,
+  warungId: string,
+  userId: string | undefined,
+) {
+  const ok = await hasStaffOrAbove(db, warungId, userId);
+  if (!ok)
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Insufficient role: staff or above required",
+    });
+}
