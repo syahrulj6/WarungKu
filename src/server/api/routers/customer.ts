@@ -1,23 +1,36 @@
 import { z } from "zod";
 import { customerFormSchema } from "~/schemas/customer";
 import { createTRPCRouter, privateProcedure } from "~/server/api/trpc";
+import {
+  assertManagerOrOwner,
+  getAuthorizedWarungIds,
+} from "~/server/api/utils/roles";
 
 export const customerRouter = createTRPCRouter({
   getAll: privateProcedure
-    .input(z.object({ warungId: z.string() }))
-    .query(({ ctx, input }) => {
-      const { db } = ctx;
+    .input(z.object({ warungId: z.string().optional() }))
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
 
       const { warungId } = input;
 
+      if (!user?.id) return [];
+
+      if (warungId) {
+        await assertManagerOrOwner(db, warungId, user.id);
+
+        return db.customer.findMany({
+          where: { warungId, isActive: true },
+          orderBy: { name: "asc" },
+        });
+      }
+
+      const authorizedWarungIds = await getAuthorizedWarungIds(db, user.id);
+      if (authorizedWarungIds.length === 0) return [];
+
       return db.customer.findMany({
-        where: {
-          warungId: warungId,
-          isActive: true,
-        },
-        orderBy: {
-          name: "asc",
-        },
+        where: { warungId: { in: authorizedWarungIds }, isActive: true },
+        orderBy: { name: "asc" },
       });
     }),
 
@@ -51,5 +64,3 @@ export const customerRouter = createTRPCRouter({
       return customer;
     }),
 });
-
-

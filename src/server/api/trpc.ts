@@ -14,6 +14,7 @@ import { ZodError } from "zod";
 import { db } from "~/server/db";
 import { readSessionUserId } from "~/lib/auth/server";
 import { type User } from "@prisma/client";
+import type { WarungStaffRole } from "@prisma/client";
 
 /**
  * 1. CONTEXT
@@ -133,6 +134,38 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
+// Simple in-memory rate limiter. Suitable for single-instance deployments.
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = process.env.NODE_ENV === "production" ? 60 : 120; // tighter in prod
+
+const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
+  const forwarded = ctx.req.headers["x-forwarded-for"] as string | undefined;
+  const ip =
+    forwarded?.split(",")[0].trim() ??
+    ctx.req.socket?.remoteAddress ??
+    "unknown";
+
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+
+  if (!entry || entry.resetAt <= now) {
+    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+  } else {
+    entry.count += 1;
+    rateLimitStore.set(ip, entry);
+
+    if (entry.count > RATE_LIMIT_MAX) {
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: "Rate limit exceeded",
+      });
+    }
+  }
+
+  return await next();
+});
+
 const authMiddleware = t.middleware(async ({ ctx, next }) => {
   if (!ctx.user)
     throw new TRPCError({ code: "UNAUTHORIZED", message: "user unauthorized" });
@@ -147,6 +180,28 @@ const authMiddleware = t.middleware(async ({ ctx, next }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(rateLimitMiddleware)
+  .use(timingMiddleware);
 
-export const privateProcedure = t.procedure.use(authMiddleware);
+export const privateProcedure = t.procedure
+  .use(rateLimitMiddleware)
+  .use(authMiddleware);
+
+/**
+ * Role-based procedure factory. Use like: `export const managerProcedure = roleProcedure('MANAGER');`
+ */
+export const roleProcedure = (role: WarungStaffRole) =>
+  t.procedure.use(async ({ ctx, next }) => {
+    if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+    const hasRole = await ctx.db.warungStaff.findFirst({
+      where: { userId: ctx.user.id, role },
+    });
+
+    if (!hasRole) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient role" });
+    }
+
+    return await next();
+  });

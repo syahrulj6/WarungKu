@@ -7,6 +7,12 @@ import {
 } from "./constants";
 
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "warungku-local-auth-secret";
+
+if (!process.env.AUTH_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error(
+    "Missing AUTH_SECRET environment variable. Set AUTH_SECRET for production deployments.",
+  );
+}
 const EMAIL_VERIFICATION_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 
 type CookieOptions = {
@@ -32,7 +38,9 @@ export function createEmailVerificationToken(email: string) {
     exp: Math.floor(Date.now() / 1000) + EMAIL_VERIFICATION_TTL_SECONDS,
   };
 
-  const payloadString = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const payloadString = Buffer.from(JSON.stringify(payload)).toString(
+    "base64url",
+  );
   const signature = createSignature(payloadString);
 
   return `${payloadString}.${signature}`;
@@ -260,4 +268,3 @@ export function readMfaVerified(cookieHeader?: string) {
 
   return cookies[MFA_COOKIE_NAME] === "true";
 }
-

@@ -3,6 +3,10 @@ import { type PrismaClient } from "@prisma/client";
 import { createSaleFormSchema } from "~/schemas/sale";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import {
+  assertManagerOrOwner,
+  getAuthorizedWarungIds,
+} from "~/server/api/utils/roles";
 
 export const saleRouter = createTRPCRouter({
   create: privateProcedure
@@ -122,30 +126,19 @@ export const saleRouter = createTRPCRouter({
       const { id } = input;
       const { db, user } = ctx;
 
-      const sale = await db.sale.findFirst({
-        where: {
-          id,
-          warung: {
-            ownerId: user?.id,
-          },
-        },
+      const sale = await db.sale.findUnique({
+        where: { id },
         include: {
           warung: true,
           customer: true,
-          items: {
-            include: {
-              product: true,
-            },
-          },
+          items: { include: { product: true } },
         },
       });
 
-      if (!sale) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Sale not found",
-        });
-      }
+      if (!sale)
+        throw new TRPCError({ code: "NOT_FOUND", message: "Sale not found" });
+
+      await assertManagerOrOwner(db, sale.warungId, user?.id);
 
       return sale;
     }),
@@ -161,6 +154,9 @@ export const saleRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       const { warungId, startDate, endDate } = input;
       const { db } = ctx;
+
+      // require manager or owner for metrics
+      await assertManagerOrOwner(db, warungId, (ctx.user as any)?.id);
 
       const whereClause = {
         warungId,
@@ -273,25 +269,14 @@ export const saleRouter = createTRPCRouter({
       const { db } = ctx;
       const { warungId, isPaid } = input;
 
+      await assertManagerOrOwner(db, warungId, (ctx.user as any)?.id);
+
       try {
         const sale = await db.sale.findMany({
-          where: {
-            warungId,
-            isPaid,
-          },
-          include: {
-            customer: true,
-            items: {
-              include: {
-                product: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
+          where: { warungId, isPaid },
+          include: { customer: true, items: { include: { product: true } } },
+          orderBy: { createdAt: "desc" },
         });
-
         return sale;
       } catch {
         throw new TRPCError({
@@ -312,26 +297,15 @@ export const saleRouter = createTRPCRouter({
       const { warungId, isPaid } = input;
       const { db } = ctx;
 
+      await assertManagerOrOwner(db, warungId, (ctx.user as any)?.id);
+
       try {
         const sale = await db.sale.findMany({
-          where: {
-            warungId,
-            isPaid,
-          },
-          include: {
-            customer: true,
-            items: {
-              include: {
-                product: true,
-              },
-            },
-          },
+          where: { warungId, isPaid },
+          include: { customer: true, items: { include: { product: true } } },
           take: 10,
-          orderBy: {
-            createdAt: "desc",
-          },
+          orderBy: { createdAt: "desc" },
         });
-
         return sale;
       } catch {
         throw new TRPCError({
@@ -358,36 +332,23 @@ export const saleRouter = createTRPCRouter({
       endOfDay.setHours(23, 59, 59, 999);
 
       try {
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
         const sale = await db.sale.findMany({
           where: {
             AND: [
-              {
-                warung: {
-                  ownerId: user?.id,
-                },
-              },
-              {
-                createdAt: {
-                  gte: startOfDay,
-                  lte: endOfDay,
-                },
-              },
+              { warungId: { in: authorizedWarungIds } },
+              { createdAt: { gte: startOfDay, lte: endOfDay } },
             ],
           },
           include: {
             customer: true,
-            items: {
-              include: {
-                product: true,
-              },
-            },
+            items: { include: { product: true } },
           },
-          orderBy: {
-            createdAt: "desc",
-          },
+          orderBy: { createdAt: "desc" },
         });
         return sale;
-      } catch {
+      } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -406,36 +367,18 @@ export const saleRouter = createTRPCRouter({
       const { receiptNumber } = input;
 
       try {
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
         const sale = await db.sale.findMany({
           where: {
-            AND: [
-              {
-                warung: {
-                  ownerId: user?.id,
-                },
-              },
-              {
-                receiptNo: {
-                  contains: receiptNumber,
-                  mode: "insensitive",
-                },
-              },
-            ],
+            warungId: { in: authorizedWarungIds },
+            receiptNo: { contains: receiptNumber, mode: "insensitive" },
           },
-          include: {
-            customer: true,
-            items: {
-              include: {
-                product: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
+          include: { customer: true, items: { include: { product: true } } },
+          orderBy: { createdAt: "desc" },
         });
         return sale;
-      } catch {
+      } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch sale",
@@ -482,6 +425,8 @@ export const saleRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { db } = ctx;
       const { warungId } = input;
+
+      await assertManagerOrOwner(db, warungId, (ctx.user as any)?.id);
 
       const now = new Date();
       const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -614,7 +559,9 @@ export const saleRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const { warungId, isPaid, searchTerm, startDate, endDate } = input;
-      const { db } = ctx;
+      const { db, user } = ctx;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       return db.sale.findMany({
         where: {
@@ -656,8 +603,10 @@ export const saleRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { warungId, startDate, endDate } = input;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       const whereClause = {
         warungId,
@@ -733,8 +682,10 @@ export const saleRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { warungId, startDate, endDate } = input;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       const whereClause = {
         warungId,
@@ -830,8 +781,10 @@ export const saleRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { warungId, startDate, endDate } = input;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       const whereClause = {
         warungId,
@@ -933,8 +886,10 @@ export const saleRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { warungId, startDate, endDate } = input;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       const whereClause = {
         warungId,
@@ -1035,8 +990,10 @@ export const saleRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { db } = ctx;
+      const { db, user } = ctx;
       const { warungId, startDate, endDate } = input;
+
+      await assertManagerOrOwner(db, warungId, (user as any)?.id);
 
       const whereClause = {
         warungId,

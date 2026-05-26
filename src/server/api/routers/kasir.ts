@@ -1,19 +1,22 @@
 import { z } from "zod";
 import { createTRPCRouter, privateProcedure } from "../trpc";
+import {
+  assertManagerOrOwner,
+  getAuthorizedWarungIds,
+} from "~/server/api/utils/roles";
 import { TRPCError } from "@trpc/server";
 import { createKasirFormSchema } from "~/schemas/kasir";
 
 export const kasirRouter = createTRPCRouter({
   getKasir: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
+    const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
 
     return db.warung.findMany({
       where: {
-        ownerId: user?.id,
+        id: { in: authorizedWarungIds },
       },
-      include: {
-        subscriptions: true,
-      },
+      include: { subscriptions: true },
     });
   }),
 
@@ -26,13 +29,9 @@ export const kasirRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { db, user } = ctx;
       const { warungId } = input;
+      await assertManagerOrOwner(db, warungId, user?.id);
 
-      return db.warung.findFirst({
-        where: {
-          id: warungId,
-          ownerId: user?.id,
-        },
-      });
+      return db.warung.findFirst({ where: { id: warungId } });
     }),
 
   searchKasirByName: privateProcedure
@@ -46,21 +45,16 @@ export const kasirRouter = createTRPCRouter({
       const { name } = input;
 
       try {
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
         return await db.warung.findMany({
           where: {
-            ownerId: user?.id,
-            name: {
-              contains: name,
-              mode: "insensitive",
-            },
+            id: { in: authorizedWarungIds },
+            name: { contains: name, mode: "insensitive" },
           },
-          include: {
-            subscriptions: true,
-          },
+          include: { subscriptions: true },
           take: 10,
-          orderBy: {
-            name: "asc",
-          },
+          orderBy: { name: "asc" },
         });
       } catch (error) {
         console.error("Search failed:", error);
@@ -207,6 +201,9 @@ export const kasirRouter = createTRPCRouter({
       const { warungId, startDate, endDate } = input;
       const { db } = ctx;
 
+      // ensure manager/owner for the requested warung
+      await assertManagerOrOwner(db, warungId, (ctx.user as any)?.id);
+
       return db.warungActivity.findMany({
         where: {
           warungId,
@@ -218,9 +215,7 @@ export const kasirRouter = createTRPCRouter({
               },
             }),
         },
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy: { createdAt: "desc" },
       });
     }),
 });

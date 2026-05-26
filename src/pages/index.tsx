@@ -111,10 +111,8 @@ export default function Home() {
                 className="animate-reveal-up text-4xl leading-tight font-bold tracking-tight md:text-6xl"
                 style={{ animationDelay: "0.2s" }}
               >
-                Kelola kasir lebih cepat,
-                <span className="text-primary block">
-                  rapi, dan profitable.
-                </span>
+                Kelola kasir lebih cepat,{" "}
+                <span className="text-primary">rapi, dan profitable.</span>
               </h1>
               <p
                 className="text-muted-foreground animate-reveal-up mt-5 max-w-xl text-sm tracking-tight md:text-base"

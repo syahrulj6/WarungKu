@@ -39,6 +39,15 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     return () => router.events.off("routeChangeComplete", handleRouteChange);
   }, [gaId, router.events]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then(() => console.log("Service worker registered"))
+        .catch((err) => console.warn("SW registration failed", err));
+    }
+  }, []);
+
   return (
     <ThemeProvider
       attribute="class"

@@ -14,6 +14,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "postinstall": "prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "db:backup": "sh scripts/backup_db.sh",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
@@ -88,6 +90,7 @@
     "prettier-plugin-tailwindcss": "^0.6.11",
     "prisma": "^7.8.0",
     "tailwindcss": "^4.0.15",
+    "vitest": "^1.1.5",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0"
   },
