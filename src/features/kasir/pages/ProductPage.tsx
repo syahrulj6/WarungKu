@@ -34,7 +34,14 @@ const ProductSkeleton = () => {
 const ProductPage = () => {
   const router = useRouter();
   const { id } = router.query;
+  const kasirId = typeof id === "string" ? id : null;
   const utils = api.useUtils();
+  const { data: myRole } = api.kasir.getMyRoleInKasir.useQuery(
+    { warungId: kasirId! },
+    { enabled: !!kasirId },
+  );
+  const canManageProducts =
+    myRole?.role === "OWNER" || myRole?.role === "MANAGER";
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,6 +141,7 @@ const ProductPage = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onCreateSuccess={refreshProductData}
+          canManageProducts={canManageProducts}
         />
       }
       metaTitle="Daftar Produk"
@@ -161,61 +169,71 @@ const ProductPage = () => {
                 productImage={product.productPictureUrl ?? ""}
                 price={product.price}
                 stock={product.stock}
-                onEdit={() => setEditingProduct(product)}
-                onDelete={() =>
-                  setDeletingProduct({ id: product.id, name: product.name })
+                onEdit={
+                  canManageProducts ? () => setEditingProduct(product) : undefined
                 }
+                onDelete={
+                  canManageProducts
+                    ? () =>
+                        setDeletingProduct({ id: product.id, name: product.name })
+                    : undefined
+                }
+                canManageProducts={canManageProducts}
               />
             ))
           )}
         </div>
       </div>
 
-      <ProductFormModal
-        mode="edit"
-        product={editingProduct ?? undefined}
-        open={!!editingProduct}
-        onOpenChange={(open) => {
-          if (!open) {
+      {canManageProducts && (
+        <ProductFormModal
+          mode="edit"
+          product={editingProduct ?? undefined}
+          open={!!editingProduct}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingProduct(null);
+            }
+          }}
+          onSuccess={async () => {
             setEditingProduct(null);
-          }
-        }}
-        onSuccess={async () => {
-          setEditingProduct(null);
-          await refreshProductData();
-        }}
-      />
+            await refreshProductData();
+          }}
+        />
+      )}
 
-      <AlertDialog
-        open={!!deletingProduct}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeletingProduct(null);
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Produk</AlertDialogTitle>
-            <AlertDialogDescription>
-              Produk {deletingProduct?.name} akan disembunyikan dari daftar dan
-              tidak bisa dipilih lagi di kasir.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => {
-                e.preventDefault();
-                void handleDeleteProduct();
-              }}
-              disabled={deleteProduct.isPending}
-            >
-              {deleteProduct.isPending ? "Menghapus..." : "Ya, Hapus"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {canManageProducts && (
+        <AlertDialog
+          open={!!deletingProduct}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeletingProduct(null);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Hapus Produk</AlertDialogTitle>
+              <AlertDialogDescription>
+                Produk {deletingProduct?.name} akan disembunyikan dari daftar dan
+                tidak bisa dipilih lagi di kasir.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleDeleteProduct();
+                }}
+                disabled={deleteProduct.isPending}
+              >
+                {deleteProduct.isPending ? "Menghapus..." : "Ya, Hapus"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </KasirDashboardLayout>
   );
 };

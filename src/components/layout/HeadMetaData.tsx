@@ -14,7 +14,8 @@ export const HeadMetaData: React.FC<{
   pathname = "",
 }) => {
   const defaultTitle = "Kasirium";
-  const fullTitle = title === defaultTitle ? defaultTitle : `${title} | ${defaultTitle}`;
+  const fullTitle =
+    title === defaultTitle ? defaultTitle : `${title} | ${defaultTitle}`;
 
   const baseUrl =
     process.env.NODE_ENV === "development"
@@ -28,6 +29,8 @@ export const HeadMetaData: React.FC<{
     <Head>
       <title>{fullTitle}</title>
       <link rel="icon" href="/warungku.png" />
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="apple-touch-icon" href="/assets/icon-192.png" />
       <link rel="canonical" href={pageUrl} />
 
       {/* metadata */}
@@ -35,6 +38,7 @@ export const HeadMetaData: React.FC<{
       <meta name="description" content={metaDescription} />
       <meta name="robots" content="index,follow" />
       <meta name="theme-color" content="#10b981" />
+      <meta name="mobile-web-app-capable" content="yes" />
 
       <meta property="og:url" content={pageUrl} />
       <meta property="og:type" content="website" />
@@ -42,7 +46,10 @@ export const HeadMetaData: React.FC<{
       <meta property="og:description" content={metaDescription} />
       <meta property="og:site_name" content="Kasirium" />
       <meta property="og:image" content={socialImage} />
-      <meta property="og:image:alt" content="Kasirium - Aplikasi POS modern untuk UMKM" />
+      <meta
+        property="og:image:alt"
+        content="Kasirium - Aplikasi POS modern untuk UMKM"
+      />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
 
@@ -51,9 +58,10 @@ export const HeadMetaData: React.FC<{
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={socialImage} />
-      <meta name="twitter:image:alt" content="Kasirium - Aplikasi POS modern untuk UMKM" />
+      <meta
+        name="twitter:image:alt"
+        content="Kasirium - Aplikasi POS modern untuk UMKM"
+      />
     </Head>
   );
 };
-
-

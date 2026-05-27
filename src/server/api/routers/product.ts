@@ -7,18 +7,21 @@ import {
   deleteProductPicture,
   saveProductPicture,
 } from "~/lib/storage/product-pictures";
+import {
+  assertManagerOrOwner,
+  getAuthorizedWarungIds,
+} from "~/server/api/utils/roles";
 
 export const productRouter = createTRPCRouter({
   getAllProduct: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
-
     try {
+      const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
       const products = await db.product.findMany({
         where: {
           isActive: true,
-          warung: {
-            ownerId: user!.id,
-          },
+          warungId: { in: authorizedWarungIds },
         },
         orderBy: { stock: "desc" },
         include: {
@@ -26,7 +29,7 @@ export const productRouter = createTRPCRouter({
         },
       });
       return products;
-    } catch {
+    } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch products",
@@ -45,29 +48,21 @@ export const productRouter = createTRPCRouter({
       const { categoryId } = input;
 
       try {
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
         const products = await db.product.findMany({
           where: {
             AND: [
-              {
-                isActive: true,
-              },
-              {
-                warung: {
-                  ownerId: user!.id,
-                },
-              },
-              {
-                categoryId: categoryId,
-              },
+              { isActive: true },
+              { warungId: { in: authorizedWarungIds } },
+              { categoryId: categoryId },
             ],
           },
           orderBy: { stock: "desc" },
-          include: {
-            category: true,
-          },
+          include: { category: true },
         });
         return products;
-      } catch {
+      } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch products",
@@ -86,17 +81,13 @@ export const productRouter = createTRPCRouter({
       const { name } = input;
 
       try {
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
         const products = await db.product.findMany({
           where: {
             AND: [
-              {
-                isActive: true,
-              },
-              {
-                warung: {
-                  ownerId: user!.id,
-                },
-              },
+              { isActive: true },
+              { warungId: { in: authorizedWarungIds } },
               {
                 name: {
                   contains: name,
@@ -106,12 +97,10 @@ export const productRouter = createTRPCRouter({
             ],
           },
           orderBy: { stock: "desc" },
-          include: {
-            category: true,
-          },
+          include: { category: true },
         });
         return products;
-      } catch {
+      } catch (err) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to fetch products",
@@ -123,21 +112,19 @@ export const productRouter = createTRPCRouter({
     const { db, user } = ctx;
 
     try {
+      const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);
+
       const products = await db.product.findMany({
         where: {
           isActive: true,
-          warung: {
-            ownerId: user!.id,
-          },
+          warungId: { in: authorizedWarungIds },
         },
         orderBy: { stock: "desc" },
         take: 4,
-        include: {
-          category: true,
-        },
+        include: { category: true },
       });
       return products;
-    } catch {
+    } catch (err) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Failed to fetch trending products",
@@ -156,20 +143,8 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
 
       try {
-        const warung = await db.warung.findFirst({
-          where: {
-            id: input.warungId,
-            ownerId: user!.id,
-          },
-          select: { id: true },
-        });
-
-        if (!warung) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "warung tidak ditemukan atau bukan milik Anda",
-          });
-        }
+        // Allow manager or owner to view low stock; assert role
+        await assertManagerOrOwner(db, input.warungId, user?.id);
 
         const products = await db.product.findMany({
           where: {
@@ -219,14 +194,27 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { productPictureBase64, ...productData } = input;
 
+      // find a warung where the user is owner or manager
       const warung = await db.warung.findFirst({
-        where: { ownerId: user?.id },
+        where: {
+          OR: [
+            { ownerId: user?.id },
+            {
+              staff: {
+                some: {
+                  userId: user?.id,
+                  role: { in: ["OWNER", "MANAGER"] },
+                } as any,
+              },
+            },
+          ],
+        },
       });
 
       if (!warung) {
         throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Kasirium not found",
+          code: "FORBIDDEN",
+          message: "Kasirium not found or insufficient role",
         });
       }
 
@@ -315,20 +303,19 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
 
-      const product = await db.product.findFirst({
-        where: {
-          id: input.productId,
-          isActive: true,
-          warung: { ownerId: user!.id },
-        },
+      const product = await db.product.findUnique({
+        where: { id: input.productId },
+        include: { warung: true },
       });
 
-      if (!product) {
+      if (!product?.isActive) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Produk tidak ditemukan",
         });
       }
+
+      await assertManagerOrOwner(db, product.warungId, user?.id);
 
       const category = await db.category.findFirst({
         where: {
@@ -396,11 +383,9 @@ export const productRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
 
-      const product = await db.product.findFirst({
-        where: {
-          id: input.productId,
-          warung: { ownerId: user!.id },
-        },
+      const product = await db.product.findUnique({
+        where: { id: input.productId },
+        include: { warung: true },
       });
 
       if (!product) {
@@ -409,6 +394,8 @@ export const productRouter = createTRPCRouter({
           message: "Produk tidak ditemukan",
         });
       }
+
+      await assertManagerOrOwner(db, product.warungId, user?.id);
 
       if (!product.isActive) {
         throw new TRPCError({
@@ -446,11 +433,9 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { productId, productPictureBase64 } = input;
 
-      const product = await db.product.findFirst({
-        where: {
-          id: productId,
-          warung: { ownerId: user!.id },
-        },
+      const product = await db.product.findUnique({
+        where: { id: productId },
+        include: { warung: true },
       });
 
       if (!product) {
@@ -459,6 +444,8 @@ export const productRouter = createTRPCRouter({
           message: "Produk tidak ditemukan",
         });
       }
+
+      await assertManagerOrOwner(db, product.warungId, user?.id);
 
       const newImageUrl = await handleImageUpload(
         productPictureBase64,
@@ -491,11 +478,9 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { productId } = input;
 
-      const product = await db.product.findFirst({
-        where: {
-          id: productId,
-          warung: { ownerId: user!.id },
-        },
+      const product = await db.product.findUnique({
+        where: { id: productId },
+        include: { warung: true },
       });
 
       if (!product) {
@@ -504,6 +489,8 @@ export const productRouter = createTRPCRouter({
           message: "Produk tidak ditemukan",
         });
       }
+
+      await assertManagerOrOwner(db, product.warungId, user?.id);
 
       if (!product.productPictureUrl) {
         throw new TRPCError({
@@ -543,19 +530,8 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
       const { warungId, productId, quantityToAdd, reason } = input;
 
-      const warung = await db.warung.findFirst({
-        where: {
-          id: warungId,
-          ownerId: user!.id,
-        },
-      });
-
-      if (!warung) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "warung tidak ditemukan atau bukan milik Anda",
-        });
-      }
+      // allow manager or owner to adjust stock for the warung
+      await assertManagerOrOwner(db, warungId, user?.id);
 
       const product = await db.product.findFirst({
         where: {

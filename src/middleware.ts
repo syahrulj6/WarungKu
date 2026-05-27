@@ -9,7 +9,11 @@ export default async function middleware(request: NextRequest) {
 
   const isDashboardRoute =
     path === "/dashboard" || path.startsWith("/dashboard/");
-  const isProtectedRoute = isDashboardRoute || path.startsWith("/docs");
+  const isProtectedRoute =
+    isDashboardRoute ||
+    path.startsWith("/docs") ||
+    path === "/staff" ||
+    path.startsWith("/shift");
   const isAuthRoute = path === "/login" || path === "/register";
 
   if (isAuthRoute && sessionCookie) {

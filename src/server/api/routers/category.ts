@@ -1,51 +1,53 @@
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, privateProcedure } from "../trpc";
 import { z } from "zod";
+import {
+  assertManagerOrOwner,
+  assertStaffOrAbove,
+  getAuthorizedWarungIds,
+} from "~/server/api/utils/roles";
 
 export const categoryRouter = createTRPCRouter({
   getAllCategory: privateProcedure
     .input(
       z.object({
-        warungId: z.string(),
+        warungId: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-    const { db, user } = ctx;
+      const { db, user } = ctx;
 
-    if (!user?.id) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Pengguna belum terautentikasi",
-      });
-    }
-
-    try {
-      const warung = await db.warung.findFirst({
-        where: { id: input.warungId, ownerId: user.id },
-        select: { id: true },
-      });
-      if (!warung) {
+      if (!user?.id) {
         throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "warung tidak ditemukan atau bukan milik Anda",
+          code: "UNAUTHORIZED",
+          message: "Pengguna belum terautentikasi",
         });
       }
 
-      const categories = await db.category.findMany({
-        where: {
-          warungId: warung.id,
-        },
-        orderBy: { name: "asc" },
-      });
+      try {
+        if (input.warungId) {
+          await assertStaffOrAbove(db, input.warungId, user.id);
+          return await db.category.findMany({
+            where: { warungId: input.warungId },
+            orderBy: { name: "asc" },
+          });
+        }
 
-      return categories;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Gagal mengambil kategori",
-      });
-    }
+        const authorizedWarungIds = await getAuthorizedWarungIds(db, user.id);
+
+        if (authorizedWarungIds.length === 0) return [];
+
+        return await db.category.findMany({
+          where: { warungId: { in: authorizedWarungIds } },
+          orderBy: { name: "asc" },
+        });
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal mengambil kategori",
+        });
+      }
     }),
 
   createDefaultsCategory: privateProcedure
@@ -55,54 +57,40 @@ export const categoryRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-    const { db, user } = ctx;
+      const { db, user } = ctx;
 
-    if (!user?.id) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Pengguna belum terautentikasi",
-      });
-    }
-
-    const warung = await db.warung.findFirst({
-      where: { id: input.warungId, ownerId: user.id },
-      select: { id: true },
-    });
-    if (!warung) {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "warung tidak ditemukan atau bukan milik Anda",
-      });
-    }
-
-    const defaultCategories = ["Food", "Beverage", "Snack"];
-
-    try {
-      const existingCategories = await db.category.findMany({
-        where: {
-          warungId: warung.id,
-          name: { in: defaultCategories },
-        },
-      });
-
-      const existingNames = existingCategories.map((c) => c.name);
-      const categoriesToCreate = defaultCategories
-        .filter((name) => !existingNames.includes(name))
-        .map((name) => ({ name, warungId: warung.id }));
-
-      if (categoriesToCreate.length > 0) {
-        await db.category.createMany({
-          data: categoriesToCreate,
+      if (!user?.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Pengguna belum terautentikasi",
         });
       }
 
-      return { success: true, created: categoriesToCreate.length };
-    } catch {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Gagal membuat kategori default",
-      });
-    }
+      await assertManagerOrOwner(db, input.warungId, user.id);
+
+      const defaultCategories = ["Food", "Beverage", "Snack"];
+
+      try {
+        const existingCategories = await db.category.findMany({
+          where: { warungId: input.warungId, name: { in: defaultCategories } },
+        });
+
+        const existingNames = existingCategories.map((c) => c.name);
+        const categoriesToCreate = defaultCategories
+          .filter((name) => !existingNames.includes(name))
+          .map((name) => ({ name, warungId: input.warungId }));
+
+        if (categoriesToCreate.length > 0) {
+          await db.category.createMany({ data: categoriesToCreate });
+        }
+
+        return { success: true, created: categoriesToCreate.length };
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Gagal membuat kategori default",
+        });
+      }
     }),
 
   createCategory: privateProcedure
@@ -125,24 +113,12 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      const warung = await db.warung.findFirst({
-        where: { id: input.warungId, ownerId: user.id },
-        select: { id: true },
-      });
-      if (!warung) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "warung tidak ditemukan atau bukan milik Anda",
-        });
-      }
+      await assertManagerOrOwner(db, input.warungId, user.id);
 
       try {
         // Check if category already exists
         const existingCategory = await db.category.findFirst({
-          where: {
-            warungId: warung.id,
-            name: input.name,
-          },
+          where: { warungId: input.warungId, name: input.name },
         });
 
         if (existingCategory) {
@@ -153,10 +129,7 @@ export const categoryRouter = createTRPCRouter({
         }
 
         const category = await db.category.create({
-          data: {
-            name: input.name,
-            warungId: warung.id,
-          },
+          data: { name: input.name, warungId: input.warungId },
         });
 
         return category;
@@ -191,11 +164,24 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
+      // find category to get warungId
+      const category = await db.category.findUnique({
+        where: { id: input.id },
+        select: { warungId: true },
+      });
+      if (!category)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Kategori tidak ditemukan",
+        });
+
+      await assertManagerOrOwner(db, category.warungId, user.id);
+
       try {
         // Check if new name conflicts with another category
         const nameConflict = await db.category.findFirst({
           where: {
-            warungId: user.id,
+            warungId: category.warungId,
             name: input.name,
             NOT: { id: input.id },
           },
@@ -209,13 +195,8 @@ export const categoryRouter = createTRPCRouter({
         }
 
         const updatedCategory = await db.category.update({
-          where: {
-            id: input.id,
-            warungId: user.id,
-          },
-          data: {
-            name: input.name,
-          },
+          where: { id: input.id },
+          data: { name: input.name },
         });
 
         return updatedCategory;
@@ -234,21 +215,29 @@ export const categoryRouter = createTRPCRouter({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { db, user } = ctx;
-
-      if (!user?.id) {
+      if (!user?.id)
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Pengguna belum terautentikasi",
         });
-      }
+
+      // find category to get warungId
+      const category = await db.category.findUnique({
+        where: { id: input.id },
+        select: { warungId: true },
+      });
+      if (!category)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Kategori tidak ditemukan",
+        });
+
+      await assertManagerOrOwner(db, category.warungId, user.id);
 
       try {
         // Check if category has any products
         const productsCount = await db.product.count({
-          where: {
-            categoryId: input.id,
-            warungId: user.id,
-          },
+          where: { categoryId: input.id, warungId: category.warungId },
         });
 
         if (productsCount > 0) {
@@ -259,10 +248,7 @@ export const categoryRouter = createTRPCRouter({
         }
 
         const deletedCategory = await db.category.delete({
-          where: {
-            id: input.id,
-            warungId: user.id,
-          },
+          where: { id: input.id },
         });
 
         return deletedCategory;
@@ -276,5 +262,3 @@ export const categoryRouter = createTRPCRouter({
       }
     }),
 });
-
-

@@ -9,12 +9,14 @@ interface ProductHeaderProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onCreateSuccess?: () => Promise<void> | void;
+  canManageProducts?: boolean;
 }
 
 export const ProductHeader = ({
   searchTerm,
   onSearchChange,
   onCreateSuccess,
+  canManageProducts = false,
 }: ProductHeaderProps) => {
   const searchId = useId();
 
@@ -33,12 +35,14 @@ export const ProductHeader = ({
         </Label>
       </div>
 
-      <ProductFormModal mode="create" onSuccess={onCreateSuccess}>
-        <Button className="w-full md:w-auto">
-          <Plus className="h-4 w-4" />
-          <span className="ml-2">Tambah Produk</span>
-        </Button>
-      </ProductFormModal>
+      {canManageProducts && (
+        <ProductFormModal mode="create" onSuccess={onCreateSuccess}>
+          <Button className="w-full md:w-auto">
+            <Plus className="h-4 w-4" />
+            <span className="ml-2">Tambah Produk</span>
+          </Button>
+        </ProductFormModal>
+      )}
     </div>
   );
 };
