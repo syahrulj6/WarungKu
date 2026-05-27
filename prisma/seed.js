@@ -26,7 +26,8 @@ try {
     process.exit(1);
   }
 } catch (err) {
-  console.error("Failed to parse DATABASE_URL:", err?.message ?? err);
+  const message = err instanceof Error ? err.message : String(err);
+  console.error("Failed to parse DATABASE_URL:", message);
   process.exit(1);
 }
 
@@ -35,6 +36,7 @@ const adapter = new PrismaPg(pool);
 
 const db = new PrismaClient({ adapter });
 
+/** @param {string} password */
 function hashPasswordSync(password) {
   const salt = crypto.randomBytes(16).toString("hex");
   const derived = crypto.scryptSync(password, salt, 64);
@@ -44,6 +46,10 @@ function hashPasswordSync(password) {
 async function main() {
   const adminEmail = process.env.ADMIN_EMAIL ?? "admin@local.test";
   const adminPassword = process.env.ADMIN_PASSWORD ?? "password123";
+  const usernameFromEmail =
+    adminEmail.includes("@") && adminEmail.indexOf("@") > 0
+      ? adminEmail.slice(0, adminEmail.indexOf("@"))
+      : "admin";
 
   const passwordHash = hashPasswordSync(adminPassword);
 
@@ -54,7 +60,7 @@ async function main() {
     update: { passwordHash, isActive: true },
     create: {
       email: adminEmail,
-      username: adminEmail.split("@")[0],
+      username: usernameFromEmail,
       passwordHash,
       isActive: true,
       mfaBackupCodes: [],

@@ -3,6 +3,7 @@ import { createTRPCRouter, privateProcedure } from "../trpc";
 import { z } from "zod";
 import {
   assertManagerOrOwner,
+  assertStaffOrAbove,
   getAuthorizedWarungIds,
 } from "~/server/api/utils/roles";
 
@@ -25,7 +26,7 @@ export const categoryRouter = createTRPCRouter({
 
       try {
         if (input.warungId) {
-          await assertManagerOrOwner(db, input.warungId, user.id);
+          await assertStaffOrAbove(db, input.warungId, user.id);
           return await db.category.findMany({
             where: { warungId: input.warungId },
             orderBy: { name: "asc" },

@@ -4,6 +4,7 @@ import { createSaleFormSchema } from "~/schemas/sale";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import {
+  assertStaffOrAbove,
   assertManagerOrOwner,
   getAuthorizedWarungIds,
 } from "~/server/api/utils/roles";
@@ -564,11 +565,28 @@ export const saleRouter = createTRPCRouter({
       const { warungId, isPaid, searchTerm, startDate, endDate } = input;
       const { db, user } = ctx;
 
-      await assertManagerOrOwner(db, warungId, (user as any)?.id);
+      await assertStaffOrAbove(db, warungId, (user as any)?.id);
+
+      const isManagerOrOwner = await (async () => {
+        const warung = await db.warung.findUnique({
+          where: { id: warungId },
+          select: { ownerId: true },
+        });
+        if (warung?.ownerId === user?.id) return true;
+        const staff = await db.warungStaff.findFirst({
+          where: {
+            warungId,
+            userId: user?.id,
+            role: { in: ["OWNER", "MANAGER"] },
+          } as any,
+        });
+        return !!staff;
+      })();
 
       return db.sale.findMany({
         where: {
           warungId,
+          ...(isManagerOrOwner ? {} : { userId: user?.id }),
           isPaid,
           ...(searchTerm && {
             receiptNo: {
@@ -585,6 +603,13 @@ export const saleRouter = createTRPCRouter({
             }),
         },
         include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+            },
+          },
           customer: true,
           items: {
             include: {

@@ -47,7 +47,10 @@ export async function getAuthorizedWarungIds(
   });
 
   const staff = await db.warungStaff.findMany({
-    where: { userId, role: { in: ["OWNER", "MANAGER"] } } as any,
+    where: {
+      userId,
+      role: { in: ["OWNER", "MANAGER", "STAFF", "CASHIER"] },
+    } as any,
     select: { warungId: true },
   });
 

@@ -22,6 +22,7 @@ import { Button } from "~/components/ui/button";
 import { Menu, PanelRightClose, ShoppingCart } from "lucide-react";
 import { OrderPanel } from "./OrderPanel";
 import { HeadMetaData } from "./HeadMetaData";
+import { api } from "~/utils/api";
 
 const menuItems = [
   {
@@ -29,42 +30,49 @@ const menuItems = [
     icon: <GoHomeFill />,
     url: "/dashboard/kasir/[id]",
     path: (id: string) => `/dashboard/kasir/${id}`,
+    allowedRoles: ["OWNER", "MANAGER"],
   },
   {
     title: "Produk",
     icon: <FaConciergeBell />,
     url: "/dashboard/kasir/[id]/product",
     path: (id: string) => `/dashboard/kasir/${id}/product`,
+    allowedRoles: ["OWNER", "MANAGER", "STAFF", "CASHIER"],
   },
   {
     title: "Pesanan",
     icon: <FaShoppingCart />,
     url: "/dashboard/kasir/[id]/order",
     path: (id: string) => `/dashboard/kasir/${id}/order`,
+    allowedRoles: ["OWNER", "MANAGER", "STAFF", "CASHIER"],
   },
   {
     title: "Riwayat",
     icon: <GoClockFill />,
     url: "/dashboard/kasir/[id]/history",
     path: (id: string) => `/dashboard/kasir/${id}/history`,
+    allowedRoles: ["OWNER", "MANAGER", "STAFF", "CASHIER"],
   },
   {
     title: "Laporan",
     icon: <FaBook />,
     url: "/dashboard/kasir/[id]/report",
     path: (id: string) => `/dashboard/kasir/${id}/report`,
+    allowedRoles: ["OWNER", "MANAGER"],
   },
   {
     title: "Peringatan",
     icon: <FaBell />,
     url: "/dashboard/kasir/[id]/alert",
     path: (id: string) => `/dashboard/kasir/${id}/alert`,
+    allowedRoles: ["OWNER", "MANAGER"],
   },
   {
     title: "Pengaturan",
     icon: <IoSettingsSharp />,
     url: "/dashboard/kasir/[id]/settings",
     path: (id: string) => `/dashboard/kasir/${id}/settings`,
+    allowedRoles: ["OWNER", "MANAGER"],
   },
 ];
 
@@ -87,9 +95,14 @@ export const KasirDashboardLayout = ({
 }: KasirDashboardLayoutProps) => {
   const router = useRouter();
   const { id } = router.query;
+  const kasirId = typeof id === "string" ? id : null;
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { data: myRole } = api.kasir.getMyRoleInKasir.useQuery(
+    { warungId: kasirId! },
+    { enabled: !!kasirId },
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -106,7 +119,14 @@ export const KasirDashboardLayout = ({
     setIsRightPanelOpen(!isMobile);
   }, [isMobile]);
 
-  const enhancedMenuItems = menuItems.map((item) => {
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (!kasirId) return false;
+    const role = myRole?.role;
+    if (!role) return false;
+    return item.allowedRoles.includes(role);
+  });
+
+  const enhancedMenuItems = filteredMenuItems.map((item) => {
     const isActive =
       router.pathname === item.url ||
       (item.url !== "/dashboard/kasir/[id]" &&
@@ -115,7 +135,7 @@ export const KasirDashboardLayout = ({
     return {
       ...item,
       active: isActive,
-      href: item.path(id as string),
+      href: item.path(kasirId!),
     };
   });
 

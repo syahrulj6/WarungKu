@@ -22,11 +22,19 @@ import {
 import { chartActivityConfig } from "~/utils/type";
 import { DishCard } from "../components/DishCard";
 import { Button } from "~/components/ui/button";
+import Link from "next/link";
 
 const MainDashboardPage = () => {
   const router = useRouter();
   const { id } = router.query;
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("30-hari");
+  const { data: myRole, isLoading: roleLoading } = api.kasir.getMyRoleInKasir.useQuery(
+    { warungId: id as string },
+    { enabled: !!id },
+  );
+
+  const canViewDashboardSummary =
+    myRole?.role === "OWNER" || myRole?.role === "MANAGER";
 
   const { data: Kasir } = api.kasir.getKasirById.useQuery(
     {
@@ -89,6 +97,23 @@ const MainDashboardPage = () => {
         </div>
       }
     >
+      {!roleLoading && !canViewDashboardSummary && id && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800">
+          <p className="font-semibold">Akses ringkasan terbatas</p>
+          <p className="mt-1 text-sm">
+            Halaman ringkasan hanya dapat diakses oleh Pemilik atau Manajer.
+          </p>
+          <div className="mt-3">
+            <Button asChild>
+              <Link href={`/dashboard/kasir/${id as string}/order`}>
+                Buka Menu Pesanan
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!roleLoading && canViewDashboardSummary && (
       <div className="flex flex-col gap-4">
         {/* Time period selector */}
         <div className="flex gap-2">
@@ -202,6 +227,7 @@ const MainDashboardPage = () => {
           />
         </div>
       </div>
+      )}
     </KasirDashboardLayout>
   );
 };

@@ -308,7 +308,7 @@ export const productRouter = createTRPCRouter({
         include: { warung: true },
       });
 
-      if (!product || !product.isActive) {
+      if (!product?.isActive) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Produk tidak ditemukan",
@@ -384,7 +384,7 @@ export const productRouter = createTRPCRouter({
       const { db, user } = ctx;
 
       const product = await db.product.findUnique({
-        where: { id: productId },
+        where: { id: input.productId },
         include: { warung: true },
       });
 

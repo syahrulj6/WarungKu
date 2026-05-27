@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, privateProcedure } from "../trpc";
-import { v4 as uuidv4 } from "uuid";
-import { sendVerificationEmail } from "~/lib/email";
+import { randomUUID } from "crypto";
+import { sendInvitationEmail } from "~/lib/email";
+import { getAppBaseUrl } from "~/lib/url";
 import {
   assertManagerOrOwner,
   getAuthorizedWarungIds,
@@ -26,7 +27,7 @@ export const staffRouter = createTRPCRouter({
       // only owner or manager can invite
       await assertManagerOrOwner(db, warungId, user.id);
 
-      const token = uuidv4();
+      const token = randomUUID();
       const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
 
       await db.staffInvitation.create({
@@ -40,10 +41,11 @@ export const staffRouter = createTRPCRouter({
         },
       });
 
-      const acceptUrl = `${process.env.APP_URL ?? ""}/invitations/accept?token=${token}`;
+      const baseUrl = getAppBaseUrl(ctx.req);
+      const acceptUrl = `${baseUrl}/invitations/accept?token=${token}`;
 
       try {
-        await sendVerificationEmail({ email, verificationUrl: acceptUrl });
+        await sendInvitationEmail({ email, invitationUrl: acceptUrl });
       } catch (err) {
         console.error("Failed to send invite email:", err);
       }
@@ -79,8 +81,12 @@ export const staffRouter = createTRPCRouter({
           message: "Invitation email does not match your account",
         });
 
-      // create staff entry
-      try {
+      const existingStaff = await db.warungStaff.findFirst({
+        where: { warungId: invitation.warungId, userId: user.id },
+        select: { id: true },
+      });
+
+      if (!existingStaff) {
         await db.warungStaff.create({
           data: {
             warungId: invitation.warungId,
@@ -88,9 +94,6 @@ export const staffRouter = createTRPCRouter({
             role: invitation.role,
           },
         });
-      } catch (err) {
-        // unique constraint may fail if already exists
-        console.error("Failed to create staff record:", err);
       }
 
       await db.staffInvitation.delete({ where: { id: invitation.id } });

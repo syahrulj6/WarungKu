@@ -8,6 +8,45 @@ import { TRPCError } from "@trpc/server";
 import { createKasirFormSchema } from "~/schemas/kasir";
 
 export const kasirRouter = createTRPCRouter({
+  getMyRoleInKasir: privateProcedure
+    .input(
+      z.object({
+        warungId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db, user } = ctx;
+      const { warungId } = input;
+
+      if (!user?.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      const warung = await db.warung.findUnique({
+        where: { id: warungId },
+        select: { ownerId: true },
+      });
+
+      if (!warung) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Kasir not found" });
+      }
+
+      if (warung.ownerId === user.id) {
+        return { role: "OWNER" as const };
+      }
+
+      const staff = await db.warungStaff.findFirst({
+        where: { warungId, userId: user.id },
+        select: { role: true },
+      });
+
+      if (!staff) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
+      }
+
+      return { role: staff.role };
+    }),
+
   getKasir: privateProcedure.query(async ({ ctx }) => {
     const { db, user } = ctx;
     const authorizedWarungIds = await getAuthorizedWarungIds(db, user?.id);

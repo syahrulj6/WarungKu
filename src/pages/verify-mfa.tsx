@@ -18,6 +18,10 @@ const VerifyMfaPage = () => {
   const [countdown, setCountdown] = useState(60);
   const initialCodeSent = useRef(false);
   const router = useRouter();
+  const nextPath =
+    typeof router.query.next === "string" && router.query.next.startsWith("/")
+      ? router.query.next
+      : "/dashboard/kasir";
 
   const verifyMfa = api.auth.verifyMfaLogin.useMutation();
   const sendMfaCode = api.security.sendMfaCode.useMutation();
@@ -67,7 +71,7 @@ const VerifyMfaPage = () => {
     setIsLoading(true);
     try {
       await verifyMfa.mutateAsync({ token: otp });
-      await router.push("/dashboard/kasir");
+      await router.push(nextPath);
     } catch {
       toast.error("Invalid verification code");
     } finally {

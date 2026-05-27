@@ -21,6 +21,7 @@ interface ProductCardProps {
   id: string;
   onEdit?: () => void;
   onDelete?: () => void;
+  canManageProducts?: boolean;
 }
 
 export const ProductCard = ({
@@ -31,6 +32,7 @@ export const ProductCard = ({
   id,
   onEdit,
   onDelete,
+  canManageProducts = false,
 }: ProductCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -55,34 +57,36 @@ export const ProductCard = ({
         className="md relative flex flex-col items-center gap-2 pt-0 pb-2 hover:cursor-pointer md:pb-3"
         onClick={() => setIsOpen(true)}
       >
-        <div className="absolute top-2 right-2 z-10 flex gap-1">
-          <Button
-            type="button"
-            size="icon"
-            variant="secondary"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit?.();
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-            <span className="sr-only">Edit produk</span>
-          </Button>
-          <Button
-            type="button"
-            size="icon"
-            variant="destructive"
-            className="h-8 w-8"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.();
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Hapus produk</span>
-          </Button>
-        </div>
+        {canManageProducts && (
+          <div className="absolute top-2 right-2 z-10 flex gap-1">
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.();
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+              <span className="sr-only">Edit produk</span>
+            </Button>
+            <Button
+              type="button"
+              size="icon"
+              variant="destructive"
+              className="h-8 w-8"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.();
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Hapus produk</span>
+            </Button>
+          </div>
+        )}
 
         <div className="relative aspect-square h-32 w-full md:h-52">
           <Image

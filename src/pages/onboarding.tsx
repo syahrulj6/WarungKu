@@ -7,7 +7,7 @@ export default function OnboardingPage() {
       <div className="max-w-xl rounded bg-white p-8 shadow">
         <h1 className="mb-4 text-2xl font-semibold">Welcome to Warungku</h1>
         <p className="mb-6">
-          Let's get your shop set up. Create your first Warung, add products,
+          Let&apos;s get your shop set up. Create your first Warung, add products,
           and invite staff.
         </p>
         <div className="flex gap-2">

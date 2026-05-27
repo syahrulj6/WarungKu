@@ -1,5 +1,4 @@
 import { type AppType } from "next/app";
-import { Poppins } from "next/font/google";
 import { useRouter } from "next/router";
 import Script from "next/script";
 import { useEffect } from "react";
@@ -9,11 +8,6 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "~/components/theme-provider";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "600", "700", "500"],
-});
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   const router = useRouter();
@@ -74,7 +68,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
           </Script>
         </>
       )}
-      <div className={poppins.className}>
+      <div className="font-sans">
         <Component {...pageProps} />
         <Toaster position="top-center" />
       </div>

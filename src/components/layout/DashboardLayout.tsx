@@ -15,6 +15,16 @@ const menuItems = [
     url: "/dashboard",
   },
   {
+    title: "Team & Staff",
+    category: "Kasirium",
+    url: "/dashboard/staff",
+  },
+  {
+    title: "Shifts",
+    category: "Kasirium",
+    url: "/dashboard/shift",
+  },
+  {
     title: "Preferensi akun",
     category: "Account",
     url: "/dashboard/account/me",

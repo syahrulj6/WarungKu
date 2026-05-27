@@ -141,10 +141,8 @@ const RATE_LIMIT_MAX = process.env.NODE_ENV === "production" ? 60 : 120; // tigh
 
 const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
   const forwarded = ctx.req.headers["x-forwarded-for"] as string | undefined;
-  const ip =
-    forwarded?.split(",")[0].trim() ??
-    ctx.req.socket?.remoteAddress ??
-    "unknown";
+  const forwardedIp = forwarded?.split(",")[0]?.trim();
+  const ip = forwardedIp || ctx.req.socket?.remoteAddress || "unknown";
 
   const now = Date.now();
   const entry = rateLimitStore.get(ip);

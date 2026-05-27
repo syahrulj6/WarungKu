@@ -31,6 +31,10 @@ const LoginPage = () => {
   }, []);
 
   const router = useRouter();
+  const nextPath =
+    typeof router.query.next === "string" && router.query.next.startsWith("/")
+      ? router.query.next
+      : "/dashboard/kasir";
   const { mutateAsync: loginUser, isPending: loginUserIsPending } =
     api.auth.login.useMutation();
   const { mutateAsync: resendVerificationEmail, isPending: resendIsPending } =
@@ -42,9 +46,9 @@ const LoginPage = () => {
       setUnverifiedEmail(null);
 
       if (result.mfaRequired) {
-        await router.replace("/verify-mfa");
+        await router.replace(`/verify-mfa?next=${encodeURIComponent(nextPath)}`);
       } else {
-        await router.replace("/dashboard/kasir");
+        await router.replace(nextPath);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
@@ -240,7 +244,6 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
 
 
 

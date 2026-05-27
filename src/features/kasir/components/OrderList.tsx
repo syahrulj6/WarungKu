@@ -31,6 +31,11 @@ interface Order {
   id: string;
   receiptNo: string;
   createdAt: Date;
+  user?: {
+    id: string;
+    email: string | null;
+    username: string | null;
+  } | null;
   customer: {
     id: string;
     name: string;
@@ -119,6 +124,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
               <th className="px-4 py-3">No. Struk</th>
               <th className="px-4 py-3">Tanggal</th>
               <th className="px-4 py-3">Pelanggan</th>
+              <th className="px-4 py-3">Ditangani Oleh</th>
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Pembayaran</th>
               <th className="px-4 py-3">Status</th>
@@ -139,6 +145,9 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                 </td>
                 <td className="max-w-[180px] truncate px-4 py-2">
                   {order.customer?.name || "Umum"}
+                </td>
+                <td className="max-w-[180px] truncate px-4 py-2">
+                  {order.user?.username || order.user?.email || "-"}
                 </td>
                 <td className="min-w-[100px] px-4 py-2">
                   Rp{order.totalAmount.toLocaleString("id-ID")}
@@ -173,6 +182,7 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
               <th className="px-3 py-2">Struk</th>
               <th className="px-3 py-2">Tanggal</th>
               <th className="px-3 py-2">Pelanggan</th>
+              <th className="px-3 py-2">Kasir</th>
               <th className="px-3 py-2">Total</th>
               <th className="px-3 py-2">Status</th>
             </tr>
@@ -192,6 +202,9 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                 </td>
                 <td className="max-w-[120px] truncate px-3 py-2">
                   {order.customer?.name || "Umum"}
+                </td>
+                <td className="max-w-[120px] truncate px-3 py-2">
+                  {order.user?.username || order.user?.email || "-"}
                 </td>
                 <td className="min-w-[80px] px-3 py-2">
                   Rp{order.totalAmount.toLocaleString("id-ID")}
@@ -242,6 +255,15 @@ export const OrderList = ({ orders, isLoading }: OrderListProps) => {
                 <div>
                   <h3 className="font-medium">Pelanggan</h3>
                   <p>{selectedOrder.customer?.name || "Umum"}</p>
+                </div>
+
+                <div>
+                  <h3 className="font-medium">Ditangani Oleh</h3>
+                  <p>
+                    {selectedOrder.user?.username ||
+                      selectedOrder.user?.email ||
+                      "-"}
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
